@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orion — Gestão de Mobilização</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #f0f4f8;
+  --bg2:      #ffffff;
+  --bg3:      #e8eef5;
+  --bg4:      #dce6f0;
+  --sidebar:  #0d1f35;
+  --sidebar2: #152d4a;
+  --sidebar3: #1a3860;
+  --accent:   #1a6fbf;
+  --accent2:  #2284e8;
+  --accent-l: #e8f2fd;
+  --green:    #16a34a;
+  --green-l:  #dcfce7;
+  --amber:    #d97706;
+  --amber-l:  #fef3c7;
+  --red:      #dc2626;
+  --red-l:    #fee2e2;
+  --gray:     #6b7280;
+  --gray-l:   #f3f4f6;
+  --border:   #d1dce8;
+  --text:     #0f1f33;
+  --text2:    #3d5470;
+  --text3:    #7a93ad;
+  --shadow:   0 1px 3px rgba(13,31,53,0.08), 0 1px 2px rgba(13,31,53,0.04);
+  --shadow2:  0 4px 16px rgba(13,31,53,0.12);
+  --mono:     'JetBrains Mono', monospace;
+  --sans:     'Sora', sans-serif;
+  --radius:   10px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* ── SIDEBAR ─────────────────────────────── */
+.sidebar {
+  width: 240px;
+  background: var(--sidebar);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 50;
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.sidebar-logo-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.sidebar-logo svg { flex-shrink: 0; }
+
+.sidebar-logo-name {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #fff;
+}
+
+.sidebar-logo-sub {
+  font-size: 10px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+.sidebar-section {
+  padding: 20px 12px 8px;
+}
+
+.sidebar-section-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  padding: 0 8px;
+  margin-bottom: 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: rgba(255,255,255,0.55);
+  font-size: 13px;
+  font-weight: 400;
+  margin-bottom: 2px;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+.nav-item.active { background: var(--accent); color: #fff; font-weight: 500; }
+
+.nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+
+.nav-badge {
+  margin-left: auto;
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.7);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-family: var(--mono);
+}
+
+.nav-item.active .nav-badge { background: rgba(255,255,255,0.25); color: #fff; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 12px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 7px;
+}
+
+.user-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+
+.user-name { font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 500; }
+.user-role { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 1px; }
+
+/* ── MAIN CONTENT ─────────────────────────── */
+.content {
+  margin-left: 240px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.topbar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.topbar-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.topbar-sub {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 1px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 7px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--accent2); }
+
+.btn-secondary {
+  background: var(--bg2);
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: var(--bg3); border-color: #b5c6d8; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text3);
+  padding: 6px 10px;
+}
+.btn-ghost:hover { background: var(--bg3); color: var(--text2); }
+
+.btn-danger {
+  background: var(--red-l);
+  color: var(--red);
+  border: 1px solid #fca5a5;
+}
+.btn-danger:hover { background: #fecaca; }
+
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+
+/* ── PAGES ─────────────────────────────────── */
+.page { display: none; padding: 24px 28px; animation: fadeUp 0.3s ease; }
+.page.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(8px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* ── FAROL / STATUS ──────────────────────── */
+.farol {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.farol-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.farol.verde  { background: var(--green-l); color: var(--green); }
+.farol.verde .farol-dot  { background: var(--green); animation: blink 2s infinite; }
+.farol.amarelo { background: var(--amber-l); color: var(--amber); }
+.farol.amarelo .farol-dot { background: var(--amber); animation: blink 1.5s infinite; }
+.farol.vermelho { background: var(--red-l); color: var(--red); }
+.farol.vermelho .farol-dot { background: var(--red); animation: blink 1s infinite; }
+.farol.cinza  { background: var(--gray-l); color: var(--gray); }
+.farol.cinza .farol-dot  { background: #9ca3af; }
+
+@keyframes blink {
+  0%,100% { opacity:1; } 50% { opacity:0.4; }
+}
+
+/* ── CARDS ──────────────────────────────── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.card-body { padding: 20px; }
+
+/* ── MOBILIZAÇÃO LIST ───────────────────── */
+.mob-list { display: flex; flex-direction: column; gap: 12px; }
+
+.mob-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 4px solid transparent;
+}
+
+.mob-card:hover { box-shadow: var(--shadow2); transform: translateY(-1px); }
+.mob-card.verde   { border-left-color: var(--green); }
+.mob-card.amarelo { border-left-color: var(--amber); }
+.mob-card.vermelho{ border-left-color: var(--red); }
+.mob-card.cinza   { border-left-color: #9ca3af; }
+
+.mob-card-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.mob-card-client { font-size: 12px; color: var(--text3); margin-bottom: 10px; }
+.mob-card-client span { color: var(--text2); font-weight: 500; }
+
+.mob-card-meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.mob-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text3);
+}
+
+.mob-meta-item strong { color: var(--text2); font-weight: 500; }
+
+.mob-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+/* ── PROGRESS BAR ───────────────────────── */
+.progress-wrap { display: flex; flex-direction: column; gap: 4px; min-width: 120px; }
+.progress-label { font-size: 10px; color: var(--text3); display: flex; justify-content: space-between; }
+.progress-track {
+  height: 6px;
+  background: var(--bg3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+  transition: width 0.6s ease;
+}
+.progress-fill.green { background: var(--green); }
+.progress-fill.amber { background: var(--amber); }
+.progress-fill.red   { background: var(--red); }
+
+/* ── MODAL ──────────────────────────────── */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(13,31,53,0.45);
+  z-index: 200;
+  backdrop-filter: blur(2px);
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-backdrop.open { display: flex; }
+
+.modal {
+  background: var(--bg2);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(13,31,53,0.22);
+  width: 600px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalIn 0.2s ease;
+}
+
+.modal.wide { width: 820px; }
+
+@keyframes modalIn {
+  from { opacity:0; transform: scale(0.96) translateY(8px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: var(--bg2);
+  z-index: 5;
+}
+
+.modal-title { font-size: 15px; font-weight: 600; }
+.modal-close {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: var(--bg3);
+  color: var(--text3);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.modal-close:hover { background: var(--bg4); color: var(--text); }
+
+.modal-body { padding: 24px; }
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  position: sticky;
+  bottom: 0;
+  background: var(--bg2);
+}
+
+/* ── FORM ───────────────────────────────── */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.form-row.full { grid-template-columns: 1fr; }
+.form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 12px; font-weight: 500; color: var(--text2); }
+.form-label span { color: var(--red); margin-left: 2px; }
+
+.form-input, .form-select, .form-textarea {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg2);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(26,111,191,0.1);
+}
+
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-hint { font-size: 11px; color: var(--text3); }
+
+.section-divider {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 20px 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ── TEAM LIST (no modal) ──────────────── */
+.team-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+
+.team-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+
+.team-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--accent-l);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.team-name { font-size: 13px; font-weight: 500; flex: 1; }
+.team-role { font-size: 11px; color: var(--text3); }
+
+.team-remove {
+  width: 24px; height: 24px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.team-remove:hover { background: var(--red-l); color: var(--red); }
+
+/* ── DOC LIST ─────────────────────────── */
+.doc-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  transition: border-color 0.15s;
+}
+
+.doc-item:hover { border-color: #b5c6d8; }
+
+.doc-icon {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  background: var(--accent-l);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.doc-info { flex: 1; min-width: 0; }
+.doc-name { font-size: 13px; font-weight: 500; }
+.doc-path {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: var(--mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.doc-status-wrap { flex-shrink: 0; }
+
+.doc-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text3);
+}
+
+.doc-check input[type=checkbox] {
+  width: 15px; height: 15px;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+
+/* ── DETAIL VIEW ─────────────────────── */
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.detail-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.detail-client { font-size: 13px; color: var(--text3); }
+.detail-client strong { color: var(--text2); }
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.info-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.info-item-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.info-item-value { font-size: 14px; font-weight: 600; color: var(--text); }
+
+/* ── TABS ────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.15s;
+}
+
+.tab:hover { color: var(--text2); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── EMPTY STATE ─────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text3);
+}
+
+.empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+.empty-state p { font-size: 13px; }
+
+/* ── SUMMARY CARDS ───────────────────── */
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+}
+
+.summary-label { font-size: 11px; color: var(--text3); font-weight: 500; margin-bottom: 6px; }
+.summary-value { font-size: 26px; font-weight: 700; color: var(--text); font-family: var(--mono); }
+.summary-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+/* ── TOAST ───────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--text);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  z-index: 999;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.25s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.green { background: var(--green); }
+
+/* ── FILTER BAR ──────────────────────── */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  padding: 8px 12px 8px 34px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-family: var(--sans);
+  font-size: 13px;
+  background: var(--bg2);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+  position: relative;
+  min-width: 220px;
+}
+.search-wrap { position: relative; }
+.search-wrap::before {
+  content: '⌕';
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3);
+  font-size: 15px;
+  pointer-events: none;
+}
+.search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,111,191,0.1); }
+
+.filter-chip {
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-chip:hover { border-color: var(--accent); color: var(--accent); }
+.filter-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-mark">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+        <circle cx="13" cy="13" r="11" stroke="#1a6fbf" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="13" cy="13" r="7" stroke="#1a6fbf" stroke-width="1.5" opacity="0.75"/>
+        <circle cx="13" cy="13" r="3" fill="#1a6fbf"/>
+      </svg>
+      <span class="sidebar-logo-name">ORION</span>
+    </div>
+    <div class="sidebar-logo-sub">Gestão de Projetos</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Principal</div>
+    <div class="nav-item active" onclick="navigate('painel')">
+      <span class="nav-icon">◉</span> Painel
+    </div>
+    <div class="nav-item" onclick="navigate('mobilizacoes')">
+      <span class="nav-icon">⊞</span> Mobilizações
+      <span class="nav-badge" id="badge-mob">0</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Cadastros</div>
+    <div class="nav-item" onclick="navigate('clientes')">
+      <span class="nav-icon">◻</span> Clientes
+    </div>
+    <div class="nav-item" onclick="navigate('profissionais')">
+      <span class="nav-icon">◻</span> Profissionais
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-avatar">RA</div>
+      <div>
+        <div class="user-name">Rafael A.</div>
+        <div class="user-role">Gestor de Mobilização</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- TOPBAR -->
+  <div class="topbar" id="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">Painel</div>
+      <div class="topbar-sub" id="topbar-sub">Visão geral das mobilizações</div>
+    </div>
+    <div style="display:flex;gap:10px;" id="topbar-actions">
+      <button class="btn btn-primary" onclick="openModalNovaMob()">＋ Nova Mobilização</button>
+    </div>
+  </div>
+
+  <!-- ── PAGE: PAINEL ──────────────────────── -->
+  <div class="page active" id="page-painel">
+    <div class="summary-row">
+      <div class="summary-card">
+        <div class="summary-label">Total de Mobilizações</div>
+        <div class="summary-value" id="sum-total">0</div>
+        <div class="summary-sub">cadastradas</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label" style="color:var(--green)">● Em dia</div>
+        <div class="summary-value" id="sum-verde" style="color:var(--green)">0</div>
+        <div class="summary-sub">todas docs OK</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label" style="color:var(--amber)">● Atenção</div>
+        <div class="summary-value" id="sum-amarelo" style="color:var(--amber)">0</div>
+        <div class="summary-sub">pendências parciais</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label" style="color:var(--red)">● Crítico</div>
+        <div class="summary-value" id="sum-vermelho" style="color:var(--red)">0</div>
+        <div class="summary-sub">docs não entregues</div>
+      </div>
+    </div>
+
+    <div class="card-header" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;margin-bottom:0;">
+      <span class="card-title">Mobilizações Recentes</span>
+      <button class="btn btn-ghost btn-sm" onclick="navigate('mobilizacoes')">Ver todas →</button>
+    </div>
+    <div id="painel-mob-list" style="border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);overflow:hidden;background:var(--bg2);">
+      <div class="empty-state"><div class="empty-icon">📋</div><p>Nenhuma mobilização cadastrada ainda.</p></div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: MOBILIZAÇÕES ──────────────── -->
+  <div class="page" id="page-mobilizacoes">
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <input class="search-input" id="search-mob" placeholder="Buscar por projeto ou cliente..." oninput="renderMobilizacoes()">
+      </div>
+      <div class="filter-chip active" onclick="setFilter('todos')" id="chip-todos">Todos</div>
+      <div class="filter-chip" onclick="setFilter('verde')" id="chip-verde">● Em dia</div>
+      <div class="filter-chip" onclick="setFilter('amarelo')" id="chip-amarelo">● Atenção</div>
+      <div class="filter-chip" onclick="setFilter('vermelho')" id="chip-vermelho">● Crítico</div>
+      <div class="filter-chip" onclick="setFilter('cinza')" id="chip-cinza">● Novo</div>
+    </div>
+    <div class="mob-list" id="mob-list">
+      <div class="empty-state"><div class="empty-icon">📋</div><p>Nenhuma mobilização encontrada.</p></div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: DETALHE MOBILIZAÇÃO ─────── -->
+  <div class="page" id="page-detalhe">
+    <div class="detail-header">
+      <div>
+        <button class="btn btn-ghost btn-sm" style="margin-bottom:10px;padding-left:0;" onclick="navigate('mobilizacoes')">← Voltar</button>
+        <div class="detail-title" id="detail-titulo"></div>
+        <div class="detail-client" id="detail-cliente"></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span id="detail-farol"></span>
+        <button class="btn btn-secondary btn-sm" onclick="openModalEditarMob()">✎ Editar</button>
+      </div>
+    </div>
+
+    <div class="info-grid" id="detail-info"></div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('equipe')">👥 Equipe Técnica</div>
+      <div class="tab" onclick="switchTab('documentos')">📄 Documentos</div>
+    </div>
+
+    <!-- Tab Equipe -->
+    <div class="tab-panel active" id="tab-equipe">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="font-size:13px;color:var(--text3);" id="equipe-count"></div>
+        <button class="btn btn-secondary btn-sm" onclick="openModalAddProfissional()">＋ Adicionar Profissional</button>
+      </div>
+      <div class="team-list" id="detalhe-team-list"></div>
+    </div>
+
+    <!-- Tab Documentos -->
+    <div class="tab-panel" id="tab-documentos">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="font-size:13px;color:var(--text3);" id="doc-count"></div>
+        <button class="btn btn-secondary btn-sm" onclick="openModalAddDoc()">＋ Adicionar Documento</button>
+      </div>
+      <div class="doc-list" id="detalhe-doc-list"></div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: CLIENTES ──────────────────── -->
+  <div class="page" id="page-clientes">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:18px;">
+      <button class="btn btn-primary" onclick="openModalCliente()">＋ Novo Cliente</button>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Clientes Cadastrados</span></div>
+      <div id="clientes-table" class="card-body"></div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: PROFISSIONAIS ─────────────── -->
+  <div class="page" id="page-profissionais">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:18px;">
+      <button class="btn btn-primary" onclick="openModalProfissional()">＋ Novo Profissional</button>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Profissionais Cadastrados</span></div>
+      <div id="profissionais-table" class="card-body"></div>
+    </div>
+  </div>
+
+</div><!-- end content -->
+
+<!-- ═══════════════════════════════════════════
+     MODAIS
+═══════════════════════════════════════════ -->
+
+<!-- Modal: Nova/Editar Mobilização -->
+<div class="modal-backdrop" id="modal-mob">
+  <div class="modal wide">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-mob-title">Nova Mobilização</span>
+      <button class="modal-close" onclick="closeModal('modal-mob')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nome do Projeto <span>*</span></label>
+          <input class="form-input" id="mob-nome" placeholder="Ex: Implantação ERP Fase 2">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cliente <span>*</span></label>
+          <select class="form-select" id="mob-cliente">
+            <option value="">Selecione o cliente...</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row three">
+        <div class="form-group">
+          <label class="form-label">Responsável pela Mobilização</label>
+          <input class="form-input" id="mob-responsavel" placeholder="Nome do responsável">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data de Início</label>
+          <input class="form-input" type="date" id="mob-inicio">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prazo de Entrega</label>
+          <input class="form-input" type="date" id="mob-prazo">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Observações</label>
+          <textarea class="form-textarea" id="mob-obs" placeholder="Informações adicionais sobre a mobilização..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-mob')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarMobilizacao()">Salvar Mobilização</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Adicionar Profissional à equipe -->
+<div class="modal-backdrop" id="modal-add-prof">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Adicionar Profissional à Equipe</span>
+      <button class="modal-close" onclick="closeModal('modal-add-prof')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Profissional <span>*</span></label>
+          <select class="form-select" id="prof-select">
+            <option value="">Selecione o profissional...</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Papel no Projeto</label>
+          <input class="form-input" id="prof-papel" placeholder="Ex: Líder Técnico, Desenvolvedor, Analista...">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-prof')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarProfissionalEquipe()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Adicionar Documento -->
+<div class="modal-backdrop" id="modal-add-doc">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Adicionar Documento Necessário</span>
+      <button class="modal-close" onclick="closeModal('modal-add-doc')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Nome do Documento <span>*</span></label>
+          <input class="form-input" id="doc-nome" placeholder="Ex: Currículo, Certidão de Registro, NDA...">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Caminho na Rede</label>
+          <input class="form-input" id="doc-caminho" placeholder="\\servidor\projetos\mobilizacao\...">
+          <span class="form-hint">Informe o caminho de rede onde o documento foi armazenado</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tipo</label>
+          <select class="form-select" id="doc-tipo">
+            <option value="documento">📄 Documento</option>
+            <option value="contrato">📝 Contrato</option>
+            <option value="certificado">🏅 Certificado</option>
+            <option value="curriculo">👤 Currículo</option>
+            <option value="outros">📁 Outros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Profissional (opcional)</label>
+          <select class="form-select" id="doc-profissional">
+            <option value="">Geral (todos)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-doc')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarDocumento()">Adicionar Documento</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Novo Cliente -->
+<div class="modal-backdrop" id="modal-cliente">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Novo Cliente</span>
+      <button class="modal-close" onclick="closeModal('modal-cliente')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Nome da Empresa <span>*</span></label>
+          <input class="form-input" id="cli-nome" placeholder="Razão Social">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">CNPJ</label>
+          <input class="form-input" id="cli-cnpj" placeholder="00.000.000/0001-00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contato Principal</label>
+          <input class="form-input" id="cli-contato" placeholder="Nome do contato">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input class="form-input" id="cli-email" placeholder="email@empresa.com.br" type="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefone</label>
+          <input class="form-input" id="cli-tel" placeholder="(11) 99999-9999">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-cliente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarCliente()">Salvar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Novo Profissional -->
+<div class="modal-backdrop" id="modal-profissional">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Novo Profissional</span>
+      <button class="modal-close" onclick="closeModal('modal-profissional')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nome Completo <span>*</span></label>
+          <input class="form-input" id="prf-nome" placeholder="Nome completo">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cargo / Especialidade</label>
+          <input class="form-input" id="prf-cargo" placeholder="Ex: Engenheiro de Software">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input class="form-input" id="prf-email" placeholder="email@empresa.com.br" type="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Matrícula</label>
+          <input class="form-input" id="prf-matricula" placeholder="00000">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-profissional')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarProfissional()">Salvar Profissional</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════ JAVASCRIPT ═══════════ -->
+<script>
+// ── STATE ──────────────────────────────────────
+let state = {
+  mobilizacoes: [],
+  clientes: [],
+  profissionais: [],
+  currentMobId: null,
+  editingMobId: null,
+  filterStatus: 'todos',
+};
+
+let mobIdCounter = 1;
+let cliIdCounter = 1;
+let prfIdCounter = 1;
+let docIdCounter = 1;
+
+// ── SEED DATA ─────────────────────────────────
+function seedData() {
+  // Clientes
+  state.clientes = [
+    { id: cliIdCounter++, nome: 'Petrobras S.A.', cnpj: '33.000.167/0001-01', contato: 'Marcos Oliveira', email: 'marcos@petrobras.com.br', tel: '(21) 3324-1010' },
+    { id: cliIdCounter++, nome: 'Vale S.A.', cnpj: '33.592.510/0001-54', contato: 'Ana Costa', email: 'ana.costa@vale.com', tel: '(31) 3485-5555' },
+    { id: cliIdCounter++, nome: 'Embraer S.A.', cnpj: '07.689.002/0001-89', contato: 'Carlos Mendes', email: 'carlos.mendes@embraer.com.br', tel: '(12) 3927-1000' },
+  ];
+
+  // Profissionais
+  state.profissionais = [
+    { id: prfIdCounter++, nome: 'Rafael Almeida', cargo: 'Arquiteto de Software', email: 'rafael@empresa.com', matricula: '10421' },
+    { id: prfIdCounter++, nome: 'Juliana Ferreira', cargo: 'Engenheira de Dados', email: 'juliana@empresa.com', matricula: '10398' },
+    { id: prfIdCounter++, nome: 'Bruno Carvalho', cargo: 'DevOps Engineer', email: 'bruno@empresa.com', matricula: '10512' },
+    { id: prfIdCounter++, nome: 'Patrícia Lima', cargo: 'Scrum Master', email: 'patricia@empresa.com', matricula: '10456' },
+    { id: prfIdCounter++, nome: 'Diego Santos', cargo: 'Analista de Segurança', email: 'diego@empresa.com', matricula: '10387' },
+  ];
+
+  // Mobilizações de exemplo
+  const mob1 = {
+    id: mobIdCounter++,
+    nome: 'Modernização de Infraestrutura TI',
+    clienteId: 1,
+    responsavel: 'Rafael Almeida',
+    inicio: '2025-04-10',
+    prazo: '2025-05-30',
+    obs: 'Mobilização prioritária. Cliente aguarda documentação até o dia 20.',
+    equipe: [
+      { profId: 1, papel: 'Líder Técnico' },
+      { profId: 2, papel: 'Engenheira de Dados' },
+      { profId: 3, papel: 'DevOps' },
+    ],
+    documentos: [
+      { id: docIdCounter++, nome: 'Currículo — Rafael Almeida', caminho: '\\\\srv-files\\mobilizacao\\petrobras\\curriculo_rafael.pdf', tipo: 'curriculo', profId: 1, entregue: true },
+      { id: docIdCounter++, nome: 'Currículo — Juliana Ferreira', caminho: '\\\\srv-files\\mobilizacao\\petrobras\\curriculo_juliana.pdf', tipo: 'curriculo', profId: 2, entregue: true },
+      { id: docIdCounter++, nome: 'Currículo — Bruno Carvalho', caminho: '', tipo: 'curriculo', profId: 3, entregue: false },
+      { id: docIdCounter++, nome: 'Acordo de Confidencialidade (NDA)', caminho: '\\\\srv-files\\mobilizacao\\petrobras\\nda_assinado.pdf', tipo: 'contrato', profId: null, entregue: true },
+      { id: docIdCounter++, nome: 'Certidão de Regularidade CREA', caminho: '', tipo: 'certificado', profId: 1, entregue: false },
+    ],
+  };
+
+  const mob2 = {
+    id: mobIdCounter++,
+    nome: 'Plataforma de Analytics Mining',
+    clienteId: 2,
+    responsavel: 'Patrícia Lima',
+    inicio: '2025-03-15',
+    prazo: '2025-04-30',
+    obs: '',
+    equipe: [
+      { profId: 4, papel: 'Gerente de Projeto' },
+      { profId: 5, papel: 'Analista de Segurança' },
+    ],
+    documentos: [
+      { id: docIdCounter++, nome: 'Currículo — Patrícia Lima', caminho: '\\\\srv-files\\mobilizacao\\vale\\curriculo_patricia.pdf', tipo: 'curriculo', profId: 4, entregue: true },
+      { id: docIdCounter++, nome: 'Currículo — Diego Santos', caminho: '\\\\srv-files\\mobilizacao\\vale\\curriculo_diego.pdf', tipo: 'curriculo', profId: 5, entregue: true },
+      { id: docIdCounter++, nome: 'Carta de Apresentação', caminho: '\\\\srv-files\\mobilizacao\\vale\\carta_apresentacao.docx', tipo: 'documento', profId: null, entregue: true },
+    ],
+  };
+
+  const mob3 = {
+    id: mobIdCounter++,
+    nome: 'Sistema de Gestão de Manutenção',
+    clienteId: 3,
+    responsavel: 'Bruno Carvalho',
+    inicio: '2025-05-02',
+    prazo: '2025-06-15',
+    obs: 'Cliente solicitou documentação técnica detalhada de cada profissional.',
+    equipe: [
+      { profId: 1, papel: 'Arquiteto' },
+    ],
+    documentos: [],
+  };
+
+  state.mobilizacoes = [mob1, mob2, mob3];
+}
+
+// ── FAROL LOGIC ───────────────────────────────
+function calcFarol(mob) {
+  const docs = mob.documentos;
+  if (docs.length === 0) return 'cinza';
+  const entregues = docs.filter(d => d.entregue).length;
+  const pct = entregues / docs.length;
+  if (pct === 1) return 'verde';
+  if (pct >= 0.5) return 'amarelo';
+  return 'vermelho';
+}
+
+function farolLabel(cor) {
+  return { verde: 'Em dia', amarelo: 'Atenção', vermelho: 'Crítico', cinza: 'Novo' }[cor];
+}
+
+function farolHTML(cor) {
+  return `<span class="farol ${cor}"><span class="farol-dot"></span>${farolLabel(cor)}</span>`;
+}
+
+function progressPct(mob) {
+  const docs = mob.documentos;
+  if (docs.length === 0) return 0;
+  return Math.round((docs.filter(d => d.entregue).length / docs.length) * 100);
+}
+
+// ── NAVIGATION ────────────────────────────────
+let currentPage = 'painel';
+const pageTitles = {
+  painel: ['Painel', 'Visão geral das mobilizações'],
+  mobilizacoes: ['Mobilizações', 'Lista de mobilizações em andamento'],
+  clientes: ['Clientes', 'Cadastro de clientes'],
+  profissionais: ['Profissionais', 'Cadastro de profissionais técnicos'],
+  detalhe: ['Detalhe da Mobilização', ''],
+};
+
+function navigate(page, mobId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelector(`[onclick="navigate('${page}')"]`)?.classList.add('active');
+
+  const [title, sub] = pageTitles[page] || ['', ''];
+  document.getElementById('topbar-title').textContent = title;
+  document.getElementById('topbar-sub').textContent = sub;
+
+  // Show/hide new mob button
+  const actions = document.getElementById('topbar-actions');
+  actions.innerHTML = (page === 'painel' || page === 'mobilizacoes')
+    ? `<button class="btn btn-primary" onclick="openModalNovaMob()">＋ Nova Mobilização</button>`
+    : page === 'clientes'
+    ? `<button class="btn btn-primary" onclick="openModalCliente()">＋ Novo Cliente</button>`
+    : page === 'profissionais'
+    ? `<button class="btn btn-primary" onclick="openModalProfissional()">＋ Novo Profissional</button>`
+    : '';
+
+  currentPage = page;
+
+  if (page === 'painel') renderPainel();
+  if (page === 'mobilizacoes') renderMobilizacoes();
+  if (page === 'clientes') renderClientes();
+  if (page === 'profissionais') renderProfissionais();
+  if (page === 'detalhe' && mobId) renderDetalhe(mobId);
+}
+
+// ── RENDER PAINEL ─────────────────────────────
+function renderPainel() {
+  const mobs = state.mobilizacoes;
+  document.getElementById('sum-total').textContent = mobs.length;
+  document.getElementById('sum-verde').textContent = mobs.filter(m => calcFarol(m) === 'verde').length;
+  document.getElementById('sum-amarelo').textContent = mobs.filter(m => calcFarol(m) === 'amarelo').length;
+  document.getElementById('sum-vermelho').textContent = mobs.filter(m => calcFarol(m) === 'vermelho').length;
+
+  const container = document.getElementById('painel-mob-list');
+  const recent = [...mobs].slice(-5).reverse();
+
+  if (!recent.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>Nenhuma mobilização cadastrada ainda.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = recent.map(mob => {
+    const cli = state.clientes.find(c => c.id === mob.clienteId);
+    const cor = calcFarol(mob);
+    const pct = progressPct(mob);
+    return `
+      <div style="display:flex;align-items:center;gap:16px;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''" onclick="navigate('detalhe',${mob.id})">
+        <div style="width:4px;height:40px;border-radius:2px;background:${cor==='verde'?'var(--green)':cor==='amarelo'?'var(--amber)':cor==='vermelho'?'var(--red)':'#9ca3af'};flex-shrink:0;"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:13px;margin-bottom:2px;">${mob.nome}</div>
+          <div style="font-size:11px;color:var(--text3);">${cli ? cli.nome : '—'} · ${mob.equipe.length} profissional(is)</div>
+        </div>
+        <div style="min-width:130px;">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px;"><span>Docs entregues</span><span>${pct}%</span></div>
+          <div class="progress-track"><div class="progress-fill ${cor==='verde'?'green':cor==='amarelo'?'amber':cor==='vermelho'?'red':''}" style="width:${pct}%"></div></div>
+        </div>
+        <div>${farolHTML(cor)}</div>
+      </div>`;
+  }).join('');
+}
+
+// ── RENDER MOBILIZAÇÕES ───────────────────────
+let currentFilter = 'todos';
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('chip-' + f)?.classList.add('active');
+  renderMobilizacoes();
+}
+
+function renderMobilizacoes() {
+  const search = document.getElementById('search-mob')?.value.toLowerCase() || '';
+  const container = document.getElementById('mob-list');
+  let mobs = state.mobilizacoes;
+
+  if (currentFilter !== 'todos') mobs = mobs.filter(m => calcFarol(m) === currentFilter);
+  if (search) mobs = mobs.filter(m => {
+    const cli = state.clientes.find(c => c.id === m.clienteId);
+    return m.nome.toLowerCase().includes(search) || (cli && cli.nome.toLowerCase().includes(search));
+  });
+
+  document.getElementById('badge-mob').textContent = state.mobilizacoes.length;
+
+  if (!mobs.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>Nenhuma mobilização encontrada.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = mobs.map(mob => {
+    const cli = state.clientes.find(c => c.id === mob.clienteId);
+    const cor = calcFarol(mob);
+    const pct = progressPct(mob);
+    const fillClass = cor==='verde'?'green':cor==='amarelo'?'amber':cor==='vermelho'?'red':'';
+
+    return `
+    <div class="mob-card ${cor}" onclick="navigate('detalhe',${mob.id})">
+      <div>
+        <div class="mob-card-title">${mob.nome}</div>
+        <div class="mob-card-client">Cliente: <span>${cli ? cli.nome : '—'}</span></div>
+        <div class="mob-card-meta">
+          <div class="mob-meta-item">👤 <strong>${mob.equipe.length}</strong> profissional(is)</div>
+          <div class="mob-meta-item">📄 <strong>${mob.documentos.filter(d=>d.entregue).length}/${mob.documentos.length}</strong> docs entregues</div>
+          ${mob.responsavel ? `<div class="mob-meta-item">🔧 Resp: <strong>${mob.responsavel}</strong></div>` : ''}
+          ${mob.prazo ? `<div class="mob-meta-item">📅 Prazo: <strong>${formatDate(mob.prazo)}</strong></div>` : ''}
+        </div>
+      </div>
+      <div class="mob-card-right">
+        ${farolHTML(cor)}
+        <div class="progress-wrap">
+          <div class="progress-label"><span>Documentação</span><span>${pct}%</span></div>
+          <div class="progress-track"><div class="progress-fill ${fillClass}" style="width:${pct}%"></div></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── RENDER DETALHE ────────────────────────────
+function renderDetalhe(mobId) {
+  state.currentMobId = mobId;
+  const mob = state.mobilizacoes.find(m => m.id === mobId);
+  if (!mob) return;
+  const cli = state.clientes.find(c => c.id === mob.clienteId);
+  const cor = calcFarol(mob);
+
+  document.getElementById('detail-titulo').textContent = mob.nome;
+  document.getElementById('detail-cliente').innerHTML = `Cliente: <strong>${cli ? cli.nome : '—'}</strong>`;
+  document.getElementById('detail-farol').innerHTML = farolHTML(cor);
+  document.getElementById('topbar-title').textContent = mob.nome;
+  document.getElementById('topbar-sub').textContent = cli ? cli.nome : '';
+
+  document.getElementById('detail-info').innerHTML = `
+    <div class="info-item"><div class="info-item-label">Responsável</div><div class="info-item-value">${mob.responsavel || '—'}</div></div>
+    <div class="info-item"><div class="info-item-label">Data de Início</div><div class="info-item-value">${mob.inicio ? formatDate(mob.inicio) : '—'}</div></div>
+    <div class="info-item"><div class="info-item-label">Prazo</div><div class="info-item-value">${mob.prazo ? formatDate(mob.prazo) : '—'}</div></div>
+    <div class="info-item"><div class="info-item-label">Observações</div><div class="info-item-value" style="font-size:12px;font-weight:400;color:var(--text2)">${mob.obs || '—'}</div></div>
+  `;
+
+  renderEquipeDetalhe(mob);
+  renderDocsDetalhe(mob);
+}
+
+function renderEquipeDetalhe(mob) {
+  const container = document.getElementById('detalhe-team-list');
+  document.getElementById('equipe-count').textContent = `${mob.equipe.length} profissional(is) na equipe`;
+
+  if (!mob.equipe.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><p>Nenhum profissional adicionado ainda.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = mob.equipe.map((e, idx) => {
+    const prf = state.profissionais.find(p => p.id === e.profId);
+    if (!prf) return '';
+    const initials = prf.nome.split(' ').slice(0,2).map(n=>n[0]).join('');
+    return `
+      <div class="team-item">
+        <div class="team-avatar">${initials}</div>
+        <div style="flex:1">
+          <div class="team-name">${prf.nome}</div>
+          <div class="team-role">${e.papel || prf.cargo}</div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);font-family:var(--mono);">Mat. ${prf.matricula || '—'}</div>
+        <button class="team-remove" onclick="removerProfissionalEquipe(${mob.id},${idx})" title="Remover">×</button>
+      </div>`;
+  }).join('');
+}
+
+function renderDocsDetalhe(mob) {
+  const container = document.getElementById('detalhe-doc-list');
+  const entregues = mob.documentos.filter(d => d.entregue).length;
+  document.getElementById('doc-count').textContent = `${entregues}/${mob.documentos.length} documentos entregues`;
+
+  if (!mob.documentos.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📄</div><p>Nenhum documento adicionado. Clique em "Adicionar Documento" para começar.</p></div>`;
+    return;
+  }
+
+  const icones = { documento:'📄', contrato:'📝', certificado:'🏅', curriculo:'👤', outros:'📁' };
+
+  container.innerHTML = mob.documentos.map((doc, idx) => {
+    const prf = doc.profId ? state.profissionais.find(p => p.id === doc.profId) : null;
+    const icone = icones[doc.tipo] || '📄';
+    return `
+      <div class="doc-item">
+        <div class="doc-icon">${icone}</div>
+        <div class="doc-info">
+          <div class="doc-name">${doc.nome}${prf ? `<span style="font-size:10px;color:var(--text3);font-weight:400;margin-left:6px;">— ${prf.nome}</span>` : ''}</div>
+          <div class="doc-path">${doc.caminho || 'Caminho não informado'}</div>
+        </div>
+        <div class="doc-status-wrap">
+          <label class="doc-check">
+            <input type="checkbox" ${doc.entregue ? 'checked' : ''} onchange="toggleDoc(${mob.id},${idx},this.checked)">
+            ${doc.entregue ? '<span style="color:var(--green);font-weight:500;">Entregue</span>' : '<span>Pendente</span>'}
+          </label>
+        </div>
+        <button class="team-remove" onclick="removerDoc(${mob.id},${idx})" title="Remover">×</button>
+      </div>`;
+  }).join('');
+}
+
+// ── RENDER CLIENTES ───────────────────────────
+function renderClientes() {
+  const container = document.getElementById('clientes-table');
+  if (!state.clientes.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🏢</div><p>Nenhum cliente cadastrado.</p></div>`;
+    return;
+  }
+  container.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border);">
+          ${['Empresa','CNPJ','Contato','E-mail','Telefone',''].map(h => `<th style="text-align:left;padding:8px 12px;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">${h}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${state.clientes.map(c => `
+          <tr style="border-bottom:1px solid var(--border);transition:background 0.12s;" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''">
+            <td style="padding:12px;font-weight:500;">${c.nome}</td>
+            <td style="padding:12px;font-size:12px;font-family:var(--mono);color:var(--text2);">${c.cnpj||'—'}</td>
+            <td style="padding:12px;font-size:13px;">${c.contato||'—'}</td>
+            <td style="padding:12px;font-size:12px;color:var(--accent);">${c.email||'—'}</td>
+            <td style="padding:12px;font-size:12px;">${c.tel||'—'}</td>
+            <td style="padding:12px;"><button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="removerCliente(${c.id})">Remover</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+// ── RENDER PROFISSIONAIS ──────────────────────
+function renderProfissionais() {
+  const container = document.getElementById('profissionais-table');
+  if (!state.profissionais.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">👤</div><p>Nenhum profissional cadastrado.</p></div>`;
+    return;
+  }
+  container.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border);">
+          ${['Nome','Cargo','E-mail','Matrícula',''].map(h => `<th style="text-align:left;padding:8px 12px;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">${h}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${state.profissionais.map(p => {
+          const initials = p.nome.split(' ').slice(0,2).map(n=>n[0]).join('');
+          return `
+          <tr style="border-bottom:1px solid var(--border);transition:background 0.12s;" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''">
+            <td style="padding:12px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:30px;height:30px;border-radius:50%;background:var(--accent-l);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${initials}</div>
+                <span style="font-weight:500;">${p.nome}</span>
+              </div>
+            </td>
+            <td style="padding:12px;font-size:12px;color:var(--text2);">${p.cargo||'—'}</td>
+            <td style="padding:12px;font-size:12px;color:var(--accent);">${p.email||'—'}</td>
+            <td style="padding:12px;font-size:12px;font-family:var(--mono);">${p.matricula||'—'}</td>
+            <td style="padding:12px;"><button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="removerProfissional(${p.id})">Remover</button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+// ── MODAIS HELPERS ─────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function populateClienteSelect(selectId) {
+  const sel = document.getElementById(selectId);
+  sel.innerHTML = `<option value="">Selecione o cliente...</option>`;
+  state.clientes.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.nome;
+    sel.appendChild(opt);
+  });
+}
+
+function populateProfSelect(selectId, excludeIds = []) {
+  const sel = document.getElementById(selectId);
+  sel.innerHTML = `<option value="">Selecione o profissional...</option>`;
+  state.profissionais.filter(p => !excludeIds.includes(p.id)).forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `${p.nome} — ${p.cargo}`;
+    sel.appendChild(opt);
+  });
+}
+
+function populateProfDocSelect(selectId, mob) {
+  const sel = document.getElementById(selectId);
+  sel.innerHTML = `<option value="">Geral (todos)</option>`;
+  mob.equipe.forEach(e => {
+    const prf = state.profissionais.find(p => p.id === e.profId);
+    if (!prf) return;
+    const opt = document.createElement('option');
+    opt.value = prf.id;
+    opt.textContent = prf.nome;
+    sel.appendChild(opt);
+  });
+}
+
+// ── MODAL: NOVA MOBILIZAÇÃO ───────────────────
+function openModalNovaMob() {
+  state.editingMobId = null;
+  document.getElementById('modal-mob-title').textContent = 'Nova Mobilização';
+  ['mob-nome','mob-responsavel','mob-inicio','mob-prazo','mob-obs'].forEach(id => document.getElementById(id).value = '');
+  populateClienteSelect('mob-cliente');
+  openModal('modal-mob');
+}
+
+function openModalEditarMob() {
+  const mob = state.mobilizacoes.find(m => m.id === state.currentMobId);
+  if (!mob) return;
+  state.editingMobId = mob.id;
+  document.getElementById('modal-mob-title').textContent = 'Editar Mobilização';
+  document.getElementById('mob-nome').value = mob.nome;
+  document.getElementById('mob-responsavel').value = mob.responsavel || '';
+  document.getElementById('mob-inicio').value = mob.inicio || '';
+  document.getElementById('mob-prazo').value = mob.prazo || '';
+  document.getElementById('mob-obs').value = mob.obs || '';
+  populateClienteSelect('mob-cliente');
+  document.getElementById('mob-cliente').value = mob.clienteId;
+  openModal('modal-mob');
+}
+
+function salvarMobilizacao() {
+  const nome = document.getElementById('mob-nome').value.trim();
+  const clienteId = parseInt(document.getElementById('mob-cliente').value);
+  if (!nome) return showToast('Informe o nome do projeto.', '');
+  if (!clienteId) return showToast('Selecione um cliente.', '');
+
+  const data = {
+    nome,
+    clienteId,
+    responsavel: document.getElementById('mob-responsavel').value.trim(),
+    inicio: document.getElementById('mob-inicio').value,
+    prazo: document.getElementById('mob-prazo').value,
+    obs: document.getElementById('mob-obs').value.trim(),
+  };
+
+  if (state.editingMobId) {
+    const mob = state.mobilizacoes.find(m => m.id === state.editingMobId);
+    Object.assign(mob, data);
+    closeModal('modal-mob');
+    showToast('Mobilização atualizada!', 'green');
+    renderDetalhe(mob.id);
+  } else {
+    const newMob = { id: mobIdCounter++, ...data, equipe: [], documentos: [] };
+    state.mobilizacoes.push(newMob);
+    closeModal('modal-mob');
+    showToast('Mobilização criada com sucesso!', 'green');
+    navigate('detalhe', newMob.id);
+  }
+  renderPainel();
+}
+
+// ── MODAL: PROFISSIONAL EQUIPE ────────────────
+function openModalAddProfissional() {
+  const mob = state.mobilizacoes.find(m => m.id === state.currentMobId);
+  if (!mob) return;
+  const excludeIds = mob.equipe.map(e => e.profId);
+  populateProfSelect('prof-select', excludeIds);
+  document.getElementById('prof-papel').value = '';
+  openModal('modal-add-prof');
+}
+
+function salvarProfissionalEquipe() {
+  const profId = parseInt(document.getElementById('prof-select').value);
+  const papel = document.getElementById('prof-papel').value.trim();
+  if (!profId) return showToast('Selecione um profissional.', '');
+
+  const mob = state.mobilizacoes.find(m => m.id === state.currentMobId);
+  mob.equipe.push({ profId, papel });
+  closeModal('modal-add-prof');
+  showToast('Profissional adicionado!', 'green');
+  renderEquipeDetalhe(mob);
+  updateFarolDetalhe(mob);
+}
+
+function removerProfissionalEquipe(mobId, idx) {
+  const mob = state.mobilizacoes.find(m => m.id === mobId);
+  mob.equipe.splice(idx, 1);
+  renderEquipeDetalhe(mob);
+  showToast('Profissional removido.');
+}
+
+// ── MODAL: DOCUMENTO ──────────────────────────
+function openModalAddDoc() {
+  const mob = state.mobilizacoes.find(m => m.id === state.currentMobId);
+  if (!mob) return;
+  ['doc-nome','doc-caminho'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('doc-tipo').value = 'documento';
+  populateProfDocSelect('doc-profissional', mob);
+  openModal('modal-add-doc');
+}
+
+function salvarDocumento() {
+  const nome = document.getElementById('doc-nome').value.trim();
+  if (!nome) return showToast('Informe o nome do documento.', '');
+
+  const mob = state.mobilizacoes.find(m => m.id === state.currentMobId);
+  const profIdVal = document.getElementById('doc-profissional').value;
+  mob.documentos.push({
+    id: docIdCounter++,
+    nome,
+    caminho: document.getElementById('doc-caminho').value.trim(),
+    tipo: document.getElementById('doc-tipo').value,
+    profId: profIdVal ? parseInt(profIdVal) : null,
+    entregue: false,
+  });
+
+  closeModal('modal-add-doc');
+  showToast('Documento adicionado!', 'green');
+  renderDocsDetalhe(mob);
+  updateFarolDetalhe(mob);
+}
+
+function toggleDoc(mobId, idx, checked) {
+  const mob = state.mobilizacoes.find(m => m.id === mobId);
+  mob.documentos[idx].entregue = checked;
+  renderDocsDetalhe(mob);
+  updateFarolDetalhe(mob);
+  showToast(checked ? 'Documento marcado como entregue!' : 'Documento marcado como pendente.');
+}
+
+function removerDoc(mobId, idx) {
+  const mob = state.mobilizacoes.find(m => m.id === mobId);
+  mob.documentos.splice(idx, 1);
+  renderDocsDetalhe(mob);
+  updateFarolDetalhe(mob);
+  showToast('Documento removido.');
+}
+
+function updateFarolDetalhe(mob) {
+  const cor = calcFarol(mob);
+  document.getElementById('detail-farol').innerHTML = farolHTML(cor);
+}
+
+// ── MODAL: CLIENTE ────────────────────────────
+function openModalCliente() {
+  ['cli-nome','cli-cnpj','cli-contato','cli-email','cli-tel'].forEach(id => document.getElementById(id).value = '');
+  openModal('modal-cliente');
+}
+
+function salvarCliente() {
+  const nome = document.getElementById('cli-nome').value.trim();
+  if (!nome) return showToast('Informe o nome da empresa.', '');
+  state.clientes.push({
+    id: cliIdCounter++,
+    nome,
+    cnpj: document.getElementById('cli-cnpj').value.trim(),
+    contato: document.getElementById('cli-contato').value.trim(),
+    email: document.getElementById('cli-email').value.trim(),
+    tel: document.getElementById('cli-tel').value.trim(),
+  });
+  closeModal('modal-cliente');
+  showToast('Cliente salvo!', 'green');
+  renderClientes();
+}
+
+function removerCliente(id) {
+  state.clientes = state.clientes.filter(c => c.id !== id);
+  renderClientes();
+  showToast('Cliente removido.');
+}
+
+// ── MODAL: PROFISSIONAL ───────────────────────
+function openModalProfissional() {
+  ['prf-nome','prf-cargo','prf-email','prf-matricula'].forEach(id => document.getElementById(id).value = '');
+  openModal('modal-profissional');
+}
+
+function salvarProfissional() {
+  const nome = document.getElementById('prf-nome').value.trim();
+  if (!nome) return showToast('Informe o nome do profissional.', '');
+  state.profissionais.push({
+    id: prfIdCounter++,
+    nome,
+    cargo: document.getElementById('prf-cargo').value.trim(),
+    email: document.getElementById('prf-email').value.trim(),
+    matricula: document.getElementById('prf-matricula').value.trim(),
+  });
+  closeModal('modal-profissional');
+  showToast('Profissional salvo!', 'green');
+  renderProfissionais();
+}
+
+function removerProfissional(id) {
+  state.profissionais = state.profissionais.filter(p => p.id !== id);
+  renderProfissionais();
+  showToast('Profissional removido.');
+}
+
+// ── TABS ──────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// ── TOAST ─────────────────────────────────────
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── UTILS ─────────────────────────────────────
+function formatDate(str) {
+  if (!str) return '—';
+  const [y,m,d] = str.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+// ── CLOSE BACKDROP ────────────────────────────
+document.querySelectorAll('.modal-backdrop').forEach(bd => {
+  bd.addEventListener('click', e => { if (e.target === bd) bd.classList.remove('open'); });
+});
+
+// ── INIT ──────────────────────────────────────
+seedData();
+renderPainel();
+document.getElementById('badge-mob').textContent = state.mobilizacoes.length;
+</script>
+</body>
+</html>
