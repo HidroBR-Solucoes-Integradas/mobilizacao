@@ -558,38 +558,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
       <div id="app-topbar-actions" style="display:flex;gap:10px;"></div>
     </div>
 
-    <!-- PAGE: PAINEL -->
-    <div class="page active" id="app-page-painel">
-      <div class="summary-row">
-        <div class="summary-card">
-          <div class="summary-label">Solicitações Totais</div>
-          <div class="summary-value" id="sum-total">0</div>
-          <div class="summary-sub">cadastradas</div>
-        </div>
-        <div class="summary-card">
-          <div class="summary-label" style="color:#3730a3">● Cadastrado</div>
-          <div class="summary-value" id="sum-cadastrado" style="color:#3730a3">0</div>
-          <div class="summary-sub">aguardando ação</div>
-        </div>
-        <div class="summary-card">
-          <div class="summary-label" style="color:var(--amber)">● Processamento</div>
-          <div class="summary-value" id="sum-processamento" style="color:var(--amber)">0</div>
-          <div class="summary-sub">em andamento</div>
-        </div>
-        <div class="summary-card">
-          <div class="summary-label" style="color:var(--green)">● Mobilizado</div>
-          <div class="summary-value" id="sum-mobilizado" style="color:var(--green)">0</div>
-          <div class="summary-sub">concluídas</div>
-        </div>
-      </div>
-      <div class="card-header" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;margin-bottom:0;">
-        <span class="card-title">Solicitações Recentes</span>
-        <button class="btn btn-ghost btn-sm" onclick="appNav('mobilizacoes')">Ver todas →</button>
-      </div>
-      <div id="painel-mob-list" style="border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);overflow:hidden;background:var(--bg2);">
-        <div class="empty-state"><div class="empty-icon">📋</div><p>Nenhuma mobilização ainda.</p></div>
-      </div>
-    </div>
 
     <!-- PAGE: DASHBOARD -->
     <div class="page" id="app-page-dashboard">
@@ -611,7 +579,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
     </div>
 
     <!-- PAGE: MOBILIZAÇÕES -->
-    <div class="page" id="app-page-mobilizacoes">
+    <div class="page active" id="app-page-mobilizacoes">
       <!-- Resumo rápido -->
       <div class="summary-row" style="margin-bottom:20px;">
         <div class="summary-card">
@@ -1457,7 +1425,6 @@ function appNav(pg,mobId){
   document.getElementById('app-topbar-sub').textContent=sub;
   document.getElementById('app-topbar-actions').innerHTML='';
   appCurrentPage=pg;
-  if(pg==='painel')renderAppPainel();
   if(pg==='dashboard')renderAppDashboard();
   if(pg==='mobilizacoes'){renderAppMobs();atualizarSumarios();}
   if(pg==='gestores')renderGestores();
@@ -1468,27 +1435,6 @@ function appNav(pg,mobId){
 }
 
 // ── APP: PAINEL ───────────────────────────────────
-function renderAppPainel(){
-  const mobs=state.mobilizacoes;
-  atualizarSumarios();
-
-  const c=document.getElementById('painel-mob-list');
-  const recent=[...mobs].reverse().slice(0,6);
-  if(!recent.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>Nenhuma solicitação ainda.</p></div>';return;}
-  c.innerHTML=recent.map(mob=>{
-    const cli=state.clientes.find(c2=>c2.id===mob.clienteId);
-    const cor=calcFarol(mob);
-    return`<div style="display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s;"
-      onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''" onclick="appNav('detalhe',${mob.id})">
-      <div style="width:4px;height:36px;border-radius:2px;background:${cor==='verde'?'var(--green)':cor==='amarelo'?'var(--amber)':cor==='vermelho'?'var(--red)':'#9ca3af'};flex-shrink:0;"></div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-weight:600;font-size:13px;margin-bottom:2px;">${mob.nome}</div>
-        <div style="font-size:11px;color:var(--text3);">${cli?cli.nome:'—'} · ${mob.equipe.length} profissional(is) · ${formatDate(mob.dataCriacao?mob.dataCriacao.split('T')[0]:'')}</div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;">${statusBadgeHTML(mob.status)} ${farolHTML(cor)}</div>
-    </div>`;
-  }).join('');
-}
 
 // ── APP: DASHBOARD ────────────────────────────────
 function renderAppDashboard(){
