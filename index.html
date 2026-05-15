@@ -368,13 +368,16 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
       </div>
     </div>
 
-    <!-- Status das Mobilizações -->
-    <div style="text-align:left;">
-      <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:16px;display:flex;align-items:center;gap:10px;">
-        <span>Status das Mobilizações</span>
-        <span style="flex:1;height:1px;background:rgba(255,255,255,0.1);display:block;"></span>
-      </div>
+    <!-- Painel SLA + Status -->
+    <div style="width:100%;margin-top:48px;text-align:left;">
+
+      <!-- SLA cards -->
+      <div id="landing-sla" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;"></div>
+
+      <!-- Lista mobilizações -->
+      <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:12px;">Mobilizações em andamento</div>
       <div id="landing-status-list"></div>
+
     </div>
 
   </div>
@@ -406,18 +409,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
   <div class="portal-topbar">
     <div class="portal-logo"><div><div class="portal-logo-name">ORION MOB</div><div class="portal-logo-sub">GESTÃO DE MOBILIZAÇÃO</div></div></div>
     </div>
-    <div class="portal-nav">
-      <div class="portal-nav-item active" id="pnav-solicitar" onclick="portalNav('solicitar')">Nova Solicitação</div>
-      <div class="portal-nav-item" id="pnav-status" onclick="portalNav('status')">Status das Mobilizações</div>
-    </div>
     <button class="portal-login-btn" onclick="goLogin()">🔐 Equipe de Mobilização</button>
   </div>
 
   <!-- Conteúdo portal -->
   <div class="portal-content">
 
-    <!-- PAGE: SOLICITAR -->
-    <div class="portal-page active" id="ppage-solicitar">
+    <!-- FORMULÁRIO DIRETO -->
+    <div id="ppage-solicitar">
       <!-- Formulário de solicitação -->
       <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;">
         <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
@@ -483,29 +482,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
       </div>
     </div>
 
-    <!-- PAGE: STATUS -->
-    <div class="portal-page" id="ppage-status">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-        <div>
-          <h2 style="font-size:18px;font-weight:700;margin-bottom:4px;">Status das Mobilizações</h2>
-          <p style="font-size:13px;color:var(--text3);">Acompanhe o andamento das suas solicitações em tempo real</p>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center;">
-          <label style="font-size:12px;font-weight:500;color:var(--text2);">Filtrar por líder:</label>
-          <select class="form-select" id="filtro-lider" onchange="renderPortalStatus()" style="min-width:180px;">
-            <option value="">Todos os líderes</option>
-          </select>
-        </div>
-      </div>
 
-      <!-- SLA -->
-      <div class="sla-row" id="portal-sla"></div>
-
-      <!-- Cards de status -->
-      <div id="portal-status-list"></div>
-    </div>
-
-  </div><!-- end portal-content -->
+    </div><!-- end portal-content -->
 </div><!-- end view-portal -->
 
 <!-- ══════════════════════════════════════
@@ -1047,13 +1025,68 @@ function showToast(msg,type=''){const t=document.getElementById('toast');t.textC
 function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
 // ── NAVEGAÇÃO ─────────────────────────────────────
-function goLanding(){showView('view-landing'); if(typeof state!=='undefined') renderLandingStatus();}
+// ── LANDING: PAINEL SLA + STATUS ─────────────────
+function renderLandingStatus(){
+  // SLA cards
+  const slaEl = document.getElementById('landing-sla');
+  const listEl = document.getElementById('landing-status-list');
+  if(!slaEl || !listEl) return;
+
+  const mobs = state.mobilizacoes || [];
+  const mobilizados = mobs.filter(m => m.status === 'mobilizado');
+  const diasMob = mobilizados.map(m => calcSLADias(m)).filter(Boolean);
+  const slaMedia = diasMob.length ? Math.round(diasMob.reduce((a,b)=>a+b,0)/diasMob.length) : null;
+  const emAberto = mobs.filter(m => m.status !== 'mobilizado');
+  const diasAberto = emAberto.map(m => calcSLADias(m)).filter(Boolean);
+  const mediaAberto = diasAberto.length ? Math.round(diasAberto.reduce((a,b)=>a+b,0)/diasAberto.length) : null;
+
+  const byCor = {verde:0, amarelo:0, vermelho:0, cinza:0};
+  mobs.forEach(m => byCor[calcFarol(m)]++);
+
+  slaEl.innerHTML = [
+    {val: mobs.length, label: 'Total de Mobilizações', sub: 'todas as solicitações', color: '#fff'},
+    {val: slaMedia ?? '—', label: 'SLA Médio (dias)', sub: 'abertura → mobilizado', color: '#4ade80'},
+    {val: mediaAberto ?? '—', label: 'Tempo Médio em Aberto', sub: 'solicitações pendentes', color: '#fbbf24'},
+  ].map(c => `
+    <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:18px 20px;text-align:center;">
+      <div style="font-size:30px;font-weight:700;font-family:monospace;color:${c.color};margin-bottom:4px;">${c.val}</div>
+      <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.7);">${c.label}</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;">${c.sub}</div>
+    </div>`).join('');
+
+  if(!mobs.length){
+    listEl.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:13px;">Nenhuma mobilização registrada ainda.</div>';
+    return;
+  }
+
+  const statusColor = {cadastrado:'#818cf8', processamento:'#fbbf24', mobilizado:'#4ade80', 'pendente-info':'#f87171'};
+  const statusLabel = {cadastrado:'Cadastrado', processamento:'Processamento', mobilizado:'Mobilizado', 'pendente-info':'Pend. Informação'};
+  const farolHex = {verde:'#4ade80', amarelo:'#fbbf24', vermelho:'#f87171', cinza:'#9ca3af'};
+
+  listEl.innerHTML = [...mobs].reverse().map(mob => {
+    const cli = state.clientes.find(c => c.id === mob.clienteId);
+    const cor = calcFarol(mob);
+    const pct = progressPct(mob);
+    const dias = calcSLADias(mob);
+    return `<div style="display:grid;grid-template-columns:4px 1fr auto;gap:14px;align-items:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 16px;margin-bottom:8px;">
+      <div style="height:36px;border-radius:2px;background:${farolHex[cor]};"></div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">${mob.nome}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);">${cli ? cli.nome : '—'} · Líder: ${mob.liderContrato || '—'}${dias !== null ? ' · '+dias+'d' : ''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+        <span style="font-size:10px;font-weight:700;color:${statusColor[mob.status]||'#fff'};background:rgba(255,255,255,0.07);padding:2px 9px;border-radius:10px;">${statusLabel[mob.status]||mob.status}</span>
+        ${mob.documentos && mob.documentos.length ? `<div style="width:70px;"><div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:2px;"><span>docs</span><span>${pct}%</span></div><div style="height:3px;background:rgba(255,255,255,0.1);border-radius:2px;"><div style="height:100%;width:${pct}%;background:${farolHex[cor]};border-radius:2px;"></div></div></div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function goLanding(){showView('view-landing'); renderLandingStatus();}
 function goLogin(){showView('view-login');document.getElementById('login-user').value='';document.getElementById('login-pass').value='';document.getElementById('login-err').style.display='none';}
 function goPortal(){
   showView('view-portal');
   populateClienteSelectSol();
-  renderPortalStatus();
-  portalNav('solicitar');
   state.solEquipe=[];
   renderSolEquipe();
 }
@@ -1764,8 +1797,8 @@ document.addEventListener('DOMContentLoaded', function(){
   bindSolListeners();
   // Dados de exemplo
   seedData();
-  // Status na landing
   renderLandingStatus();
+
 });
 </script>
 </body>
