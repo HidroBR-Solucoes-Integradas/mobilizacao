@@ -347,22 +347,36 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 <!-- ══════════════════════════════════════
      VIEW: LANDING / SELEÇÃO
 ══════════════════════════════════════ -->
-<div class="view flex-view active" id="view-landing" style="min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#0d3060 100%);">
-  <div style="text-align:center;color:#fff;padding:40px 20px;">
-    <div style="margin-bottom:16px;"><span style="font-size:42px;font-weight:800;letter-spacing:0.18em;color:#fff;">ORION MOB</span></div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-bottom:48px;">GESTÃO DE MOBILIZAÇÃO · HIDROBR</div>
-    <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">
-      <div onclick="goPortal()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:32px 36px;cursor:pointer;transition:all 0.2s;min-width:220px;" onmouseenter="this.style.background='rgba(255,255,255,0.12)'" onmouseleave="this.style.background='rgba(255,255,255,0.07)'">
-        <div style="font-size:36px;margin-bottom:14px;">📋</div>
-        <div style="font-size:16px;font-weight:600;margin-bottom:6px;">Solicitar Mobilização</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.45);">Acesso aberto · Líderes de contrato</div>
+<div class="view flex-view active" id="view-landing" style="min-height:100vh;align-items:flex-start;justify-content:center;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#0d3060 100%);overflow-y:auto;">
+  <div style="text-align:center;color:#fff;padding:48px 24px 40px;width:100%;max-width:1000px;">
+
+    <!-- Header -->
+    <div style="margin-bottom:8px;"><span style="font-size:38px;font-weight:800;letter-spacing:0.18em;color:#fff;">ORION MOB</span></div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-bottom:40px;">GESTÃO DE MOBILIZAÇÃO · HIDROBR</div>
+
+    <!-- Botões de acesso -->
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:48px;">
+      <div onclick="goPortal()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:28px 36px;cursor:pointer;transition:all 0.2s;min-width:200px;" onmouseenter="this.style.background='rgba(255,255,255,0.12)'" onmouseleave="this.style.background='rgba(255,255,255,0.07)'">
+        <div style="font-size:32px;margin-bottom:12px;">📋</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:5px;">Solicitar Mobilização</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45);">Acesso aberto · Líderes de contrato</div>
       </div>
-      <div onclick="goLogin()" style="background:rgba(26,111,191,0.2);border:1px solid rgba(26,111,191,0.4);border-radius:14px;padding:32px 36px;cursor:pointer;transition:all 0.2s;min-width:220px;" onmouseenter="this.style.background='rgba(26,111,191,0.3)'" onmouseleave="this.style.background='rgba(26,111,191,0.2)'">
-        <div style="font-size:36px;margin-bottom:14px;">🔐</div>
-        <div style="font-size:16px;font-weight:600;margin-bottom:6px;">Equipe de Mobilização</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.45);">Acesso restrito · Login necessário</div>
+      <div onclick="goLogin()" style="background:rgba(26,111,191,0.2);border:1px solid rgba(26,111,191,0.4);border-radius:14px;padding:28px 36px;cursor:pointer;transition:all 0.2s;min-width:200px;" onmouseenter="this.style.background='rgba(26,111,191,0.3)'" onmouseleave="this.style.background='rgba(26,111,191,0.2)'">
+        <div style="font-size:32px;margin-bottom:12px;">🔐</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:5px;">Equipe de Mobilização</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45);">Acesso restrito · Login necessário</div>
       </div>
     </div>
+
+    <!-- Status das Mobilizações -->
+    <div style="text-align:left;">
+      <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+        <span>Status das Mobilizações</span>
+        <span style="flex:1;height:1px;background:rgba(255,255,255,0.1);display:block;"></span>
+      </div>
+      <div id="landing-status-list"></div>
+    </div>
+
   </div>
 </div>
 
@@ -404,66 +418,50 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 
     <!-- PAGE: SOLICITAR -->
     <div class="portal-page active" id="ppage-solicitar">
-      <div class="portal-hero">
-        <div>
-          <h1>Solicitação de Mobilização</h1>
-          <p>Preencha os dados do projeto e da equipe que será mobilizada. Nossa equipe irá processar e retornar com os próximos passos.</p>
-        </div>
-        <div style="font-size:48px;opacity:0.3;">📋</div>
-      </div>
-
       <!-- Formulário de solicitação -->
-      <div class="card" style="margin-bottom:20px;">
-        <div class="card-header"><span class="card-title">📂 Dados do Projeto</span></div>
-        <div class="card-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Nome do Projeto <span>*</span></label>
-              <input class="form-input" id="sol-nome" placeholder="Ex: Implantação ERP Fase 2">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Cliente <span>*</span></label>
-              <select class="form-select" id="sol-cliente"><option value="">Selecione o cliente...</option></select>
-            </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+          <span style="font-size:13px;font-weight:600;color:var(--text);">📂 Dados do Projeto</span>
+        </div>
+        <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:12px;font-weight:500;color:var(--text2);">Nome do Projeto <span style="color:var(--red);">*</span></label>
+            <input class="form-input" id="sol-nome" placeholder="Ex: Implantação ERP Fase 2">
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Líder de Contrato <span>*</span></label>
-              <input class="form-input" id="sol-lider" placeholder="Nome do líder de contrato HIDROBR">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Resp. Mobilização (Cliente)</label>
-              <input class="form-input" id="sol-resp-cliente" placeholder="Nome do responsável no cliente">
-            </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:12px;font-weight:500;color:var(--text2);">Cliente <span style="color:var(--red);">*</span></label>
+            <select class="form-select" id="sol-cliente"><option value="">Selecione o cliente...</option></select>
           </div>
-          <div class="form-row three">
-            <div class="form-group">
-              <label class="form-label">Data de Início Prevista</label>
-              <input class="form-input" type="date" id="sol-inicio">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Prazo de Entrega</label>
-              <input class="form-input" type="date" id="sol-prazo">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Sistema do Cliente</label>
-              <select class="form-select" id="sol-tem-sistema">
-                <option value="nao">Não possui</option>
-                <option value="sim">Possui sistema</option>
-              </select>
-            </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:12px;font-weight:500;color:var(--text2);">Líder de Contrato <span style="color:var(--red);">*</span></label>
+            <input class="form-input" id="sol-lider" placeholder="Nome do líder de contrato HIDROBR">
           </div>
-          <div class="form-row full" id="sol-sistema-wrap" style="display:none;">
-            <div class="form-group">
-              <label class="form-label">Qual sistema?</label>
-              <input class="form-input" id="sol-sistema-nome" placeholder="Ex: SAP, Portal do Cliente...">
-            </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:12px;font-weight:500;color:var(--text2);">Resp. Mobilização (Cliente)</label>
+            <input class="form-input" id="sol-resp-cliente" placeholder="Nome do responsável no cliente">
           </div>
-          <div class="form-row full">
-            <div class="form-group">
-              <label class="form-label">Observações</label>
-              <textarea class="form-textarea" id="sol-obs" placeholder="Informações adicionais sobre a mobilização..."></textarea>
-            </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:12px;font-weight:500;color:var(--text2);">Data de Início Prevista</label>
+            <input class="form-input" type="date" id="sol-inicio">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:12px;font-weight:500;color:var(--text2);">Prazo de Entrega</label>
+            <input class="form-input" type="date" id="sol-prazo">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:12px;font-weight:500;color:var(--text2);">Sistema do Cliente</label>
+            <select class="form-select" id="sol-tem-sistema">
+              <option value="nao">Não possui</option>
+              <option value="sim">Possui sistema</option>
+            </select>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;" id="sol-sistema-wrap" style="display:none;">
+            <label style="font-size:12px;font-weight:500;color:var(--text2);">Qual sistema?</label>
+            <input class="form-input" id="sol-sistema-nome" placeholder="Ex: SAP, Portal do Cliente...">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;grid-column:1/-1;">
+            <label style="font-size:12px;font-weight:500;color:var(--text2);">Observações</label>
+            <textarea class="form-textarea" id="sol-obs" placeholder="Informações adicionais sobre a mobilização..."></textarea>
           </div>
         </div>
       </div>
@@ -956,7 +954,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 // ── SUPABASE ──────────────────────────────────────
 const SUPA_URL = 'https://qmemmskitfpbqqnfddyv.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtZW1tc2tpdGZwYnFxbmZkZHl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNDE2NDgsImV4cCI6MjA5MzcxNzY0OH0.GbXuBfKgQcEXCcXK6m74XhvVudD7E67Yqqwkx2-YuBM';
-let supabase;
 
 let state = {
   mobilizacoes: [], clientes: [], profissionais: [], gestores: [],
@@ -1050,7 +1047,7 @@ function showToast(msg,type=''){const t=document.getElementById('toast');t.textC
 function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
 // ── NAVEGAÇÃO ─────────────────────────────────────
-function goLanding(){showView('view-landing');}
+function goLanding(){showView('view-landing'); if(typeof state!=='undefined') renderLandingStatus();}
 function goLogin(){showView('view-login');document.getElementById('login-user').value='';document.getElementById('login-pass').value='';document.getElementById('login-err').style.display='none';}
 function goPortal(){
   showView('view-portal');
@@ -1073,48 +1070,42 @@ async function doLogin(){
     if(!email) throw new Error('Informe o e-mail.');
     if(!pass)  throw new Error('Informe a senha.');
 
-    // Tentar Supabase (carrega dinamicamente se necessário)
+    // Carregar Supabase via ESM (única forma que funciona no browser sem bundler)
     let logado = false;
     try {
-      if(!window._supaClient){
-        // Carregar SDK dinamicamente
-        await new Promise((resolve, reject) => {
-          if(window.supabase){ resolve(); return; }
-          const s = document.createElement('script');
-          s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-          s.onload = resolve;
-          s.onerror = reject;
-          document.head.appendChild(s);
-        });
-        window._supaClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+      const cli = createClient(SUPA_URL, SUPA_KEY);
+      const { data, error } = await cli.auth.signInWithPassword({ email, password: pass });
+      if(error) {
+        // Erro de credencial inválida — não tenta fallback, mostra erro direto
+        if(error.message.includes('Invalid login') || error.message.includes('invalid_credentials')) {
+          throw new Error('E-mail ou senha incorretos.');
+        }
+        throw new Error(error.message);
       }
-      const {data, error} = await window._supaClient.auth.signInWithPassword({email, password: pass});
-      if(error) throw new Error(error.message);
-      const user = data.user;
-      const nome = user.user_metadata?.nome || user.email.split('@')[0];
+      const nome = data.user.user_metadata?.nome || data.user.email.split('@')[0];
       document.getElementById('app-username').textContent = nome;
       document.getElementById('app-avatar').textContent = nome.substring(0,2).toUpperCase();
       logado = true;
-    } catch(supaErr){
-      // Se o erro for de credenciais inválidas, não tenta fallback
-      if(supaErr.message && (supaErr.message.includes('Invalid login') || supaErr.message.includes('invalid_credentials') || supaErr.message.includes('Email not confirmed'))){
-        throw new Error('E-mail ou senha incorretos.');
-      }
-      // Se for erro de rede/SDK, tenta fallback local
-      console.warn('Supabase indisponível, usando fallback:', supaErr.message);
+    } catch(supaErr) {
+      // Se foi erro de credencial, relancar
+      if(supaErr.message === 'E-mail ou senha incorretos.') throw supaErr;
+      // Erro técnico (rede, CORS etc) → fallback local
+      console.warn('Supabase falhou, usando fallback local:', supaErr.message);
     }
 
-    // Fallback local (só se Supabase falhou por erro técnico)
-    if(!logado){
+    if(!logado) {
+      // Fallback local para uso sem internet ou emergência
       const CREDS = {'mobilizacao@hidrobr.com.br':'hidrobr2024','admin@hidrobr.com.br':'admin123'};
       if(!CREDS[email] || CREDS[email] !== pass) throw new Error('E-mail ou senha incorretos.');
       const nome = email.split('@')[0];
       document.getElementById('app-username').textContent = nome;
       document.getElementById('app-avatar').textContent = nome.substring(0,2).toUpperCase();
     }
+
     showView('view-app');
     appNav('painel');
-  } catch(e){
+  } catch(e) {
     err.textContent = e.message || 'Erro ao fazer login.';
     err.style.display = 'block';
   } finally {
@@ -1122,9 +1113,11 @@ async function doLogin(){
     btn.disabled = false;
   }
 }
-
 function doLogout(){
-  try { const s = window.supabase?.createClient(SUPA_URL, SUPA_KEY); if(s) s.auth.signOut(); } catch(e){}
+  // Signout assíncrono silencioso
+  import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm').then(({createClient})=>{
+    createClient(SUPA_URL, SUPA_KEY).auth.signOut();
+  }).catch(()=>{});
   showView('view-landing');
 }
 
@@ -1763,8 +1756,6 @@ function printReport(){
 
 // ── INIT ──────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function(){
-  // Inicializar Supabase
-  if(window.supabase) supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
   // Fechar modal no backdrop
   document.querySelectorAll('.modal-backdrop').forEach(bd=>{
     bd.addEventListener('click',e=>{if(e.target===bd)bd.classList.remove('open');});
@@ -1773,6 +1764,8 @@ document.addEventListener('DOMContentLoaded', function(){
   bindSolListeners();
   // Dados de exemplo
   seedData();
+  // Status na landing
+  renderLandingStatus();
 });
 </script>
 </body>
