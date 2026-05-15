@@ -1075,16 +1075,34 @@ async function doLogin(){
   btn.textContent = 'Entrando...';
   btn.disabled = true;
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
-    if (error) throw error;
-    const user = data.user;
-    const nome = user.user_metadata?.nome || user.email.split('@')[0];
-    document.getElementById('app-username').textContent = nome;
-    document.getElementById('app-avatar').textContent = nome.substring(0,2).toUpperCase();
+    if (!email) throw new Error('Informe o e-mail.');
+    if (!pass)  throw new Error('Informe a senha.');
+
+    if (supabase) {
+      // Autenticação via Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+      if (error) {
+        if (error.message.includes('Invalid login credentials') || error.message.includes('invalid_credentials')) {
+          throw new Error('E-mail ou senha incorretos.');
+        }
+        throw error;
+      }
+      const user = data.user;
+      const nome = user.user_metadata?.nome || user.email.split('@')[0];
+      document.getElementById('app-username').textContent = nome;
+      document.getElementById('app-avatar').textContent = nome.substring(0,2).toUpperCase();
+    } else {
+      // Fallback local (Supabase ainda não carregou)
+      const CREDS = {'mobilizacao@hidrobr.com.br':'hidrobr2024','admin@hidrobr.com.br':'admin123'};
+      if (!CREDS[email] || CREDS[email] !== pass) throw new Error('E-mail ou senha incorretos.');
+      const nome = email.split('@')[0];
+      document.getElementById('app-username').textContent = nome;
+      document.getElementById('app-avatar').textContent = nome.substring(0,2).toUpperCase();
+    }
     showView('view-app');
     appNav('painel');
   } catch(e) {
-    err.textContent = e.message === 'Invalid login credentials' ? 'E-mail ou senha incorretos.' : e.message;
+    err.textContent = e.message || 'Erro ao fazer login.';
     err.style.display = 'block';
   } finally {
     btn.textContent = 'Entrar';
@@ -1092,7 +1110,7 @@ async function doLogin(){
   }
 }
 function doLogout(){
-  supabase.auth.signOut();
+  if (supabase) supabase.auth.signOut();
   showView('view-landing');
 }
 
