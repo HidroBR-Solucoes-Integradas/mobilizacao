@@ -156,6 +156,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 .status-processamento{background:var(--amber-l);color:var(--amber);}
 .status-mobilizado{background:var(--green-l);color:var(--green);}
 .status-pendente-info{background:var(--red-l);color:var(--red);}
+.status-inativo{background:var(--gray-l);color:var(--gray);}
 
 /* FAROL */
 .farol{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;}
@@ -306,6 +307,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 .filter-chip{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;transition:all 0.15s;}
 .filter-chip:hover{border-color:var(--accent);color:var(--accent);}
 .filter-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+#app-detail-status-select option[value="cadastrado"]{color:#3730a3;}
+#app-detail-status-select option[value="processamento"]{color:var(--amber);}
+#app-detail-status-select option[value="mobilizado"]{color:var(--green);}
+#app-detail-status-select option[value="pendente-info"]{color:var(--red);}
+#app-detail-status-select option[value="inativo"]{color:var(--gray);}
 
 /* DASHBOARD GRID */
 .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
@@ -429,7 +435,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
           </div>
           <div style="display:flex;flex-direction:column;gap:6px;">
             <label style="font-size:12px;font-weight:500;color:var(--text2);">Cliente <span style="color:var(--red);">*</span></label>
-            <select class="form-select" id="sol-cliente"><option value="">Selecione o cliente...</option></select>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <select class="form-select" id="sol-cliente" style="flex:1;"><option value="">Selecione o cliente...</option></select>
+              <button type="button" class="btn btn-secondary btn-sm" style="white-space:nowrap;flex-shrink:0;" onclick="abrirModalNovoClienteInline()">＋ Novo</button>
+            </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:6px;">
             <label style="font-size:12px;font-weight:500;color:var(--text2);">Líder de Contrato <span style="color:var(--red);">*</span></label>
@@ -517,9 +526,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
     </div>
     <div class="sidebar-section">
       <div class="sidebar-section-label">Principal</div>
-      <div class="nav-item active" onclick="appNav('painel')"><span class="nav-icon">◉</span> Painel <span class="nav-badge" id="badge-novas">0</span></div>
+      <div class="nav-item active" onclick="appNav('mobilizacoes')"><span class="nav-icon">⊞</span> Mobilizações <span class="nav-badge" id="badge-mob">0</span></div>
       <div class="nav-item" onclick="appNav('dashboard')"><span class="nav-icon">◈</span> Dashboard</div>
-      <div class="nav-item" onclick="appNav('mobilizacoes')"><span class="nav-icon">⊞</span> Mobilizações <span class="nav-badge" id="badge-mob">0</span></div>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-section-label">Cadastros</div>
@@ -604,6 +612,26 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 
     <!-- PAGE: MOBILIZAÇÕES -->
     <div class="page" id="app-page-mobilizacoes">
+      <!-- Resumo rápido -->
+      <div class="summary-row" style="margin-bottom:20px;">
+        <div class="summary-card">
+          <div class="summary-label">Total</div>
+          <div class="summary-value" id="sum-total">0</div>
+          <div class="summary-sub">solicitações</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label" style="color:#3730a3">● Cadastrado</div>
+          <div class="summary-value" id="sum-cadastrado" style="color:#3730a3">0</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label" style="color:var(--amber)">● Processamento</div>
+          <div class="summary-value" id="sum-processamento" style="color:var(--amber)">0</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label" style="color:var(--green)">● Mobilizado</div>
+          <div class="summary-value" id="sum-mobilizado" style="color:var(--green)">0</div>
+        </div>
+      </div>
       <div class="filter-bar">
         <div class="search-wrap">
           <input class="search-input" id="app-search-mob" placeholder="Buscar por projeto ou cliente..." oninput="renderAppMobs()">
@@ -613,6 +641,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
         <div class="filter-chip" onclick="appSetFilter('processamento')" id="achip-processamento">● Processamento</div>
         <div class="filter-chip" onclick="appSetFilter('mobilizado')" id="achip-mobilizado">● Mobilizado</div>
         <div class="filter-chip" onclick="appSetFilter('pendente-info')" id="achip-pendente-info">● Pend. Informação</div>
+        <div class="filter-chip" onclick="appSetFilter('inativo')" id="achip-inativo">○ Inativo</div>
       </div>
       <div class="mob-list" id="app-mob-list"></div>
     </div>
@@ -626,6 +655,13 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
           <div class="detail-client" id="app-detail-cliente"></div>
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <select id="app-detail-status-select" class="form-select" style="font-size:12px;font-weight:600;padding:5px 10px;min-width:150px;cursor:pointer;" onchange="mudarStatusMob(this.value)">
+            <option value="cadastrado">● Cadastrado</option>
+            <option value="processamento">● Processamento</option>
+            <option value="mobilizado">● Mobilizado</option>
+            <option value="pendente-info">● Pend. Informação</option>
+            <option value="inativo">○ Inativo</option>
+          </select>
           <span id="app-detail-status"></span>
           <span id="app-detail-farol"></span>
           <button class="btn btn-secondary btn-sm" onclick="openModalEditarMob()">✎ Editar</button>
@@ -767,7 +803,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
     <div class="modal-body">
       <div class="form-row">
         <div class="form-group"><label class="form-label">Nome do Projeto <span>*</span></label><input class="form-input" id="mob-nome" placeholder="Nome do projeto"></div>
-        <div class="form-group"><label class="form-label">Cliente <span>*</span></label><select class="form-select" id="mob-cliente"><option value="">Selecione...</option></select></div>
+        <div class="form-group"><label class="form-label">Cliente <span>*</span></label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select class="form-select" id="mob-cliente" style="flex:1;"><option value="">Selecione...</option></select>
+            <button type="button" class="btn btn-secondary btn-sm" style="white-space:nowrap;flex-shrink:0;" onclick="abrirModalNovoClienteInline()">＋ Novo</button>
+          </div>
+        </div>
       </div>
       <div class="form-row three">
         <div class="form-group">
@@ -1097,6 +1138,7 @@ function renderLandingStatus(){
         <span style="font-size:10px;font-weight:700;color:${statusColor[mob.status]||'#fff'};background:rgba(255,255,255,0.07);padding:2px 9px;border-radius:10px;">${statusLabel[mob.status]||mob.status}</span>
         ${mob.documentos && mob.documentos.length ? `<div style="width:70px;"><div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:2px;"><span>docs</span><span>${pct}%</span></div><div style="height:3px;background:rgba(255,255,255,0.1);border-radius:2px;"><div style="height:100%;width:${pct}%;background:${farolHex[cor]};border-radius:2px;"></div></div></div>` : ''}
       </div>
+        </div>
     </div>`;
   }).join('');
 }
@@ -1156,7 +1198,7 @@ async function doLogin(){
     }
 
     showView('view-app');
-    appNav('painel');
+    appNav('mobilizacoes');
   } catch(e) {
     err.textContent = e.message || 'Erro ao fazer login.';
     err.style.display = 'block';
@@ -1337,7 +1379,6 @@ function renderPortalStatus(){
 // ── APP: NAVEGAÇÃO ────────────────────────────────
 let appCurrentPage='painel', appCurrentFilter='todos';
 const appPageTitles={
-  painel:['Painel','Solicitações recebidas'],
   dashboard:['Dashboard','Análise e indicadores'],
   mobilizacoes:['Mobilizações','Todas as solicitações'],
   detalhe:['Detalhe da Mobilização',''],
@@ -1359,7 +1400,7 @@ function appNav(pg,mobId){
   appCurrentPage=pg;
   if(pg==='painel')renderAppPainel();
   if(pg==='dashboard')renderAppDashboard();
-  if(pg==='mobilizacoes')renderAppMobs();
+  if(pg==='mobilizacoes'){renderAppMobs();atualizarSumarios();}
   if(pg==='gestores')renderGestores();
   if(pg==='clientes')renderClientes();
   if(pg==='profissionais')renderProfissionais();
@@ -1370,12 +1411,7 @@ function appNav(pg,mobId){
 // ── APP: PAINEL ───────────────────────────────────
 function renderAppPainel(){
   const mobs=state.mobilizacoes;
-  document.getElementById('sum-total').textContent=mobs.length;
-  document.getElementById('sum-cadastrado').textContent=mobs.filter(m=>m.status==='cadastrado').length;
-  document.getElementById('sum-processamento').textContent=mobs.filter(m=>m.status==='processamento').length;
-  document.getElementById('sum-mobilizado').textContent=mobs.filter(m=>m.status==='mobilizado').length;
-  document.getElementById('badge-mob').textContent=mobs.length;
-  document.getElementById('badge-novas').textContent=mobs.filter(m=>m.status==='cadastrado').length;
+  atualizarSumarios();
 
   const c=document.getElementById('painel-mob-list');
   const recent=[...mobs].reverse().slice(0,6);
@@ -1445,16 +1481,19 @@ function appSetFilter(f){appCurrentFilter=f;document.querySelectorAll('.filter-c
 function renderAppMobs(){
   const search=document.getElementById('app-search-mob')?.value.toLowerCase()||'';
   let mobs=state.mobilizacoes;
-  if(appCurrentFilter!=='todos')mobs=mobs.filter(m=>m.status===appCurrentFilter);
+  if(appCurrentFilter==='todos') mobs=mobs.filter(m=>m.status!=='inativo');
+  else mobs=mobs.filter(m=>m.status===appCurrentFilter);
   if(search)mobs=mobs.filter(m=>{const cli=state.clientes.find(c=>c.id===m.clienteId);return m.nome.toLowerCase().includes(search)||(cli&&cli.nome.toLowerCase().includes(search));});
-  document.getElementById('badge-mob').textContent=state.mobilizacoes.length;
+  atualizarSumarios();
   const c=document.getElementById('app-mob-list');
   if(!mobs.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">🔍</div><p>Nenhuma mobilização encontrada.</p></div>';return;}
   c.innerHTML=mobs.map(mob=>{
     const cli=state.clientes.find(c2=>c2.id===mob.clienteId);
     const cor=calcFarol(mob);const pct=progressPct(mob);
     const dias=calcSLADias(mob);
-    return`<div class="mob-card ${cor}" onclick="appNav('detalhe',${mob.id})">
+    return`<div class="mob-card ${cor}" style="position:relative;">
+        <button onclick="event.stopPropagation();inativarMob(${mob.id})" style="position:absolute;top:10px;right:10px;background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--text3);padding:3px 8px;border-radius:5px;transition:all 0.15s;" onmouseenter="this.style.background='var(--red-l)';this.style.color='var(--red)'" onmouseleave="this.style.background='transparent';this.style.color='var(--text3)'" title="Inativar mobilização">✕ Inativar</button>
+        <div onclick="appNav('detalhe',${mob.id})" style="cursor:pointer;">
       <div style="display:grid;grid-template-columns:1fr auto;gap:12px;">
         <div>
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="mob-card-title">${mob.nome}</span>${statusBadgeHTML(mob.status)}</div>
@@ -1482,6 +1521,8 @@ function renderAppDetalhe(mobId){
   document.getElementById('app-detail-cliente').innerHTML=`Cliente: <strong>${cli?cli.nome:'—'}</strong>`;
   document.getElementById('app-detail-farol').innerHTML=farolHTML(cor);
   document.getElementById('app-detail-status').innerHTML=statusBadgeHTML(mob.status);
+  const selStatus = document.getElementById('app-detail-status-select');
+  if(selStatus){ selStatus.value = mob.status; selStatus.style.color = {cadastrado:'#3730a3',processamento:'var(--amber)',mobilizado:'var(--green)','pendente-info':'var(--red)',inativo:'var(--gray)'}[mob.status]||''; }
   document.getElementById('app-topbar-title').textContent=mob.nome;
   document.getElementById('app-topbar-sub').textContent=cli?cli.nome:'';
 
@@ -1725,6 +1766,7 @@ function salvarCliente(){
   const nome=document.getElementById('cli-nome').value.trim();if(!nome)return showToast('Informe o nome da empresa.');
   state.clientes.push({id:cliIdCounter++,nome,cnpj:document.getElementById('cli-cnpj').value.trim(),contato:document.getElementById('cli-contato').value.trim(),email:document.getElementById('cli-email').value.trim(),tel:document.getElementById('cli-tel').value.trim()});
   closeModal('modal-cliente');showToast('Cliente salvo!','green');renderClientes();
+  if(window._clienteCallbackAfterSave){ window._clienteCallbackAfterSave(); window._clienteCallbackAfterSave = null; }
 }
 function renderClientes(){
   const c=document.getElementById('clientes-table');
