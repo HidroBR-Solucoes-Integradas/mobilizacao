@@ -1084,6 +1084,65 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type?' '+type:'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
+
+// ── MUDAR STATUS DIRETO ──────────────────────────
+function mudarStatusMob(novoStatus){
+  const mob = state.mobilizacoes.find(m => m.id === state.currentMobId);
+  if(!mob) return;
+  mob.status = novoStatus;
+  const statusColors = {cadastrado:'#3730a3',processamento:'var(--amber)',mobilizado:'var(--green)','pendente-info':'var(--red)',inativo:'var(--gray)'};
+  document.getElementById('app-detail-status').innerHTML = statusBadgeHTML(novoStatus);
+  document.getElementById('app-detail-farol').innerHTML = farolHTML(calcFarol(mob));
+  const sel = document.getElementById('app-detail-status-select');
+  if(sel) sel.style.color = statusColors[novoStatus] || '';
+  renderAppMobs();
+  showToast('Status atualizado!','green');
+}
+
+// ── INATIVAR / REATIVAR MOB ──────────────────────
+function inativarMob(mobId){
+  const mob = state.mobilizacoes.find(m => m.id === mobId);
+  if(!mob) return;
+  if(mob.status === 'inativo'){
+    mob.status = 'cadastrado';
+    showToast('Mobilização reativada.','green');
+  } else {
+    mob.status = 'inativo';
+    showToast('Mobilização inativada.');
+  }
+  renderAppMobs();
+  renderLandingStatus();
+}
+
+// ── NOVO CLIENTE INLINE ──────────────────────────
+function abrirModalNovoClienteInline(){
+  ['cli-nome','cli-cnpj','cli-contato','cli-email','cli-tel'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  window._clienteCallbackAfterSave = function(){
+    const ultimo = state.clientes[state.clientes.length-1];
+    // Atualizar select no modal-mob
+    const sel1 = document.getElementById('mob-cliente');
+    if(sel1){ sel1.innerHTML = '<option value="">Selecione...</option>'; state.clientes.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nome;sel1.appendChild(o);}); sel1.value = ultimo.id; }
+    // Atualizar select no portal
+    const sel2 = document.getElementById('sol-cliente');
+    if(sel2){ populateClienteSelectSol(); sel2.value = ultimo.id; }
+    window._clienteCallbackAfterSave = null;
+  };
+  openModal('modal-cliente');
+}
+
+// ── ATUALIZAR SUMÁRIOS ───────────────────────────
+function atualizarSumarios(){
+  const ativos = state.mobilizacoes.filter(m => m.status !== 'inativo');
+  const el = id => document.getElementById(id);
+  if(el('sum-total'))        el('sum-total').textContent        = ativos.length;
+  if(el('sum-cadastrado'))   el('sum-cadastrado').textContent   = ativos.filter(m=>m.status==='cadastrado').length;
+  if(el('sum-processamento'))el('sum-processamento').textContent= ativos.filter(m=>m.status==='processamento').length;
+  if(el('sum-mobilizado'))   el('sum-mobilizado').textContent   = ativos.filter(m=>m.status==='mobilizado').length;
+  if(el('badge-mob'))        el('badge-mob').textContent        = ativos.length;
+}
+
 // ── NAVEGAÇÃO ─────────────────────────────────────
 // ── LANDING: PAINEL SLA + STATUS ─────────────────
 function renderLandingStatus(){
