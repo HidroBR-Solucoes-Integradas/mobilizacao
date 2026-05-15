@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Orion — Gestão de Mobilização</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --bg:#f0f4f8; --bg2:#ffffff; --bg3:#e8eef5; --bg4:#dce6f0;
@@ -343,6 +342,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 /* EMAIL PREVIEW */
 .email-preview{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:12px;line-height:1.7;color:var(--text2);white-space:pre-wrap;font-family:var(--mono);}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 <body>
 
@@ -961,7 +961,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 // ── SUPABASE ──────────────────────────────────────
 const SUPA_URL = 'https://qmemmskitfpbqqnfddyv.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtZW1tc2tpdGZwYnFxbmZkZHl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNDE2NDgsImV4cCI6MjA5MzcxNzY0OH0.GbXuBfKgQcEXCcXK6m74XhvVudD7E67Yqqwkx2-YuBM';
-const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+let supabase;
 
 let state = {
   mobilizacoes: [], clientes: [], profissionais: [], gestores: [],
@@ -1749,6 +1749,8 @@ function printReport(){
 
 // ── INIT ──────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function(){
+  // Inicializar Supabase
+  if(window.supabase) supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
   // Fechar modal no backdrop
   document.querySelectorAll('.modal-backdrop').forEach(bd=>{
     bd.addEventListener('click',e=>{if(e.target===bd)bd.classList.remove('open');});
