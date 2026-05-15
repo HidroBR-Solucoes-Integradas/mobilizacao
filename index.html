@@ -1265,7 +1265,6 @@ function switchProfTab(aba){
 
 function filtrarProfExistentes(){
   const busca = (document.getElementById('sol-prof-busca')?.value||'').toLowerCase();
-  // Excluir já adicionados
   const jaAdicionados = new Set(state.solEquipe.map(e=>e.profId));
   const lista = state.profissionais.filter(p =>
     !jaAdicionados.has(p.id) &&
@@ -1278,17 +1277,22 @@ function filtrarProfExistentes(){
   }
   c.innerHTML = lista.map(p => {
     const init = p.nome.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase();
-    const sel = _solProfSelecionadoId === p.id;
-    return `<div onclick="selecionarProfExistente(${p.id})" style="display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);background:${sel?'var(--accent-l)':'var(--bg2)'};transition:background 0.12s;" onmouseenter="if(${p.id}!==_solProfSelecionadoId)this.style.background='var(--bg3)'" onmouseleave="this.style.background='${sel?'var(--accent-l)':'var(--bg2)}'">
-      <div style="width:34px;height:34px;border-radius:50%;background:${sel?'var(--accent)':'var(--accent-l)'};color:${sel?'#fff':'var(--accent)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">${init}</div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:600;color:var(--text);">${p.nome}</div>
-        <div style="font-size:11px;color:var(--text3);">${p.cargo||'—'} · ${p.vinculo?.toUpperCase()||''} · ${p.regime?.toUpperCase()||''}</div>
-      </div>
-      ${sel?'<span style="color:var(--accent);font-size:16px;">✓</span>':''}
-    </div>`;
+    const sel = (_solProfSelecionadoId === p.id);
+    const bgColor = sel ? 'var(--accent-l)' : 'var(--bg2)';
+    const avatarBg = sel ? 'var(--accent)' : 'var(--accent-l)';
+    const avatarColor = sel ? '#fff' : 'var(--accent)';
+    const checkmark = sel ? '<span style="color:var(--accent);font-size:16px;flex-shrink:0;">✓</span>' : '';
+    return '<div onclick="selecionarProfExistente(' + p.id + ')" style="display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);background:' + bgColor + ';transition:background 0.12s;">'
+      + '<div style="width:34px;height:34px;border-radius:50%;background:' + avatarBg + ';color:' + avatarColor + ';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">' + init + '</div>'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="font-size:13px;font-weight:600;color:var(--text);">' + p.nome + '</div>'
+      + '<div style="font-size:11px;color:var(--text3);">' + (p.cargo||'—') + ' · ' + (p.vinculo||'').toUpperCase() + ' · ' + (p.regime||'').toUpperCase() + '</div>'
+      + '</div>'
+      + checkmark
+      + '</div>';
   }).join('');
 }
+
 
 function selecionarProfExistente(profId){
   _solProfSelecionadoId = profId;
