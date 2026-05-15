@@ -969,63 +969,7 @@ let state = {
 let mobIdCounter=1, cliIdCounter=1, prfIdCounter=1, docIdCounter=1, gestIdCounter=1, passIdCounter=1;
 
 // ── SEED ──────────────────────────────────────────
-function seedData() {
-  state.clientes = [
-    {id:cliIdCounter++,nome:'Petrobras S.A.',cnpj:'33.000.167/0001-01',contato:'Marcos Oliveira',email:'marcos@petrobras.com.br',tel:'(21) 3324-1010'},
-    {id:cliIdCounter++,nome:'Vale S.A.',cnpj:'33.592.510/0001-54',contato:'Ana Costa',email:'ana.costa@vale.com',tel:'(31) 3485-5555'},
-    {id:cliIdCounter++,nome:'Embraer S.A.',cnpj:'07.689.002/0001-89',contato:'Carlos Mendes',email:'carlos.mendes@embraer.com.br',tel:'(12) 3927-1000'},
-  ];
-  state.gestores = [
-    {id:gestIdCounter++,nome:'Fernanda Rocha',cargo:'Gestora de Mobilização',area:'Operações',email:'fernanda@hidrobr.com.br',tel:'(11) 98765-4321',obs:'Seg–Sex 8h–18h'},
-  ];
-  state.profissionais = [
-    {id:prfIdCounter++,nome:'Rafael Almeida',cargo:'Arquiteto de Software',email:'rafael@hidrobr.com.br',matricula:'10421',vinculo:'hidrobr',regime:'clt'},
-    {id:prfIdCounter++,nome:'Juliana Ferreira',cargo:'Engenheira de Dados',email:'juliana@hidrobr.com.br',matricula:'10398',vinculo:'hidrobr',regime:'clt'},
-    {id:prfIdCounter++,nome:'Bruno Carvalho',cargo:'DevOps Engineer',email:'bruno@parceiro.com',matricula:'',vinculo:'terceiro',regime:'pj'},
-    {id:prfIdCounter++,nome:'Patrícia Lima',cargo:'Scrum Master',email:'patricia@hidrobr.com.br',matricula:'10456',vinculo:'hbr',regime:'socio'},
-    {id:prfIdCounter++,nome:'Diego Santos',cargo:'Analista de Segurança',email:'diego@parceiro.com',matricula:'',vinculo:'terceiro',regime:'pj'},
-  ];
-  const t = (d) => { const dt = new Date(); dt.setDate(dt.getDate()-d); return dt.toISOString().split('T')[0]; };
-  state.mobilizacoes = [
-    {
-      id:mobIdCounter++,nome:'Modernização de Infraestrutura TI',clienteId:1,
-      liderContrato:'Fernanda Rocha',respCliente:'João Pereira',
-      temSistema:'sim',sistemaNome:'Portal Petrobras',
-      status:'processamento',inicio:t(20),prazo:t(-10),
-      dataCriacao:t(20),obs:'Mobilização prioritária.',
-      equipe:[{profId:1,papel:'Líder Técnico',vinculo:'hidrobr',regime:'clt',cargo:'Arquiteto'},{profId:2,papel:'Engenheira',vinculo:'hidrobr',regime:'clt',cargo:'Dados'},{profId:3,papel:'DevOps',vinculo:'terceiro',regime:'pj',cargo:'DevOps'}],
-      documentos:[
-        {id:docIdCounter++,nome:'Currículo',caminho:'\\\\srv\\pet\\cv_rafael.pdf',tipo:'curriculo',profId:1,entregue:true},
-        {id:docIdCounter++,nome:'Currículo',caminho:'',tipo:'curriculo',profId:2,entregue:false},
-        {id:docIdCounter++,nome:'NDA',caminho:'\\\\srv\\pet\\nda.pdf',tipo:'contrato',profId:null,entregue:true},
-      ],
-      passaporte:[{id:passIdCounter++,profId:1,tipo:'Crachá de Acesso',numero:'PB-10421',validade:'2025-12-31',obs:'Área técnica'}],
-      infoRequests:[],
-    },
-    {
-      id:mobIdCounter++,nome:'Plataforma Analytics Mining',clienteId:2,
-      liderContrato:'Ricardo Souza',respCliente:'Ana Costa',
-      temSistema:'nao',sistemaNome:'',
-      status:'mobilizado',inicio:t(45),prazo:t(5),
-      dataCriacao:t(45),obs:'',
-      equipe:[{profId:4,papel:'PM',vinculo:'hbr',regime:'socio',cargo:'Scrum Master'},{profId:5,papel:'Segurança',vinculo:'terceiro',regime:'pj',cargo:'Analista'}],
-      documentos:[
-        {id:docIdCounter++,nome:'Currículo',caminho:'\\\\srv\\vale\\cv_p.pdf',tipo:'curriculo',profId:4,entregue:true},
-        {id:docIdCounter++,nome:'Carta de Apresentação',caminho:'\\\\srv\\vale\\carta.pdf',tipo:'documento',profId:null,entregue:true},
-      ],
-      passaporte:[],infoRequests:[],
-    },
-    {
-      id:mobIdCounter++,nome:'Sistema de Gestão de Manutenção',clienteId:3,
-      liderContrato:'Fernanda Rocha',respCliente:'Carlos Mendes',
-      temSistema:'sim',sistemaNome:'SAP PM',
-      status:'cadastrado',inicio:t(3),prazo:t(-30),
-      dataCriacao:t(3),obs:'Cliente quer documentação detalhada.',
-      equipe:[{profId:1,papel:'Arquiteto',vinculo:'hidrobr',regime:'clt',cargo:'Arquiteto'}],
-      documentos:[],passaporte:[],infoRequests:[],
-    },
-  ];
-}
+function seedData(){}
 
 // ── HELPERS ───────────────────────────────────────
 function formatDate(s){if(!s)return'—';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;}
