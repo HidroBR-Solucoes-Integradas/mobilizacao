@@ -23,8 +23,9 @@
 body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;}
 
 /* ── VIEWS ── */
-.view{display:none;}
-.view.active{display:block;}
+.view{display:none !important;}
+.view.active{display:block !important;}
+.view.flex-view.active{display:flex !important;}
 
 /* ══════════════════════════════════════════
    LOGIN SCREEN
@@ -347,7 +348,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 <!-- ══════════════════════════════════════
      VIEW: LANDING / SELEÇÃO
 ══════════════════════════════════════ -->
-<div class="view active" id="view-landing" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#0d3060 100%);">
+<div class="view flex-view active" id="view-landing" style="min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#0d3060 100%);">
   <div style="text-align:center;color:#fff;padding:40px 20px;">
     <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;">
       <svg width="32" height="32" viewBox="0 0 26 26" fill="none">
@@ -401,7 +402,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 <!-- ══════════════════════════════════════
      VIEW: PORTAL PÚBLICO
 ══════════════════════════════════════ -->
-<div class="view" id="view-portal">
+<div class="view flex-view" id="view-portal">
   <!-- Topbar -->
   <div class="portal-topbar">
     <div class="portal-logo">
@@ -533,7 +534,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 <!-- ══════════════════════════════════════
      VIEW: APP INTERNO
 ══════════════════════════════════════ -->
-<div class="view" id="view-app">
+<div class="view flex-view" id="view-app">
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-logo">
