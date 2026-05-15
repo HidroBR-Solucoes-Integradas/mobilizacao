@@ -749,7 +749,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
       <div class="form-row full">
         <div class="form-group">
           <label class="form-label">Profissional <span>*</span></label>
-          <select class="form-select" id="sol-prof-select"><option value="">Selecione ou adicione novo...</option></select>
+          <select class="form-select" id="sol-prof-select" onchange="onSolProfChange()"><option value="">Selecione ou adicione novo...</option></select>
         </div>
       </div>
       <div class="form-row">
@@ -1112,9 +1112,12 @@ function populateClienteSelectSol(){
   state.clientes.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nome;sel.appendChild(o);});
 }
 
-document.getElementById('sol-tem-sistema').addEventListener('change',function(){
-  document.getElementById('sol-sistema-wrap').style.display=this.value==='sim'?'':'none';
-});
+function bindSolListeners(){
+  const elSistema=document.getElementById('sol-tem-sistema');
+  if(elSistema) elSistema.addEventListener('change',function(){
+    document.getElementById('sol-sistema-wrap').style.display=this.value==='sim'?'':'none';
+  });
+}
 
 function openModalAddProfSol(){
   const sel=document.getElementById('sol-prof-select');
@@ -1126,13 +1129,14 @@ function openModalAddProfSol(){
   openModal('modal-add-prof-sol');
 }
 
-document.getElementById('sol-prof-select').addEventListener('change',function(){
-  const prf=state.profissionais.find(p=>p.id===parseInt(this.value));
+function onSolProfChange(){
+  const val=document.getElementById('sol-prof-select').value;
+  const prf=state.profissionais.find(p=>p.id===parseInt(val));
   if(!prf)return;
   document.getElementById('sol-prof-cargo').value=prf.cargo||'';
   document.getElementById('sol-prof-vinculo').value=prf.vinculo||'hidrobr';
   document.getElementById('sol-prof-regime').value=prf.regime||'clt';
-});
+}
 
 function addProfSolicitacao(){
   const profIdVal=document.getElementById('sol-prof-select').value;
@@ -1743,13 +1747,17 @@ function printReport(){
   window.print();
 }
 
-// ── FECHAR MODAL NO BACKDROP ──────────────────────
-document.querySelectorAll('.modal-backdrop').forEach(bd=>{
-  bd.addEventListener('click',e=>{if(e.target===bd)bd.classList.remove('open');});
-});
-
 // ── INIT ──────────────────────────────────────────
-seedData();
+document.addEventListener('DOMContentLoaded', function(){
+  // Fechar modal no backdrop
+  document.querySelectorAll('.modal-backdrop').forEach(bd=>{
+    bd.addEventListener('click',e=>{if(e.target===bd)bd.classList.remove('open');});
+  });
+  // Listeners do portal
+  bindSolListeners();
+  // Dados de exemplo
+  seedData();
+});
 </script>
 </body>
 </html>
