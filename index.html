@@ -1550,13 +1550,17 @@ function renderAppMobs(){
     const cli=state.clientes.find(c2=>c2.id===mob.clienteId);
     const cor=calcFarol(mob);const pct=progressPct(mob);
     const dias=calcSLADias(mob);
-    return`<div class="mob-card ${cor}" style="position:relative;">
-        <button onclick="event.stopPropagation();inativarMob(${mob.id})" style="position:absolute;top:10px;right:10px;background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--text3);padding:3px 8px;border-radius:5px;transition:all 0.15s;" onmouseenter="this.style.background='var(--red-l)';this.style.color='var(--red)'" onmouseleave="this.style.background='transparent';this.style.color='var(--text3)'" title="Inativar mobilização">✕ Inativar</button>
-        <div onclick="appNav('detalhe',${mob.id})" style="cursor:pointer;">
-      <div style="display:grid;grid-template-columns:1fr auto;gap:12px;">
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="mob-card-title">${mob.nome}</span>${statusBadgeHTML(mob.status)}</div>
-          <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Cliente: <strong style="color:var(--text2);">${cli?cli.nome:'—'}</strong> · Líder: <strong style="color:var(--text2);">${mob.liderContrato||'—'}</strong></div>
+    const inativo=mob.status==='inativo';
+    return`<div class="mob-card ${cor}" style="opacity:${inativo?0.55:1};">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+        <div style="flex:1;min-width:0;cursor:pointer;" onclick="appNav('detalhe',${mob.id})">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap;">
+            <span class="mob-card-title">${mob.nome}</span>
+            ${statusBadgeHTML(mob.status)}
+          </div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">
+            Cliente: <strong style="color:var(--text2);">${cli?cli.nome:'—'}</strong> · Líder: <strong style="color:var(--text2);">${mob.liderContrato||'—'}</strong>
+          </div>
           <div class="mob-card-meta">
             <div class="mob-meta-item">👥 <strong>${mob.equipe.length}</strong> profissional(is)</div>
             <div class="mob-meta-item">📄 <strong>${(mob.documentos||[]).filter(d=>d.entregue).length}/${(mob.documentos||[]).length}</strong> docs</div>
@@ -1564,11 +1568,19 @@ function renderAppMobs(){
             ${dias!==null?`<div class="mob-meta-item">⏱ <strong>${dias}d</strong> em aberto</div>`:''}
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">${farolHTML(cor)}<div class="progress-wrap"><div class="progress-label"><span>Docs</span><span>${pct}%</span></div><div class="progress-track"><div class="progress-fill ${cor==='verde'?'green':cor==='amarelo'?'amber':'red'}" style="width:${pct}%"></div></div></div></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+          ${farolHTML(cor)}
+          <div class="progress-wrap" style="min-width:100px;">
+            <div class="progress-label"><span>Docs</span><span>${pct}%</span></div>
+            <div class="progress-track"><div class="progress-fill ${cor==='verde'?'green':cor==='amarelo'?'amber':'red'}" style="width:${pct}%"></div></div>
+          </div>
+          <button onclick="inativarMob(${mob.id})" style="font-size:11px;padding:3px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;cursor:pointer;color:var(--text3);transition:all 0.15s;white-space:nowrap;" onmouseenter="this.style.background='var(--red-l)';this.style.color='var(--red)';this.style.borderColor='var(--red)'" onmouseleave="this.style.background='transparent';this.style.color='var(--text3)';this.style.borderColor='var(--border)'">${inativo?'↩ Reativar':'✕ Inativar'}</button>
+        </div>
       </div>
     </div>`;
   }).join('');
 }
+
 
 // ── APP: DETALHE ──────────────────────────────────
 function renderAppDetalhe(mobId){
@@ -1635,18 +1647,128 @@ function renderAppDocs(mob){
 
 function renderAppPendencias(mob){
   const c=document.getElementById('app-detalhe-pendencias');
-  if(!mob.equipe.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><p>Sem profissionais.</p></div>';return;}
-  const gerais=(mob.documentos||[]).filter(d=>!d.profId);let html='';
-  if(gerais.length){html+=`<div class="pend-person-block"><div class="pend-person-header"><div class="pend-person-avatar" style="background:var(--bg3);color:var(--text2);">⚐</div><div style="flex:1;font-weight:600;font-size:13px;">Documentos Gerais</div><div style="font-size:12px;color:var(--text3);">${gerais.filter(d=>d.entregue).length}/${gerais.length}</div></div>${gerais.map(d=>`<div class="pend-doc-row"><div class="pend-dot ${d.entregue?'ok':'pend'}"></div><div style="flex:1;">${d.nome}</div><div style="font-size:11px;color:${d.entregue?'var(--green)':'var(--red)'};">${d.entregue?'Entregue':'Pendente'}</div></div>`).join('')}</div>`;}
-  mob.equipe.forEach(e=>{
-    const prf=state.profissionais.find(p=>p.id===e.profId);if(!prf)return;
-    const dp=(mob.documentos||[]).filter(d=>d.profId===prf.id);const all=[...gerais,...dp];
-    const init=prf.nome.split(' ').slice(0,2).map(n=>n[0]).join('');
-    const pend=all.filter(d=>!d.entregue).length;
-    html+=`<div class="pend-person-block"><div class="pend-person-header"><div class="pend-person-avatar">${init}</div><div style="flex:1;font-weight:600;font-size:13px;">${prf.nome} <span style="font-size:11px;font-weight:400;color:var(--text3);">${e.papel||prf.cargo}</span></div><div style="font-size:12px;color:${pend>0?'var(--red)':'var(--green)'};">${pend>0?pend+' pendência(s)':'✓ Completo'}</div></div>${all.map(d=>`<div class="pend-doc-row"><div class="pend-dot ${d.entregue?'ok':'pend'}"></div><div style="flex:1;">${d.nome}${!d.profId?' <span style="font-size:10px;color:var(--accent);">[Geral]</span>':''}</div><div style="font-size:11px;color:${d.entregue?'var(--green)':'var(--red)'};">${d.entregue?'Entregue':'Pendente'}</div></div>`).join('')}</div>`;
+  const docs=mob.documentos||[];
+  const equipe=mob.equipe||[];
+
+  if(!docs.length && !equipe.length){
+    c.innerHTML='<div class="empty-state"><div class="empty-icon">📄</div><p>Sem documentos cadastrados.</p></div>';
+    return;
+  }
+
+  // Agrupar por nome do documento (tipo)
+  const tiposMap={};
+  docs.forEach(doc=>{
+    const key=doc.nome;
+    if(!tiposMap[key]) tiposMap[key]={nome:key,tipo:doc.tipo,docs:[]};
+    tiposMap[key].docs.push(doc);
   });
-  c.innerHTML=html||'<div class="empty-state"><div class="empty-icon">📄</div><p>Sem documentos cadastrados.</p></div>';
+
+  // Para cada profissional da equipe, verificar quais tipos gerais estão pendentes
+  // (documentos sem profId específico contam para todos)
+  const gerais=docs.filter(d=>!d.profId);
+  const especificos=docs.filter(d=>d.profId);
+
+  // Montar estrutura: tipo → profissionais pendentes
+  const tiposAgrupados={};
+
+  // Documentos gerais — aplicam a cada profissional
+  gerais.forEach(doc=>{
+    if(!tiposAgrupados[doc.nome]) tiposAgrupados[doc.nome]={nome:doc.nome,tipo:doc.tipo,pendentes:[],entregues:[]};
+    if(doc.entregue){
+      tiposAgrupados[doc.nome].entregues.push({nome:'Geral (todos)',profId:null});
+    } else {
+      // pendente para todos os profissionais
+      equipe.forEach(e=>{
+        const prf=state.profissionais.find(p=>p.id===e.profId);
+        if(prf) tiposAgrupados[doc.nome].pendentes.push({nome:prf.nome,profId:prf.id,papel:e.papel||prf.cargo});
+      });
+      if(!equipe.length) tiposAgrupados[doc.nome].pendentes.push({nome:'Geral',profId:null,papel:''});
+    }
+  });
+
+  // Documentos específicos por profissional
+  especificos.forEach(doc=>{
+    if(!tiposAgrupados[doc.nome]) tiposAgrupados[doc.nome]={nome:doc.nome,tipo:doc.tipo,pendentes:[],entregues:[]};
+    const prf=state.profissionais.find(p=>p.id===doc.profId);
+    const nome=prf?prf.nome:'Desconhecido';
+    const equipeEntry=equipe.find(e=>e.profId===doc.profId);
+    const papel=equipeEntry?(equipeEntry.papel||prf?.cargo||''):(prf?.cargo||'');
+    if(doc.entregue){
+      tiposAgrupados[doc.nome].entregues.push({nome,profId:doc.profId});
+    } else {
+      tiposAgrupados[doc.nome].pendentes.push({nome,profId:doc.profId,papel});
+    }
+  });
+
+  const tipos=Object.values(tiposAgrupados);
+  if(!tipos.length){
+    c.innerHTML='<div class="empty-state"><div class="empty-icon">✅</div><p>Sem pendências!</p></div>';
+    return;
+  }
+
+  const icTipo={documento:'📄',contrato:'📝',certificado:'🏅',curriculo:'👤',outros:'📁'};
+
+  c.innerHTML=tipos.map((t,i)=>{
+    const total=t.pendentes.length+t.entregues.length;
+    const pend=t.pendentes.length;
+    const pct=total>0?Math.round(t.entregues.length/total*100):100;
+    const cor=pend===0?'var(--green)':pct>50?'var(--amber)':'var(--red)';
+    const id='pend-tipo-'+i;
+    return `<div style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;">
+      <!-- Header clicável -->
+      <div onclick="document.getElementById('${id}').style.display=document.getElementById('${id}').style.display==='none'?'block':'none'" 
+           style="display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--bg2);cursor:pointer;user-select:none;transition:background 0.15s;"
+           onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background='var(--bg2)'">
+        <span style="font-size:16px;">${icTipo[t.tipo]||'📄'}</span>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);">${t.nome}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">${t.entregues.length} entregue(s) · ${pend} pendente(s)</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${pend>0?`<span style="background:var(--red-l);color:var(--red);font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;">⚠ ${pend} pendente${pend>1?'s':''}</span>`:`<span style="background:var(--green-l);color:var(--green);font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;">✓ Completo</span>`}
+          <div style="width:60px;">
+            <div style="font-size:9px;color:var(--text3);text-align:right;margin-bottom:2px;">${pct}%</div>
+            <div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;">
+              <div style="height:100%;width:${pct}%;background:${cor};border-radius:2px;transition:width 0.3s;"></div>
+            </div>
+          </div>
+          <span style="font-size:10px;color:var(--text3);">${pend>0?'▼':'▶'}</span>
+        </div>
+      </div>
+      <!-- Corpo expandível -->
+      <div id="${id}" style="display:${pend>0?'block':'none'};">
+        ${pend>0?`
+          <div style="padding:8px 16px;background:var(--red-l);border-top:1px solid #fecaca;">
+            <div style="font-size:11px;font-weight:600;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Pendente em:</div>
+            ${[...new Map(t.pendentes.map(p=>[p.nome,p])).values()].map(p=>{
+              const init=p.nome.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase();
+              return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(220,38,38,0.1);">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--red-l);border:1px solid var(--red);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">${init}</div>
+                <div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text);">${p.nome}</div>
+                  ${p.papel?`<div style="font-size:10px;color:var(--text3);">${p.papel}</div>`:''}
+                </div>
+                <div style="margin-left:auto;"><span style="font-size:10px;background:var(--red);color:#fff;padding:2px 7px;border-radius:8px;font-weight:600;">Pendente</span></div>
+              </div>`;
+            }).join('')}
+          </div>`:''}
+        ${t.entregues.length>0?`
+          <div style="padding:8px 16px;background:var(--green-l);border-top:1px solid #bbf7d0;">
+            <div style="font-size:11px;font-weight:600;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Entregue por:</div>
+            ${[...new Map(t.entregues.map(p=>[p.nome,p])).values()].map(p=>{
+              const init=p.nome.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase();
+              return `<div style="display:flex;align-items:center;gap:10px;padding:5px 0;">
+                <div style="width:24px;height:24px;border-radius:50%;background:var(--green-l);border:1px solid var(--green);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;">${init}</div>
+                <div style="font-size:12px;color:var(--text2);">${p.nome}</div>
+                <div style="margin-left:auto;"><span style="font-size:10px;color:var(--green);font-weight:600;">✓ Entregue</span></div>
+              </div>`;
+            }).join('')}
+          </div>`:''}
+      </div>
+    </div>`;
+  }).join('');
 }
+
 
 function renderAppPassaporte(mob){
   const c=document.getElementById('app-detalhe-passaporte');
