@@ -330,8 +330,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
   #report-area { position: fixed; top: 0; left: 0; width: 100%; }
   .no-print { display: none !important; }
 }
-#report-area { display: none; }
-#report-area.visible { display: block; }
+#report-area { display: block; }
 
 /* TOAST */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:12px 18px;border-radius:8px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,0.25);z-index:999;opacity:0;transform:translateY(8px);transition:all 0.25s;pointer-events:none;max-width:340px;}
@@ -342,7 +341,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 /* EMAIL PREVIEW */
 .email-preview{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:12px;line-height:1.7;color:var(--text2);white-space:pre-wrap;font-family:var(--mono);}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 <body>
 
@@ -351,14 +349,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 ══════════════════════════════════════ -->
 <div class="view flex-view active" id="view-landing" style="min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#0d3060 100%);">
   <div style="text-align:center;color:#fff;padding:40px 20px;">
-    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;">
-      <svg width="48" height="48" viewBox="0 0 26 26" fill="none">
-        <circle cx="13" cy="13" r="11" stroke="#1a6fbf" stroke-width="1.5" opacity="0.5"/>
-        <circle cx="13" cy="13" r="7" stroke="#1a6fbf" stroke-width="1.5" opacity="0.75"/>
-        <circle cx="13" cy="13" r="3" fill="#1a6fbf"/>
-      </svg>
-      <span style="font-size:28px;font-weight:700;letter-spacing:0.14em;color:#fff;">ORION MOB</span>
-    </div>
+    <div style="margin-bottom:16px;"><span style="font-size:42px;font-weight:800;letter-spacing:0.18em;color:#fff;">ORION MOB</span></div>
     <div style="font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-bottom:48px;">GESTÃO DE MOBILIZAÇÃO · HIDROBR</div>
     <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">
       <div onclick="goPortal()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:32px 36px;cursor:pointer;transition:all 0.2s;min-width:220px;" onmouseenter="this.style.background='rgba(255,255,255,0.12)'" onmouseleave="this.style.background='rgba(255,255,255,0.07)'">
@@ -381,14 +372,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 <div class="view" id="view-login">
   <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#1a6fbf 100%);">
     <div class="login-box">
-      <div class="login-logo">
-        <svg width="32" height="32" viewBox="0 0 26 26" fill="none">
-          <circle cx="13" cy="13" r="11" stroke="#1a6fbf" stroke-width="1.5" opacity="0.5"/>
-          <circle cx="13" cy="13" r="7" stroke="#1a6fbf" stroke-width="1.5" opacity="0.75"/>
-          <circle cx="13" cy="13" r="3" fill="#1a6fbf"/>
-        </svg>
-        <div><div class="login-logo-name">ORION MOB</div><div class="login-logo-sub">GESTÃO DE MOBILIZAÇÃO</div></div>
-      </div>
+      <div class="login-logo" style="justify-content:center;margin-bottom:32px;"><div style="text-align:center;"><div style="font-size:26px;font-weight:800;letter-spacing:0.18em;color:#fff;">ORION MOB</div><div class="login-logo-sub">GESTÃO DE MOBILIZAÇÃO</div></div></div>
       <div class="login-title">Acesso Restrito</div>
       <div class="login-sub">Equipe de Mobilização HIDROBR</div>
       <input class="login-input" id="login-user" type="email" placeholder="E-mail" autocomplete="email">
@@ -406,13 +390,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 <div class="view flex-view" id="view-portal">
   <!-- Topbar -->
   <div class="portal-topbar">
-    <div class="portal-logo">
-      <svg width="28" height="28" viewBox="0 0 26 26" fill="none">
-        <circle cx="13" cy="13" r="11" stroke="#1a6fbf" stroke-width="1.5" opacity="0.5"/>
-        <circle cx="13" cy="13" r="7" stroke="#1a6fbf" stroke-width="1.5" opacity="0.75"/>
-        <circle cx="13" cy="13" r="3" fill="#1a6fbf"/>
-      </svg>
-      <div><div style="font-size:15px;font-weight:700;letter-spacing:0.12em;color:#fff;">ORION MOB</div><div style="font-size:9px;color:rgba(255,255,255,0.35);">GESTÃO DE MOBILIZAÇÃO</div></div>
+    <div class="portal-logo"><div><div class="portal-logo-name">ORION MOB</div><div class="portal-logo-sub">GESTÃO DE MOBILIZAÇÃO</div></div></div>
     </div>
     <div class="portal-nav">
       <div class="portal-nav-item active" id="pnav-solicitar" onclick="portalNav('solicitar')">Nova Solicitação</div>
@@ -539,14 +517,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <div class="sidebar-logo-mark">
-        <svg width="28" height="28" viewBox="0 0 26 26" fill="none">
-          <circle cx="13" cy="13" r="11" stroke="#1a6fbf" stroke-width="1.5" opacity="0.5"/>
-          <circle cx="13" cy="13" r="7" stroke="#1a6fbf" stroke-width="1.5" opacity="0.75"/>
-          <circle cx="13" cy="13" r="3" fill="#1a6fbf"/>
-        </svg>
-        <span class="sidebar-logo-name">ORION MOB</span>
-      </div>
+      <div class="sidebar-logo-mark"><span class="sidebar-logo-name">ORION MOB</span></div>
       <div class="sidebar-logo-sub">Gestão de Mobilização</div>
     </div>
     <div class="sidebar-section">
@@ -1101,21 +1072,39 @@ async function doLogin(){
   try {
     if(!email) throw new Error('Informe o e-mail.');
     if(!pass)  throw new Error('Informe a senha.');
+
+    // Tentar Supabase (carrega dinamicamente se necessário)
     let logado = false;
-    // Tentar Supabase
-    if(window.supabase){
-      try {
-        const cli = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-        const {data, error} = await cli.auth.signInWithPassword({email, password: pass});
-        if(!error && data.user){
-          const nome = data.user.user_metadata?.nome || data.user.email.split('@')[0];
-          document.getElementById('app-username').textContent = nome;
-          document.getElementById('app-avatar').textContent = nome.substring(0,2).toUpperCase();
-          logado = true;
-        }
-      } catch(e2){}
+    try {
+      if(!window._supaClient){
+        // Carregar SDK dinamicamente
+        await new Promise((resolve, reject) => {
+          if(window.supabase){ resolve(); return; }
+          const s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+        window._supaClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+      }
+      const {data, error} = await window._supaClient.auth.signInWithPassword({email, password: pass});
+      if(error) throw new Error(error.message);
+      const user = data.user;
+      const nome = user.user_metadata?.nome || user.email.split('@')[0];
+      document.getElementById('app-username').textContent = nome;
+      document.getElementById('app-avatar').textContent = nome.substring(0,2).toUpperCase();
+      logado = true;
+    } catch(supaErr){
+      // Se o erro for de credenciais inválidas, não tenta fallback
+      if(supaErr.message && (supaErr.message.includes('Invalid login') || supaErr.message.includes('invalid_credentials') || supaErr.message.includes('Email not confirmed'))){
+        throw new Error('E-mail ou senha incorretos.');
+      }
+      // Se for erro de rede/SDK, tenta fallback local
+      console.warn('Supabase indisponível, usando fallback:', supaErr.message);
     }
-    // Fallback local
+
+    // Fallback local (só se Supabase falhou por erro técnico)
     if(!logado){
       const CREDS = {'mobilizacao@hidrobr.com.br':'hidrobr2024','admin@hidrobr.com.br':'admin123'};
       if(!CREDS[email] || CREDS[email] !== pass) throw new Error('E-mail ou senha incorretos.');
@@ -1723,16 +1712,10 @@ function renderReport(){
   const por_status={cadastrado:0,processamento:0,mobilizado:0,'pendente-info':0};
   mobs.forEach(m=>por_status[m.status]=(por_status[m.status]||0)+1);
 
-  document.getElementById('report-area').innerHTML=`
+  const ra=document.getElementById('report-area');ra.classList.add('visible');ra.innerHTML=`
   <div style="font-family:var(--sans);max-width:900px;margin:0 auto;background:#fff;padding:40px;border-radius:12px;border:1px solid var(--border);">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid var(--border);">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <svg width="28" height="28" viewBox="0 0 26 26" fill="none">
-        <circle cx="13" cy="13" r="11" stroke="#1a6fbf" stroke-width="1.5" opacity="0.5"/>
-        <circle cx="13" cy="13" r="7" stroke="#1a6fbf" stroke-width="1.5" opacity="0.75"/>
-        <circle cx="13" cy="13" r="3" fill="#1a6fbf"/>
-      </svg>
-        <div><div style="font-size:18px;font-weight:700;letter-spacing:0.1em;color:#0d1f35;">ORION MOB · REPORT SEMANAL</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Gestão de Mobilização · HIDROBR</div></div>
+      <div style="display:flex;align-items:center;gap:12px;"><div><div style="font-size:18px;font-weight:700;letter-spacing:0.1em;color:#0d1f35;">ORION MOB · REPORT SEMANAL</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Gestão de Mobilização · HIDROBR</div></div>
       </div>
       <div style="text-align:right;font-size:12px;color:var(--text3);">Gerado em<br><strong style="color:var(--text);">${hoje.toLocaleDateString('pt-BR',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</strong></div>
     </div>
