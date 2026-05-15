@@ -1173,41 +1173,39 @@ async function doLogin(){
     if(!email) throw new Error('Informe o e-mail.');
     if(!pass)  throw new Error('Informe a senha.');
 
-    // Carregar Supabase via ESM (única forma que funciona no browser sem bundler)
-    let logado = false;
-    try {
-      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-      const cli = createClient(SUPA_URL, SUPA_KEY);
-      const { data, error } = await cli.auth.signInWithPassword({ email, password: pass });
-      if(error) {
-        // Erro de credencial inválida — não tenta fallback, mostra erro direto
-        if(error.message.includes('Invalid login') || error.message.includes('invalid_credentials')) {
-          throw new Error('E-mail ou senha incorretos.');
-        }
-        throw new Error(error.message);
-      }
-      const nome = data.user.user_metadata?.nome || data.user.email.split('@')[0];
-      document.getElementById('app-username').textContent = nome;
-      document.getElementById('app-avatar').textContent = nome.substring(0,2).toUpperCase();
-      logado = true;
-    } catch(supaErr) {
-      // Se foi erro de credencial, relancar
-      if(supaErr.message === 'E-mail ou senha incorretos.') throw supaErr;
-      // Erro técnico (rede, CORS etc) → fallback local
-      console.warn('Supabase falhou, usando fallback local:', supaErr.message);
-    }
+    // Credenciais de fallback local (usadas quando Supabase não tem o usuário)
+    const CREDS = {'mobilizacao@hidrobr.com.br':'hidrobr2024','admin@hidrobr.com.br':'admin123'};
+    const isFallbackUser = !!CREDS[email];
 
-    if(!logado) {
-      // Fallback local para uso sem internet ou emergência
-      const CREDS = {'mobilizacao@hidrobr.com.br':'hidrobr2024','admin@hidrobr.com.br':'admin123'};
-      if(!CREDS[email] || CREDS[email] !== pass) throw new Error('E-mail ou senha incorretos.');
+    let logado = false;
+
+    // Se for usuário de fallback, validar localmente direto sem chamar Supabase
+    if(isFallbackUser){
+      if(CREDS[email] !== pass) throw new Error('E-mail ou senha incorretos.');
       const nome = email.split('@')[0];
       document.getElementById('app-username').textContent = nome;
       document.getElementById('app-avatar').textContent = nome.substring(0,2).toUpperCase();
+      logado = true;
+    } else {
+      // Usuário não é fallback → tentar Supabase
+      try {
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+        const cli = createClient(SUPA_URL, SUPA_KEY);
+        const { data, error } = await cli.auth.signInWithPassword({ email, password: pass });
+        if(error) throw new Error('E-mail ou senha incorretos.');
+        const nome = data.user.user_metadata?.nome || data.user.email.split('@')[0];
+        document.getElementById('app-username').textContent = nome;
+        document.getElementById('app-avatar').textContent = nome.substring(0,2).toUpperCase();
+        logado = true;
+      } catch(supaErr) {
+        throw new Error(supaErr.message || 'E-mail ou senha incorretos.');
+      }
     }
 
-    showView('view-app');
-    appNav('mobilizacoes');
+    if(logado){
+      showView('view-app');
+      appNav('mobilizacoes');
+    }
   } catch(e) {
     err.textContent = e.message || 'Erro ao fazer login.';
     err.style.display = 'block';
