@@ -716,44 +716,82 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 <!-- Modal: Adicionar profissional na solicitação -->
 <div class="modal-backdrop" id="modal-add-prof-sol">
   <div class="modal wide">
-    <div class="modal-header"><span class="modal-title">Adicionar Profissional à Solicitação</span><button class="modal-close" onclick="closeModal('modal-add-prof-sol')">×</button></div>
+    <div class="modal-header">
+      <span class="modal-title">Adicionar Profissional à Solicitação</span>
+      <button class="modal-close" onclick="closeModal('modal-add-prof-sol')">×</button>
+    </div>
     <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Nome Completo <span>*</span></label>
-          <input class="form-input" id="sol-prof-nome" placeholder="Nome completo do profissional">
+      <!-- Abas -->
+      <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px;">
+        <button id="tab-prof-existente" onclick="switchProfTab('existente')"
+          style="flex:1;padding:10px;border:none;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff;transition:all 0.15s;">
+          👤 Selecionar Existente
+        </button>
+        <button id="tab-prof-novo" onclick="switchProfTab('novo')"
+          style="flex:1;padding:10px;border:none;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;background:var(--bg3);color:var(--text2);transition:all 0.15s;">
+          ＋ Novo Profissional
+        </button>
+      </div>
+
+      <!-- Painel: Selecionar Existente -->
+      <div id="panel-prof-existente">
+        <div class="form-row full" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label">Buscar profissional</label>
+            <input class="form-input" id="sol-prof-busca" placeholder="Digite nome ou cargo..." oninput="filtrarProfExistentes()">
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Cargo / Especialidade</label>
-          <input class="form-input" id="sol-prof-cargo" placeholder="Ex: Engenheiro Civil">
+        <div id="sol-prof-lista" style="max-height:240px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;"></div>
+        <div class="form-row" style="margin-top:16px;">
+          <div class="form-group">
+            <label class="form-label">Papel no Projeto</label>
+            <input class="form-input" id="sol-prof-papel-ex" placeholder="Ex: Líder Técnico, Analista...">
+          </div>
+          <div class="form-group" style="display:flex;align-items:flex-end;">
+            <div id="sol-prof-selecionado-info" style="font-size:12px;color:var(--text3);padding:9px 0;">Nenhum profissional selecionado</div>
+          </div>
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Papel no Projeto</label>
-          <input class="form-input" id="sol-prof-papel" placeholder="Ex: Líder Técnico, Analista...">
+
+      <!-- Painel: Novo Profissional -->
+      <div id="panel-prof-novo" style="display:none;">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nome Completo <span>*</span></label>
+            <input class="form-input" id="sol-prof-nome" placeholder="Nome completo do profissional">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cargo / Especialidade</label>
+            <input class="form-input" id="sol-prof-cargo" placeholder="Ex: Engenheiro Civil">
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">E-mail</label>
-          <input class="form-input" id="sol-prof-email" type="email" placeholder="email@empresa.com.br">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Papel no Projeto</label>
+            <input class="form-input" id="sol-prof-papel" placeholder="Ex: Líder Técnico, Analista...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input class="form-input" id="sol-prof-email" type="email" placeholder="email@empresa.com.br">
+          </div>
         </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Vínculo <span>*</span></label>
-          <select class="form-select" id="sol-prof-vinculo">
-            <option value="hidrobr">HIDROBR</option>
-            <option value="hbr">HBR</option>
-            <option value="terceiro">Terceiro</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Regime <span>*</span></label>
-          <select class="form-select" id="sol-prof-regime">
-            <option value="clt">CLT</option>
-            <option value="pj">PJ</option>
-            <option value="socio">Sócio</option>
-          </select>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Vínculo <span>*</span></label>
+            <select class="form-select" id="sol-prof-vinculo">
+              <option value="hidrobr">HIDROBR</option>
+              <option value="hbr">HBR</option>
+              <option value="terceiro">Terceiro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Regime <span>*</span></label>
+            <select class="form-select" id="sol-prof-regime">
+              <option value="clt">CLT</option>
+              <option value="pj">PJ</option>
+              <option value="socio">Sócio</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -1209,27 +1247,93 @@ function bindSolListeners(){
   });
 }
 
+// ── MODAL PROFISSIONAL NA SOLICITAÇÃO ────────────────
+let _solProfTabAtual = 'existente';
+let _solProfSelecionadoId = null;
+
+function switchProfTab(aba){
+  _solProfTabAtual = aba;
+  _solProfSelecionadoId = null;
+  const isExistente = aba === 'existente';
+  document.getElementById('panel-prof-existente').style.display = isExistente ? '' : 'none';
+  document.getElementById('panel-prof-novo').style.display = isExistente ? 'none' : '';
+  document.getElementById('tab-prof-existente').style.background = isExistente ? 'var(--accent)' : 'var(--bg3)';
+  document.getElementById('tab-prof-existente').style.color = isExistente ? '#fff' : 'var(--text2)';
+  document.getElementById('tab-prof-novo').style.background = isExistente ? 'var(--bg3)' : 'var(--accent)';
+  document.getElementById('tab-prof-novo').style.color = isExistente ? 'var(--text2)' : '#fff';
+}
+
+function filtrarProfExistentes(){
+  const busca = (document.getElementById('sol-prof-busca')?.value||'').toLowerCase();
+  // Excluir já adicionados
+  const jaAdicionados = new Set(state.solEquipe.map(e=>e.profId));
+  const lista = state.profissionais.filter(p =>
+    !jaAdicionados.has(p.id) &&
+    (!busca || p.nome.toLowerCase().includes(busca) || (p.cargo||'').toLowerCase().includes(busca))
+  );
+  const c = document.getElementById('sol-prof-lista');
+  if(!lista.length){
+    c.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">Nenhum profissional encontrado.</div>';
+    return;
+  }
+  c.innerHTML = lista.map(p => {
+    const init = p.nome.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase();
+    const sel = _solProfSelecionadoId === p.id;
+    return `<div onclick="selecionarProfExistente(${p.id})" style="display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);background:${sel?'var(--accent-l)':'var(--bg2)'};transition:background 0.12s;" onmouseenter="if(${p.id}!==_solProfSelecionadoId)this.style.background='var(--bg3)'" onmouseleave="this.style.background='${sel?'var(--accent-l)':'var(--bg2)}'">
+      <div style="width:34px;height:34px;border-radius:50%;background:${sel?'var(--accent)':'var(--accent-l)'};color:${sel?'#fff':'var(--accent)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">${init}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);">${p.nome}</div>
+        <div style="font-size:11px;color:var(--text3);">${p.cargo||'—'} · ${p.vinculo?.toUpperCase()||''} · ${p.regime?.toUpperCase()||''}</div>
+      </div>
+      ${sel?'<span style="color:var(--accent);font-size:16px;">✓</span>':''}
+    </div>`;
+  }).join('');
+}
+
+function selecionarProfExistente(profId){
+  _solProfSelecionadoId = profId;
+  const prf = state.profissionais.find(p=>p.id===profId);
+  const info = document.getElementById('sol-prof-selecionado-info');
+  if(info && prf) info.innerHTML = `<span style="color:var(--accent);font-weight:600;">✓ ${prf.nome}</span><br><span style="color:var(--text3);">${prf.cargo||''}</span>`;
+  filtrarProfExistentes(); // re-render para marcar selecionado
+}
+
 function openModalAddProfSol(){
-  ['sol-prof-nome','sol-prof-cargo','sol-prof-papel','sol-prof-email'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('sol-prof-vinculo').value='hidrobr';
-  document.getElementById('sol-prof-regime').value='clt';
+  _solProfSelecionadoId = null;
+  _solProfTabAtual = 'existente';
+  // Reset campos novo
+  ['sol-prof-nome','sol-prof-cargo','sol-prof-papel','sol-prof-email'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const vinc = document.getElementById('sol-prof-vinculo'); if(vinc) vinc.value='hidrobr';
+  const reg = document.getElementById('sol-prof-regime'); if(reg) reg.value='clt';
+  const papel = document.getElementById('sol-prof-papel-ex'); if(papel) papel.value='';
+  const busca = document.getElementById('sol-prof-busca'); if(busca) busca.value='';
+  const info = document.getElementById('sol-prof-selecionado-info'); if(info) info.innerHTML='Nenhum profissional selecionado';
+  switchProfTab('existente');
+  filtrarProfExistentes();
   openModal('modal-add-prof-sol');
 }
 
-// onSolProfChange removido - profissional sempre novo
-
 function addProfSolicitacao(){
-  const nome=document.getElementById('sol-prof-nome').value.trim();
-  const cargo=document.getElementById('sol-prof-cargo').value.trim();
-  const papel=document.getElementById('sol-prof-papel').value.trim();
-  const email=document.getElementById('sol-prof-email').value.trim();
-  const vinculo=document.getElementById('sol-prof-vinculo').value;
-  const regime=document.getElementById('sol-prof-regime').value;
-  if(!nome) return showToast('Informe o nome do profissional.');
-  // Criar novo profissional
-  const newP={id:prfIdCounter++,nome,cargo,email,matricula:'',vinculo,regime};
-  state.profissionais.push(newP);
-  state.solEquipe.push({profId:newP.id,papel,vinculo,regime,cargo});
+  if(_solProfTabAtual === 'existente'){
+    // Selecionar existente
+    if(!_solProfSelecionadoId) return showToast('Selecione um profissional da lista.');
+    const prf = state.profissionais.find(p=>p.id===_solProfSelecionadoId);
+    if(!prf) return showToast('Profissional não encontrado.');
+    const papel = (document.getElementById('sol-prof-papel-ex')?.value||'').trim();
+    state.solEquipe.push({profId:prf.id, papel, vinculo:prf.vinculo, regime:prf.regime, cargo:prf.cargo});
+  } else {
+    // Novo profissional
+    const nome = document.getElementById('sol-prof-nome').value.trim();
+    if(!nome) return showToast('Informe o nome do profissional.');
+    const cargo  = document.getElementById('sol-prof-cargo').value.trim();
+    const papel  = document.getElementById('sol-prof-papel').value.trim();
+    const email  = document.getElementById('sol-prof-email').value.trim();
+    const vinculo = document.getElementById('sol-prof-vinculo').value;
+    const regime  = document.getElementById('sol-prof-regime').value;
+    const newP = {id:prfIdCounter++, nome, cargo, email, matricula:'', vinculo, regime};
+    state.profissionais.push(newP);
+    state.solEquipe.push({profId:newP.id, papel, vinculo, regime, cargo});
+  }
   closeModal('modal-add-prof-sol');
   renderSolEquipe();
 }
