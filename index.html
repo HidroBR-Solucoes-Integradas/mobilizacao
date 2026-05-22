@@ -365,7 +365,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 <!-- ══════════════════════════════════════
      VIEW: LANDING / SELEÇÃO
 ══════════════════════════════════════ -->
-<div class="view flex-view active" id="view-landing" style="min-height:100vh;align-items:flex-start;justify-content:center;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#0d3060 100%);overflow-y:auto;">
+<div class="view flex-view" id="view-landing" style="min-height:100vh;align-items:flex-start;justify-content:center;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#0d3060 100%);overflow-y:auto;">
   <div style="text-align:center;color:#fff;padding:48px 24px 40px;width:100%;max-width:1100px;">
 
     <div style="margin-bottom:8px;"><span style="font-size:38px;font-weight:800;letter-spacing:0.18em;color:#fff;">ORION MOB</span></div>
@@ -378,7 +378,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
         <div style="font-size:15px;font-weight:600;margin-bottom:5px;">Solicitar Mobilização</div>
         <div style="font-size:11px;color:rgba(255,255,255,0.45);">Acesso aberto · Líderes de contrato</div>
       </div>
-      <div onclick="goLogin()" style="background:rgba(26,111,191,0.2);border:1px solid rgba(26,111,191,0.4);border-radius:14px;padding:28px 36px;cursor:pointer;transition:all 0.2s;min-width:200px;" onmouseenter="this.style.background='rgba(26,111,191,0.3)'" onmouseleave="this.style.background='rgba(26,111,191,0.2)'">
+      <div onclick="goLogin()" style="background: rgba(26, 111, 191, 0.2); border: 1px solid rgba(26, 111, 191, 0.4); border-radius: 14px; padding: 28px 36px; cursor: pointer; transition: 0.2s; min-width: 200px;" onmouseenter="this.style.background='rgba(26,111,191,0.3)'" onmouseleave="this.style.background='rgba(26,111,191,0.2)'">
         <div style="font-size:32px;margin-bottom:12px;">🔐</div>
         <div style="font-size:15px;font-weight:600;margin-bottom:5px;">Equipe de Mobilização</div>
         <div style="font-size:11px;color:rgba(255,255,255,0.45);">Acesso restrito · Login necessário</div>
@@ -424,7 +424,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
       <div class="login-sub">Equipe de Mobilização HIDROBR</div>
       <input class="login-input" id="login-user" type="email" placeholder="E-mail" autocomplete="email">
       <input class="login-input" id="login-pass" type="password" placeholder="Senha" onkeydown="if(event.key==='Enter')doLogin()">
-      <div class="login-err" id="login-err">Usuário ou senha incorretos.</div>
+      <div class="login-err" id="login-err" style="display: none;">E-mail ou senha incorretos.</div>
       <button class="login-btn" onclick="doLogin()">Entrar</button>
       <div class="login-back" onclick="goLanding()">← Voltar ao início</div>
     </div>
@@ -544,7 +544,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 <!-- ══════════════════════════════════════
      VIEW: APP INTERNO
 ══════════════════════════════════════ -->
-<div class="view flex-view" id="view-app">
+<div class="view flex-view active" id="view-app">
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-logo">
@@ -568,8 +568,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
     </div>
     <div class="sidebar-footer">
       <div class="user-chip">
-        <div class="user-avatar" id="app-avatar">MO</div>
-        <div><div class="user-name" id="app-username">Mobilização</div><div class="user-role">Equipe HIDROBR</div></div>
+        <div class="user-avatar" id="app-avatar">JU</div>
+        <div><div class="user-name" id="app-username">jucelino.damasceno</div><div class="user-role">Equipe HIDROBR</div></div>
       </div>
       <button class="logout-btn" onclick="doLogout()">Sair →</button>
     </div>
@@ -579,8 +579,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
   <div class="content">
     <div class="topbar" id="app-topbar">
       <div>
-        <div class="topbar-title" id="app-topbar-title">Painel</div>
-        <div class="topbar-sub" id="app-topbar-sub">Solicitações recebidas</div>
+        <div class="topbar-title" id="app-topbar-title">Mobilizações</div>
+        <div class="topbar-sub" id="app-topbar-sub">Todas as solicitações</div>
       </div>
       <div id="app-topbar-actions" style="display:flex;gap:10px;"></div>
     </div>
@@ -638,7 +638,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
         <div class="filter-chip" onclick="appSetFilter('pendente-info')" id="achip-pendente-info">● Pend. Informação</div>
         <div class="filter-chip" onclick="appSetFilter('inativo')" id="achip-inativo">○ Inativo</div>
       </div>
-      <div class="mob-list" id="app-mob-list"></div>
+      <div class="mob-list" id="app-mob-list"><div class="empty-state"><div class="empty-icon">🔍</div><p>Nenhuma mobilização encontrada.</p></div></div>
     </div>
 
     <!-- PAGE: DETALHE -->
@@ -2078,4 +2078,4 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 
 
-<div id="claude-agent-glow-border" style="position: fixed; inset: 0px; pointer-events: none; z-index: 2147483646; opacity: 0; transition: opacity 0.3s ease-in-out;"><div id="claude-agent-glow-border-inner" style="position: absolute; inset: 0px; will-change: opacity; box-shadow: rgba(217, 119, 87, 0.7) 0px 0px 15px inset, rgba(217, 119, 87, 0.5) 0px 0px 25px inset, rgba(217, 119, 87, 0.2) 0px 0px 35px inset;"></div></div><div id="claude-phantom-cursor" aria-hidden="true" style="position: fixed; top: 0px; left: 0px; pointer-events: none; z-index: 2147483646; transform: translate3d(633px, 293px, 0px); transition: transform 180ms cubic-bezier(0.2, 0, 0, 1); will-change: transform;"><svg id="claude-phantom-cursor-plain" width="20" height="26" viewBox="0 0 20 26" style="position: absolute; top: 0px; left: 0px; overflow: visible;"><path d="M0 0 L0 18 L4.5 14 L7.5 21.5 L11 20 L8 13 L14 13 Z" stroke="white" stroke-width="3" stroke-linejoin="round" fill="white"></path><path d="M0 0 L0 18 L4.5 14 L7.5 21.5 L11 20 L8 13 L14 13 Z" fill="#111"></path></svg><svg id="claude-phantom-cursor-styled" width="20" height="26" viewBox="0 0 20 26" style="position: absolute; top: 0px; left: 0px; overflow: visible; filter: drop-shadow(rgba(217, 119, 87, 0.9) 0px 0px 4px) drop-shadow(rgba(217, 119, 87, 0.45) 0px 0px 10px);"><path d="M0 0 L0 18 L4.5 14 L7.5 21.5 L11 20 L8 13 L14 13 Z" stroke="#D97757" stroke-width="3" stroke-linejoin="round" fill="#D97757"></path><path d="M0 0 L0 18 L4.5 14 L7.5 21.5 L11 20 L8 13 L14 13 Z" fill="#FAF9F5"></path></svg></div></body></html>
+<div id="claude-agent-glow-border" style="position: fixed; inset: 0px; pointer-events: none; z-index: 2147483646; opacity: 1; transition: opacity 0.3s ease-in-out;"><div id="claude-agent-glow-border-inner" style="position: absolute; inset: 0px; will-change: opacity; box-shadow: rgba(217, 119, 87, 0.7) 0px 0px 15px inset, rgba(217, 119, 87, 0.5) 0px 0px 25px inset, rgba(217, 119, 87, 0.2) 0px 0px 35px inset;"></div></div><div id="claude-phantom-cursor" aria-hidden="true" style="position: fixed; top: 0px; left: 0px; pointer-events: none; z-index: 2147483646; transform: translate3d(633px, 265px, 0px); transition: transform 180ms cubic-bezier(0.2, 0, 0, 1); will-change: transform;"><svg id="claude-phantom-cursor-plain" width="20" height="26" viewBox="0 0 20 26" style="position: absolute; top: 0px; left: 0px; overflow: visible;"><path d="M0 0 L0 18 L4.5 14 L7.5 21.5 L11 20 L8 13 L14 13 Z" stroke="white" stroke-width="3" stroke-linejoin="round" fill="white"></path><path d="M0 0 L0 18 L4.5 14 L7.5 21.5 L11 20 L8 13 L14 13 Z" fill="#111"></path></svg><svg id="claude-phantom-cursor-styled" width="20" height="26" viewBox="0 0 20 26" style="position: absolute; top: 0px; left: 0px; overflow: visible; filter: drop-shadow(rgba(217, 119, 87, 0.9) 0px 0px 4px) drop-shadow(rgba(217, 119, 87, 0.45) 0px 0px 10px);"><path d="M0 0 L0 18 L4.5 14 L7.5 21.5 L11 20 L8 13 L14 13 Z" stroke="#D97757" stroke-width="3" stroke-linejoin="round" fill="#D97757"></path><path d="M0 0 L0 18 L4.5 14 L7.5 21.5 L11 20 L8 13 L14 13 Z" fill="#FAF9F5"></path></svg></div></body></html>
