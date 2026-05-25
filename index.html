@@ -985,79 +985,22 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 
 <script>
 
-// \u2500\u2500 STATE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── STATE ──────────────────────────────────────────
 const CREDENTIALS = { 'mobilizacao': 'hidrobr2024', 'admin': 'admin123' };
 
 let state = {
   mobilizacoes: [], clientes: [], profissionais: [], gestores: [],
   currentMobId: null, editingMobId: null,
-  solEquipe: [], // equipe tempor\u00e1ria na solicita\u00e7\u00e3o
+  solEquipe: [], // equipe temporária na solicitação
 };
 let mobIdCounter=1, cliIdCounter=1, prfIdCounter=1, docIdCounter=1, gestIdCounter=1, passIdCounter=1;
 
-// \u2500\u2500 SEED \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-function seedData() {
-  state.clientes = [
-    {id:cliIdCounter++,nome:'Petrobras S.A.',cnpj:'33.000.167/0001-01',contato:'Marcos Oliveira',email:'marcos@petrobras.com.br',tel:'(21) 3324-1010'},
-    {id:cliIdCounter++,nome:'Vale S.A.',cnpj:'33.592.510/0001-54',contato:'Ana Costa',email:'ana.costa@vale.com',tel:'(31) 3485-5555'},
-    {id:cliIdCounter++,nome:'Embraer S.A.',cnpj:'07.689.002/0001-89',contato:'Carlos Mendes',email:'carlos.mendes@embraer.com.br',tel:'(12) 3927-1000'},
-  ];
-  state.gestores = [
-    {id:gestIdCounter++,nome:'Fernanda Rocha',cargo:'Gestora de Mobiliza\u00e7\u00e3o',area:'Opera\u00e7\u00f5es',email:'fernanda@hidrobr.com.br',tel:'(11) 98765-4321',obs:'Seg\u2013Sex 8h\u201318h'},
-  ];
-  state.profissionais = [
-    {id:prfIdCounter++,nome:'Rafael Almeida',cargo:'Arquiteto de Software',email:'rafael@hidrobr.com.br',matricula:'10421',vinculo:'hidrobr',regime:'clt'},
-    {id:prfIdCounter++,nome:'Juliana Ferreira',cargo:'Engenheira de Dados',email:'juliana@hidrobr.com.br',matricula:'10398',vinculo:'hidrobr',regime:'clt'},
-    {id:prfIdCounter++,nome:'Bruno Carvalho',cargo:'DevOps Engineer',email:'bruno@parceiro.com',matricula:'',vinculo:'terceiro',regime:'pj'},
-    {id:prfIdCounter++,nome:'Patr\u00edcia Lima',cargo:'Scrum Master',email:'patricia@hidrobr.com.br',matricula:'10456',vinculo:'hbr',regime:'socio'},
-    {id:prfIdCounter++,nome:'Diego Santos',cargo:'Analista de Seguran\u00e7a',email:'diego@parceiro.com',matricula:'',vinculo:'terceiro',regime:'pj'},
-  ];
-  const t = (d) => { const dt = new Date(); dt.setDate(dt.getDate()-d); return dt.toISOString().split('T')[0]; };
-  state.mobilizacoes = [
-    {
-      id:mobIdCounter++,nome:'Moderniza\u00e7\u00e3o de Infraestrutura TI',clienteId:1,
-      liderContrato:'Fernanda Rocha',respCliente:'Jo\u00e3o Pereira',
-      temSistema:'sim',sistemaNome:'Portal Petrobras',
-      status:'processamento',inicio:t(20),prazo:t(-10),
-      dataCriacao:t(20),obs:'Mobiliza\u00e7\u00e3o priorit\u00e1ria.',
-      equipe:[{profId:1,papel:'L\u00edder T\u00e9cnico',vinculo:'hidrobr',regime:'clt',cargo:'Arquiteto'},{profId:2,papel:'Engenheira',vinculo:'hidrobr',regime:'clt',cargo:'Dados'},{profId:3,papel:'DevOps',vinculo:'terceiro',regime:'pj',cargo:'DevOps'}],
-      documentos:[
-        {id:docIdCounter++,nome:'Curr\u00edculo',caminho:'\srv\pet\cv_rafael.pdf',tipo:'curriculo',profId:1,entregue:true},
-        {id:docIdCounter++,nome:'Curr\u00edculo',caminho:'',tipo:'curriculo',profId:2,entregue:false},
-        {id:docIdCounter++,nome:'NDA',caminho:'\srv\pet
-da.pdf',tipo:'contrato',profId:null,entregue:true},
-      ],
-      passaporte:[{id:passIdCounter++,profId:1,tipo:'Crach\u00e1 de Acesso',numero:'PB-10421',validade:'2025-12-31',obs:'\u00c1rea t\u00e9cnica'}],
-      infoRequests:[],
-    },
-    {
-      id:mobIdCounter++,nome:'Plataforma Analytics Mining',clienteId:2,
-      liderContrato:'Ricardo Souza',respCliente:'Ana Costa',
-      temSistema:'nao',sistemaNome:'',
-      status:'mobilizado',inicio:t(45),prazo:t(5),
-      dataCriacao:t(45),obs:'',
-      equipe:[{profId:4,papel:'PM',vinculo:'hbr',regime:'socio',cargo:'Scrum Master'},{profId:5,papel:'Seguran\u00e7a',vinculo:'terceiro',regime:'pj',cargo:'Analista'}],
-      documentos:[
-        {id:docIdCounter++,nome:'Curr\u00edculo',caminho:'\srv\vale\cv_p.pdf',tipo:'curriculo',profId:4,entregue:true},
-        {id:docIdCounter++,nome:'Carta de Apresenta\u00e7\u00e3o',caminho:'\srv\vale\carta.pdf',tipo:'documento',profId:null,entregue:true},
-      ],
-      passaporte:[],infoRequests:[],
-    },
-    {
-      id:mobIdCounter++,nome:'Sistema de Gest\u00e3o de Manuten\u00e7\u00e3o',clienteId:3,
-      liderContrato:'Fernanda Rocha',respCliente:'Carlos Mendes',
-      temSistema:'sim',sistemaNome:'SAP PM',
-      status:'cadastrado',inicio:t(3),prazo:t(-30),
-      dataCriacao:t(3),obs:'Cliente quer documenta\u00e7\u00e3o detalhada.',
-      equipe:[{profId:1,papel:'Arquiteto',vinculo:'hidrobr',regime:'clt',cargo:'Arquiteto'}],
-      documentos:[],passaporte:[],infoRequests:[],
-    },
-  ];
-}
+// ── SEED ──────────────────────────────────────────
+function seedData(){}
 
-// \u2500\u2500 HELPERS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-function formatDate(s){if(!s)return'\u2014';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;}
-function formatDatetime(s){if(!s)return'\u2014';const dt=new Date(s);return dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+// ── HELPERS ───────────────────────────────────────
+function formatDate(s){if(!s)return'—';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;}
+function formatDatetime(s){if(!s)return'—';const dt=new Date(s);return dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
 function calcFarol(mob){
   const hoje=new Date(),prazo=mob.prazo?new Date(mob.prazo):null;
   const docs=mob.documentos||[];const pct=docs.length>0?docs.filter(d=>d.entregue).length/docs.length:1;
@@ -1067,12 +1010,12 @@ function calcFarol(mob){
   if(pct<1||dias<7)return'amarelo';
   return'verde';
 }
-function farolHTML(cor){const l={verde:'Em dia',amarelo:'Aten\u00e7\u00e3o',vermelho:'Cr\u00edtico',cinza:'Novo'}[cor];return`<span class="farol ${cor}"><span class="farol-dot"></span>${l}</span>`;}
-function statusBadgeHTML(s){const m={cadastrado:'Cadastrado',processamento:'Processamento',mobilizado:'Mobilizado','pendente-info':'Pend. Informa\u00e7\u00e3o'};const cl={cadastrado:'status-cadastrado',processamento:'status-processamento',mobilizado:'status-mobilizado','pendente-info':'status-pendente-info'};return`<span class="status-badge ${cl[s]||''}">${m[s]||s}</span>`;}
+function farolHTML(cor){const l={verde:'Em dia',amarelo:'Atenção',vermelho:'Crítico',cinza:'Novo'}[cor];return`<span class="farol ${cor}"><span class="farol-dot"></span>${l}</span>`;}
+function statusBadgeHTML(s){const m={cadastrado:'Cadastrado',processamento:'Processamento',mobilizado:'Mobilizado','pendente-info':'Pend. Informação'};const cl={cadastrado:'status-cadastrado',processamento:'status-processamento',mobilizado:'status-mobilizado','pendente-info':'status-pendente-info'};return`<span class="status-badge ${cl[s]||''}">${m[s]||s}</span>`;}
 function progressPct(mob){const d=mob.documentos||[];return d.length?Math.round(d.filter(x=>x.entregue).length/d.length*100):0;}
 function vincLabel(v){return{hidrobr:'HIDROBR',hbr:'HBR',terceiro:'Terceiro'}[v]||v;}
 function vincBadge(v){const c={hidrobr:'background:var(--accent-l);color:var(--accent)',hbr:'background:#ede9fe;color:#7c3aed',terceiro:'background:var(--gray-l);color:var(--gray)'}[v]||'';return`<span style="font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;${c}">${vincLabel(v)}</span>`;}
-function regimeBadge(r){const l={clt:'CLT',pj:'PJ',socio:'S\u00f3cio'}[r]||r;return`<span style="font-size:10px;background:var(--bg3);color:var(--text2);padding:2px 7px;border-radius:10px;font-weight:600;">${l}</span>`;}
+function regimeBadge(r){const l={clt:'CLT',pj:'PJ',socio:'Sócio'}[r]||r;return`<span style="font-size:10px;background:var(--bg3);color:var(--text2);padding:2px 7px;border-radius:10px;font-weight:600;">${l}</span>`;}
 function validadeClass(s){if(!s)return'';const d=Math.ceil((new Date(s)-new Date())/86400000);if(d<0)return'venc';if(d<30)return'warn';return'ok';}
 function calcSLADias(mob){if(!mob.dataCriacao)return null;const inicio=new Date(mob.dataCriacao);const fim=mob.status==='mobilizado'?new Date():new Date();return Math.ceil((fim-inicio)/86400000);}
 function openModal(id){document.getElementById(id).classList.add('open');}
@@ -1080,7 +1023,7 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type?' '+type:'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
-// \u2500\u2500 NAVEGA\u00c7\u00c3O \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── NAVEGAÇÃO ─────────────────────────────────────
 function goLanding(){showView('view-landing');}
 function goLogin(){showView('view-login');document.getElementById('login-user').value='';document.getElementById('login-pass').value='';document.getElementById('login-err').style.display='none';}
 function goPortal(){
@@ -1107,7 +1050,7 @@ function doLogin(){
 }
 function doLogout(){showView('view-landing');}
 
-// \u2500\u2500 PORTAL: NAVEGA\u00c7\u00c3O \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── PORTAL: NAVEGAÇÃO ─────────────────────────────
 function portalNav(pg){
   document.querySelectorAll('.portal-nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.portal-page').forEach(p=>p.classList.remove('active'));
@@ -1116,7 +1059,7 @@ function portalNav(pg){
   if(pg==='status')renderPortalStatus();
 }
 
-// \u2500\u2500 PORTAL: SOLICITA\u00c7\u00c3O \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── PORTAL: SOLICITAÇÃO ───────────────────────────
 function populateClienteSelectSol(){
   const sel=document.getElementById('sol-cliente');
   sel.innerHTML='<option value="">Selecione o cliente...</option>';
@@ -1130,7 +1073,7 @@ document.getElementById('sol-tem-sistema').addEventListener('change',function(){
 function openModalAddProfSol(){
   const sel=document.getElementById('sol-prof-select');
   sel.innerHTML='<option value="">Selecione profissional existente...</option>';
-  state.profissionais.filter(p=>!state.solEquipe.find(e=>e.profId===p.id)).forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=`${p.nome} \u2014 ${p.cargo}`;sel.appendChild(o);});
+  state.profissionais.filter(p=>!state.solEquipe.find(e=>e.profId===p.id)).forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=`${p.nome} — ${p.cargo}`;sel.appendChild(o);});
   ['sol-prof-papel','sol-prof-cargo'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('sol-prof-vinculo').value='hidrobr';
   document.getElementById('sol-prof-regime').value='clt';
@@ -1156,7 +1099,7 @@ function addProfSolicitacao(){
   if(profIdVal){
     profId=parseInt(profIdVal);
   } else {
-    // Criar profissional tempor\u00e1rio se n\u00e3o selecionado mas cargo preenchido
+    // Criar profissional temporário se não selecionado mas cargo preenchido
     if(!cargo){return showToast('Selecione ou informe o cargo do profissional.');}
     const newP={id:prfIdCounter++,nome:'Profissional '+prfIdCounter,cargo,email:'',matricula:'',vinculo,regime};
     state.profissionais.push(newP);
@@ -1169,30 +1112,30 @@ function addProfSolicitacao(){
 
 function renderSolEquipe(){
   const c=document.getElementById('sol-equipe-list');
-  if(!state.solEquipe.length){c.innerHTML='<div class="empty-state" style="padding:24px;"><div class="empty-icon">\ud83d\udc65</div><p>Nenhum profissional adicionado ainda.</p></div>';return;}
+  if(!state.solEquipe.length){c.innerHTML='<div class="empty-state" style="padding:24px;"><div class="empty-icon">👥</div><p>Nenhum profissional adicionado ainda.</p></div>';return;}
   c.innerHTML=state.solEquipe.map((e,i)=>{
     const prf=state.profissionais.find(p=>p.id===e.profId);
     const init=prf?prf.nome.split(' ').slice(0,2).map(n=>n[0]).join(''):'?';
     return`<div class="team-item">
       <div class="team-avatar">${init}</div>
       <div style="flex:1;">
-        <div style="display:flex;align-items:center;gap:6px;font-weight:500;">${prf?prf.nome:'\u2014'} ${vincBadge(e.vinculo)} ${regimeBadge(e.regime)}</div>
+        <div style="display:flex;align-items:center;gap:6px;font-weight:500;">${prf?prf.nome:'—'} ${vincBadge(e.vinculo)} ${regimeBadge(e.regime)}</div>
         <div style="font-size:11px;color:var(--text3);">${e.papel||e.cargo}</div>
       </div>
-      <button class="team-remove" onclick="state.solEquipe.splice(${i},1);renderSolEquipe()">\u00d7</button>
+      <button class="team-remove" onclick="state.solEquipe.splice(${i},1);renderSolEquipe()">×</button>
     </div>`;
   }).join('');
 }
 
 
 
-// \u2500\u2500 PORTAL: STATUS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── PORTAL: STATUS ────────────────────────────────
 function renderPortalStatus(){
-  // Popular filtro de l\u00edderes
+  // Popular filtro de líderes
   const liderSel=document.getElementById('filtro-lider');
   const currentLider=liderSel.value;
   const lideres=[...new Set(state.mobilizacoes.map(m=>m.liderContrato).filter(Boolean))];
-  liderSel.innerHTML='<option value="">Todos os l\u00edderes</option>';
+  liderSel.innerHTML='<option value="">Todos os líderes</option>';
   lideres.forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=l;liderSel.appendChild(o);});
   liderSel.value=currentLider;
 
@@ -1207,14 +1150,14 @@ function renderPortalStatus(){
   const slaMobilizados=mobilizados.length?Math.round(mobilizados.map(m=>calcSLADias(m)).filter(d=>d).reduce((a,b)=>a+b,0)/mobilizados.length):0;
 
   document.getElementById('portal-sla').innerHTML=`
-    <div class="sla-card"><div class="sla-value">${mobs.length}</div><div class="sla-label">Total de Solicita\u00e7\u00f5es</div><div class="sla-sub">${filtroLider||'todos os l\u00edderes'}</div></div>
-    <div class="sla-card"><div class="sla-value" style="color:var(--green);">${slaMobilizados || '\u2014'}</div><div class="sla-label">SLA M\u00e9dio (dias)</div><div class="sla-sub">abertura \u2192 mobilizado</div></div>
-    <div class="sla-card"><div class="sla-value" style="color:var(--amber);">${slaMedia || '\u2014'}</div><div class="sla-label">Tempo M\u00e9dio em Aberto</div><div class="sla-sub">todas as solicita\u00e7\u00f5es</div></div>
+    <div class="sla-card"><div class="sla-value">${mobs.length}</div><div class="sla-label">Total de Solicitações</div><div class="sla-sub">${filtroLider||'todos os líderes'}</div></div>
+    <div class="sla-card"><div class="sla-value" style="color:var(--green);">${slaMobilizados || '—'}</div><div class="sla-label">SLA Médio (dias)</div><div class="sla-sub">abertura → mobilizado</div></div>
+    <div class="sla-card"><div class="sla-value" style="color:var(--amber);">${slaMedia || '—'}</div><div class="sla-label">Tempo Médio em Aberto</div><div class="sla-sub">todas as solicitações</div></div>
   `;
 
   // Lista
   const container=document.getElementById('portal-status-list');
-  if(!mobs.length){container.innerHTML='<div class="empty-state"><div class="empty-icon">\ud83d\udccb</div><p>Nenhuma mobiliza\u00e7\u00e3o encontrada.</p></div>';return;}
+  if(!mobs.length){container.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>Nenhuma mobilização encontrada.</p></div>';return;}
   container.innerHTML=mobs.map(mob=>{
     const cli=state.clientes.find(c=>c.id===mob.clienteId);
     const cor=calcFarol(mob);
@@ -1227,14 +1170,14 @@ function renderPortalStatus(){
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
             <span class="mob-card-title">${mob.nome}</span>
             ${statusBadgeHTML(mob.status)}
-            ${infoReqs.length?`<span style="background:var(--red-l);color:var(--red);font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;">\u26a0 ${infoReqs.length} pend\u00eancia(s)</span>`:''}
+            ${infoReqs.length?`<span style="background:var(--red-l);color:var(--red);font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;">⚠ ${infoReqs.length} pendência(s)</span>`:''}
           </div>
-          <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Cliente: <strong style="color:var(--text2);">${cli?cli.nome:'\u2014'}</strong> \u00b7 L\u00edder: <strong style="color:var(--text2);">${mob.liderContrato||'\u2014'}</strong></div>
-          ${infoReqs.map(r=>`<div class="info-request-box" style="margin-bottom:8px;"><div class="irt">\u26a0 Informa\u00e7\u00e3o Solicitada pela Equipe de Mobiliza\u00e7\u00e3o</div><p>${r.texto}</p></div>`).join('')}
+          <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Cliente: <strong style="color:var(--text2);">${cli?cli.nome:'—'}</strong> · Líder: <strong style="color:var(--text2);">${mob.liderContrato||'—'}</strong></div>
+          ${infoReqs.map(r=>`<div class="info-request-box" style="margin-bottom:8px;"><div class="irt">⚠ Informação Solicitada pela Equipe de Mobilização</div><p>${r.texto}</p></div>`).join('')}
           <div class="mob-card-meta">
-            <div class="mob-meta-item">\ud83d\udc65 <strong>${mob.equipe.length}</strong> profissional(is)</div>
-            ${mob.prazo?`<div class="mob-meta-item">\ud83d\udcc5 Prazo: <strong>${formatDate(mob.prazo)}</strong></div>`:''}
-            ${dias!==null?`<div class="mob-meta-item">\u23f1 <strong>${dias}</strong> dias desde abertura</div>`:''}
+            <div class="mob-meta-item">👥 <strong>${mob.equipe.length}</strong> profissional(is)</div>
+            ${mob.prazo?`<div class="mob-meta-item">📅 Prazo: <strong>${formatDate(mob.prazo)}</strong></div>`:''}
+            ${dias!==null?`<div class="mob-meta-item">⏱ <strong>${dias}</strong> dias desde abertura</div>`:''}
           </div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
@@ -1246,17 +1189,17 @@ function renderPortalStatus(){
   }).join('');
 }
 
-// \u2500\u2500 APP: NAVEGA\u00c7\u00c3O \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── APP: NAVEGAÇÃO ────────────────────────────────
 let appCurrentPage='painel', appCurrentFilter='todos';
 const appPageTitles={
-  painel:['Painel','Solicita\u00e7\u00f5es recebidas'],
-  dashboard:['Dashboard','An\u00e1lise e indicadores'],
-  mobilizacoes:['Mobiliza\u00e7\u00f5es','Todas as solicita\u00e7\u00f5es'],
-  detalhe:['Detalhe da Mobiliza\u00e7\u00e3o',''],
-  gestores:['Gestores','Gestores de mobiliza\u00e7\u00e3o'],
+  painel:['Painel','Solicitações recebidas'],
+  dashboard:['Dashboard','Análise e indicadores'],
+  mobilizacoes:['Mobilizações','Todas as solicitações'],
+  detalhe:['Detalhe da Mobilização',''],
+  gestores:['Gestores','Gestores de mobilização'],
   clientes:['Clientes','Cadastro de clientes'],
   profissionais:['Profissionais','Cadastro de profissionais'],
-  report:['Report Semanal','Relat\u00f3rio para gestores e l\u00edderes'],
+  report:['Report Semanal','Relatório para gestores e líderes'],
 };
 
 function appNav(pg,mobId){
@@ -1279,7 +1222,7 @@ function appNav(pg,mobId){
   if(pg==='detalhe'&&mobId)renderAppDetalhe(mobId);
 }
 
-// \u2500\u2500 APP: PAINEL \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── APP: PAINEL ───────────────────────────────────
 function renderAppPainel(){
   const mobs=state.mobilizacoes;
   document.getElementById('sum-total').textContent=mobs.length;
@@ -1291,7 +1234,7 @@ function renderAppPainel(){
 
   const c=document.getElementById('painel-mob-list');
   const recent=[...mobs].reverse().slice(0,6);
-  if(!recent.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">\ud83d\udccb</div><p>Nenhuma solicita\u00e7\u00e3o ainda.</p></div>';return;}
+  if(!recent.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>Nenhuma solicitação ainda.</p></div>';return;}
   c.innerHTML=recent.map(mob=>{
     const cli=state.clientes.find(c2=>c2.id===mob.clienteId);
     const cor=calcFarol(mob);
@@ -1300,14 +1243,14 @@ function renderAppPainel(){
       <div style="width:4px;height:36px;border-radius:2px;background:${cor==='verde'?'var(--green)':cor==='amarelo'?'var(--amber)':cor==='vermelho'?'var(--red)':'#9ca3af'};flex-shrink:0;"></div>
       <div style="flex:1;min-width:0;">
         <div style="font-weight:600;font-size:13px;margin-bottom:2px;">${mob.nome}</div>
-        <div style="font-size:11px;color:var(--text3);">${cli?cli.nome:'\u2014'} \u00b7 ${mob.equipe.length} profissional(is) \u00b7 ${formatDate(mob.dataCriacao?mob.dataCriacao.split('T')[0]:'')}</div>
+        <div style="font-size:11px;color:var(--text3);">${cli?cli.nome:'—'} · ${mob.equipe.length} profissional(is) · ${formatDate(mob.dataCriacao?mob.dataCriacao.split('T')[0]:'')}</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">${statusBadgeHTML(mob.status)} ${farolHTML(cor)}</div>
     </div>`;
   }).join('');
 }
 
-// \u2500\u2500 APP: DASHBOARD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── APP: DASHBOARD ────────────────────────────────
 function renderAppDashboard(){
   const mobs=state.mobilizacoes;
   const diasList=mobs.map(m=>m.status==='mobilizado'?calcSLADias(m):null).filter(d=>d!==null);
@@ -1317,9 +1260,9 @@ function renderAppDashboard(){
   const mediaAberto=diasAberto.length?Math.round(diasAberto.reduce((a,b)=>a+b,0)/diasAberto.length):0;
 
   document.getElementById('app-sla').innerHTML=`
-    <div class="sla-card"><div class="sla-value">${mobs.length}</div><div class="sla-label">Total de Mobiliza\u00e7\u00f5es</div><div class="sla-sub">todas as solicita\u00e7\u00f5es</div></div>
-    <div class="sla-card"><div class="sla-value" style="color:var(--green);">${slaMedia||'\u2014'}</div><div class="sla-label">SLA M\u00e9dio (dias)</div><div class="sla-sub">abertura \u2192 mobilizado</div></div>
-    <div class="sla-card"><div class="sla-value" style="color:var(--amber);">${mediaAberto||'\u2014'}</div><div class="sla-label">Tempo M\u00e9dio em Aberto</div><div class="sla-sub">solicita\u00e7\u00f5es pendentes</div></div>
+    <div class="sla-card"><div class="sla-value">${mobs.length}</div><div class="sla-label">Total de Mobilizações</div><div class="sla-sub">todas as solicitações</div></div>
+    <div class="sla-card"><div class="sla-value" style="color:var(--green);">${slaMedia||'—'}</div><div class="sla-label">SLA Médio (dias)</div><div class="sla-sub">abertura → mobilizado</div></div>
+    <div class="sla-card"><div class="sla-value" style="color:var(--amber);">${mediaAberto||'—'}</div><div class="sla-label">Tempo Médio em Aberto</div><div class="sla-sub">solicitações pendentes</div></div>
   `;
 
   // Clientes
@@ -1331,10 +1274,10 @@ function renderAppDashboard(){
 
   // Projetos
   document.getElementById('dash-projetos').innerHTML=mobs.length?
-    mobs.map(m=>{const cli=state.clientes.find(c=>c.id===m.clienteId);return`<div class="dash-row" style="cursor:pointer;" onclick="appNav('detalhe',${m.id})"><div style="flex:1;"><div style="font-weight:500;font-size:12px;">${m.nome}</div><div style="font-size:11px;color:var(--text3);">${cli?cli.nome:'\u2014'}</div></div><div style="display:flex;gap:6px;">${statusBadgeHTML(m.status)} ${farolHTML(calcFarol(m))}</div></div>`;}).join(''):
+    mobs.map(m=>{const cli=state.clientes.find(c=>c.id===m.clienteId);return`<div class="dash-row" style="cursor:pointer;" onclick="appNav('detalhe',${m.id})"><div style="flex:1;"><div style="font-weight:500;font-size:12px;">${m.nome}</div><div style="font-size:11px;color:var(--text3);">${cli?cli.nome:'—'}</div></div><div style="display:flex;gap:6px;">${statusBadgeHTML(m.status)} ${farolHTML(calcFarol(m))}</div></div>`;}).join(''):
     '<div class="empty-state" style="padding:20px;"><p>Sem dados.</p></div>';
 
-  // Profissional \u00d7 empresa
+  // Profissional × empresa
   const byProf={};
   mobs.forEach(m=>{const cli=state.clientes.find(c=>c.id===m.clienteId);m.equipe.forEach(e=>{const prf=state.profissionais.find(p=>p.id===e.profId);if(!prf||!cli)return;if(!byProf[prf.id])byProf[prf.id]={prf,entries:[]};byProf[prf.id].entries.push({cli,mob:m,papel:e.papel,vinculo:e.vinculo,regime:e.regime});});});
   document.getElementById('dash-prof-empresa').innerHTML=Object.values(byProf).length?
@@ -1345,14 +1288,14 @@ function renderAppDashboard(){
         <div style="flex:1;margin-left:12px;">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-weight:600;font-size:13px;">${prf.nome}</span>${vincBadge(prf.vinculo)} ${regimeBadge(prf.regime)}</div>
           <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">${prf.cargo}</div>
-          <div style="display:flex;flex-wrap:wrap;gap:5px;">${entries.map(e=>`<span style="font-size:11px;background:var(--bg3);border:1px solid var(--border);padding:3px 10px;border-radius:20px;">\ud83d\udcc2 ${e.cli.nome} \u00b7 ${e.mob.nome} ${statusBadgeHTML(e.mob.status)}</span>`).join('')}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;">${entries.map(e=>`<span style="font-size:11px;background:var(--bg3);border:1px solid var(--border);padding:3px 10px;border-radius:20px;">📂 ${e.cli.nome} · ${e.mob.nome} ${statusBadgeHTML(e.mob.status)}</span>`).join('')}</div>
         </div>
       </div>`;
     }).join(''):
     '<div class="empty-state" style="padding:20px;"><p>Nenhum profissional mobilizado.</p></div>';
 }
 
-// \u2500\u2500 APP: MOBILIZA\u00c7\u00d5ES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── APP: MOBILIZAÇÕES ─────────────────────────────
 function appSetFilter(f){appCurrentFilter=f;document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));document.getElementById('achip-'+f)?.classList.add('active');renderAppMobs();}
 function renderAppMobs(){
   const search=document.getElementById('app-search-mob')?.value.toLowerCase()||'';
@@ -1361,7 +1304,7 @@ function renderAppMobs(){
   if(search)mobs=mobs.filter(m=>{const cli=state.clientes.find(c=>c.id===m.clienteId);return m.nome.toLowerCase().includes(search)||(cli&&cli.nome.toLowerCase().includes(search));});
   document.getElementById('badge-mob').textContent=state.mobilizacoes.length;
   const c=document.getElementById('app-mob-list');
-  if(!mobs.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">\ud83d\udd0d</div><p>Nenhuma mobiliza\u00e7\u00e3o encontrada.</p></div>';return;}
+  if(!mobs.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">🔍</div><p>Nenhuma mobilização encontrada.</p></div>';return;}
   c.innerHTML=mobs.map(mob=>{
     const cli=state.clientes.find(c2=>c2.id===mob.clienteId);
     const cor=calcFarol(mob);const pct=progressPct(mob);
@@ -1370,12 +1313,12 @@ function renderAppMobs(){
       <div style="display:grid;grid-template-columns:1fr auto;gap:12px;">
         <div>
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="mob-card-title">${mob.nome}</span>${statusBadgeHTML(mob.status)}</div>
-          <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Cliente: <strong style="color:var(--text2);">${cli?cli.nome:'\u2014'}</strong> \u00b7 L\u00edder: <strong style="color:var(--text2);">${mob.liderContrato||'\u2014'}</strong></div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Cliente: <strong style="color:var(--text2);">${cli?cli.nome:'—'}</strong> · Líder: <strong style="color:var(--text2);">${mob.liderContrato||'—'}</strong></div>
           <div class="mob-card-meta">
-            <div class="mob-meta-item">\ud83d\udc65 <strong>${mob.equipe.length}</strong> profissional(is)</div>
-            <div class="mob-meta-item">\ud83d\udcc4 <strong>${(mob.documentos||[]).filter(d=>d.entregue).length}/${(mob.documentos||[]).length}</strong> docs</div>
-            ${mob.prazo?`<div class="mob-meta-item">\ud83d\udcc5 <strong>${formatDate(mob.prazo)}</strong></div>`:''}
-            ${dias!==null?`<div class="mob-meta-item">\u23f1 <strong>${dias}d</strong> em aberto</div>`:''}
+            <div class="mob-meta-item">👥 <strong>${mob.equipe.length}</strong> profissional(is)</div>
+            <div class="mob-meta-item">📄 <strong>${(mob.documentos||[]).filter(d=>d.entregue).length}/${(mob.documentos||[]).length}</strong> docs</div>
+            ${mob.prazo?`<div class="mob-meta-item">📅 <strong>${formatDate(mob.prazo)}</strong></div>`:''}
+            ${dias!==null?`<div class="mob-meta-item">⏱ <strong>${dias}d</strong> em aberto</div>`:''}
           </div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">${farolHTML(cor)}<div class="progress-wrap"><div class="progress-label"><span>Docs</span><span>${pct}%</span></div><div class="progress-track"><div class="progress-fill ${cor==='verde'?'green':cor==='amarelo'?'amber':'red'}" style="width:${pct}%"></div></div></div></div>
@@ -1384,14 +1327,14 @@ function renderAppMobs(){
   }).join('');
 }
 
-// \u2500\u2500 APP: DETALHE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── APP: DETALHE ──────────────────────────────────
 function renderAppDetalhe(mobId){
   state.currentMobId=mobId;
   const mob=state.mobilizacoes.find(m=>m.id===mobId);if(!mob)return;
   const cli=state.clientes.find(c=>c.id===mob.clienteId);
   const cor=calcFarol(mob);
   document.getElementById('app-detail-titulo').textContent=mob.nome;
-  document.getElementById('app-detail-cliente').innerHTML=`Cliente: <strong>${cli?cli.nome:'\u2014'}</strong>`;
+  document.getElementById('app-detail-cliente').innerHTML=`Cliente: <strong>${cli?cli.nome:'—'}</strong>`;
   document.getElementById('app-detail-farol').innerHTML=farolHTML(cor);
   document.getElementById('app-detail-status').innerHTML=statusBadgeHTML(mob.status);
   document.getElementById('app-topbar-title').textContent=mob.nome;
@@ -1400,16 +1343,16 @@ function renderAppDetalhe(mobId){
   // Info requests pendentes
   const ireqs=(mob.infoRequests||[]);
   document.getElementById('app-info-requests').innerHTML=ireqs.length?
-    ireqs.map((r,i)=>`<div class="info-request-box"><div class="irt">\ud83d\udcac Informa\u00e7\u00e3o solicitada em ${formatDate(r.data?r.data.split('T')[0]:'')} ${r.respondido?'<span style="color:var(--green);margin-left:8px;">\u2713 Respondido</span>':''}</div><p>${r.texto}</p>${!r.respondido?`<button class="btn btn-sm btn-secondary" style="margin-top:8px;" onclick="marcarRespondido(${mobId},${i})">Marcar como respondido</button>`:''}</div>`).join(''):
+    ireqs.map((r,i)=>`<div class="info-request-box"><div class="irt">💬 Informação solicitada em ${formatDate(r.data?r.data.split('T')[0]:'')} ${r.respondido?'<span style="color:var(--green);margin-left:8px;">✓ Respondido</span>':''}</div><p>${r.texto}</p>${!r.respondido?`<button class="btn btn-sm btn-secondary" style="margin-top:8px;" onclick="marcarRespondido(${mobId},${i})">Marcar como respondido</button>`:''}</div>`).join(''):
     '';
 
   document.getElementById('app-detail-info').innerHTML=`
-    <div class="info-item"><div class="info-item-label">L\u00edder de Contrato</div><div class="info-item-value">${mob.liderContrato||'\u2014'}</div></div>
-    <div class="info-item"><div class="info-item-label">Resp. Mobiliza\u00e7\u00e3o (Cliente)</div><div class="info-item-value">${mob.respCliente||'\u2014'}</div></div>
-    <div class="info-item"><div class="info-item-label">Data de In\u00edcio</div><div class="info-item-value">${mob.inicio?formatDate(mob.inicio):'\u2014'}</div></div>
-    <div class="info-item"><div class="info-item-label">Prazo</div><div class="info-item-value">${mob.prazo?formatDate(mob.prazo):'\u2014'}</div></div>
-    <div class="info-item"><div class="info-item-label">Sistema de Mobiliza\u00e7\u00e3o</div><div class="info-item-value">${mob.temSistema==='sim'?(mob.sistemaNome||'Sim'):'N\u00e3o possui'}</div></div>
-    <div class="info-item"><div class="info-item-label">Observa\u00e7\u00f5es</div><div class="info-item-value" style="font-size:12px;font-weight:400;color:var(--text2);">${mob.obs||'\u2014'}</div></div>
+    <div class="info-item"><div class="info-item-label">Líder de Contrato</div><div class="info-item-value">${mob.liderContrato||'—'}</div></div>
+    <div class="info-item"><div class="info-item-label">Resp. Mobilização (Cliente)</div><div class="info-item-value">${mob.respCliente||'—'}</div></div>
+    <div class="info-item"><div class="info-item-label">Data de Início</div><div class="info-item-value">${mob.inicio?formatDate(mob.inicio):'—'}</div></div>
+    <div class="info-item"><div class="info-item-label">Prazo</div><div class="info-item-value">${mob.prazo?formatDate(mob.prazo):'—'}</div></div>
+    <div class="info-item"><div class="info-item-label">Sistema de Mobilização</div><div class="info-item-value">${mob.temSistema==='sim'?(mob.sistemaNome||'Sim'):'Não possui'}</div></div>
+    <div class="info-item"><div class="info-item-label">Observações</div><div class="info-item-value" style="font-size:12px;font-weight:400;color:var(--text2);">${mob.obs||'—'}</div></div>
   `;
   renderAppEquipe(mob);renderAppDocs(mob);renderAppPendencias(mob);renderAppPassaporte(mob);
 }
@@ -1417,7 +1360,7 @@ function renderAppDetalhe(mobId){
 function renderAppEquipe(mob){
   const c=document.getElementById('app-detalhe-team-list');
   document.getElementById('app-equipe-count').textContent=`${mob.equipe.length} profissional(is) na equipe`;
-  if(!mob.equipe.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">\ud83d\udc65</div><p>Equipe n\u00e3o definida.</p></div>';return;}
+  if(!mob.equipe.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><p>Equipe não definida.</p></div>';return;}
   c.innerHTML=mob.equipe.map(e=>{
     const prf=state.profissionais.find(p=>p.id===e.profId);if(!prf)return'';
     const init=prf.nome.split(' ').slice(0,2).map(n=>n[0]).join('');
@@ -1433,43 +1376,43 @@ function renderAppDocs(mob){
   const c=document.getElementById('app-detalhe-doc-list');
   const entregues=(mob.documentos||[]).filter(d=>d.entregue).length;
   document.getElementById('app-doc-count').textContent=`${entregues}/${(mob.documentos||[]).length} documentos entregues`;
-  if(!(mob.documentos||[]).length){c.innerHTML='<div class="empty-state"><div class="empty-icon">\ud83d\udcc4</div><p>Nenhum documento cadastrado.</p></div>';return;}
-  const ic={documento:'\ud83d\udcc4',contrato:'\ud83d\udcdd',certificado:'\ud83c\udfc5',curriculo:'\ud83d\udc64',outros:'\ud83d\udcc1'};
+  if(!(mob.documentos||[]).length){c.innerHTML='<div class="empty-state"><div class="empty-icon">📄</div><p>Nenhum documento cadastrado.</p></div>';return;}
+  const ic={documento:'📄',contrato:'📝',certificado:'🏅',curriculo:'👤',outros:'📁'};
   c.innerHTML=mob.documentos.map((doc,idx)=>{
     const prf=doc.profId?state.profissionais.find(p=>p.id===doc.profId):null;
-    return`<div class="doc-item"><div class="doc-icon">${ic[doc.tipo]||'\ud83d\udcc4'}</div>
-      <div class="doc-info"><div class="doc-name">${doc.nome}${prf?`<span style="font-size:10px;color:var(--text3);margin-left:6px;">\u2014 ${prf.nome}</span>`:'<span style="font-size:10px;color:var(--accent);margin-left:4px;">[Geral]</span>'}</div>
-      <div class="doc-path">${doc.caminho||'Caminho n\u00e3o informado'}</div></div>
+    return`<div class="doc-item"><div class="doc-icon">${ic[doc.tipo]||'📄'}</div>
+      <div class="doc-info"><div class="doc-name">${doc.nome}${prf?`<span style="font-size:10px;color:var(--text3);margin-left:6px;">— ${prf.nome}</span>`:'<span style="font-size:10px;color:var(--accent);margin-left:4px;">[Geral]</span>'}</div>
+      <div class="doc-path">${doc.caminho||'Caminho não informado'}</div></div>
       <div><label class="doc-check"><input type="checkbox" ${doc.entregue?'checked':''} onchange="toggleDoc(${mob.id},${idx},this.checked)">${doc.entregue?'<span style="color:var(--green);font-weight:500;">Entregue</span>':'<span>Pendente</span>'}</label></div>
-      <button class="team-remove" onclick="removerDoc(${mob.id},${idx})">\u00d7</button></div>`;
+      <button class="team-remove" onclick="removerDoc(${mob.id},${idx})">×</button></div>`;
   }).join('');
 }
 
 function renderAppPendencias(mob){
   const c=document.getElementById('app-detalhe-pendencias');
-  if(!mob.equipe.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">\ud83d\udc65</div><p>Sem profissionais.</p></div>';return;}
+  if(!mob.equipe.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><p>Sem profissionais.</p></div>';return;}
   const gerais=(mob.documentos||[]).filter(d=>!d.profId);let html='';
-  if(gerais.length){html+=`<div class="pend-person-block"><div class="pend-person-header"><div class="pend-person-avatar" style="background:var(--bg3);color:var(--text2);">\u2690</div><div style="flex:1;font-weight:600;font-size:13px;">Documentos Gerais</div><div style="font-size:12px;color:var(--text3);">${gerais.filter(d=>d.entregue).length}/${gerais.length}</div></div>${gerais.map(d=>`<div class="pend-doc-row"><div class="pend-dot ${d.entregue?'ok':'pend'}"></div><div style="flex:1;">${d.nome}</div><div style="font-size:11px;color:${d.entregue?'var(--green)':'var(--red)'};">${d.entregue?'Entregue':'Pendente'}</div></div>`).join('')}</div>`;}
+  if(gerais.length){html+=`<div class="pend-person-block"><div class="pend-person-header"><div class="pend-person-avatar" style="background:var(--bg3);color:var(--text2);">⚐</div><div style="flex:1;font-weight:600;font-size:13px;">Documentos Gerais</div><div style="font-size:12px;color:var(--text3);">${gerais.filter(d=>d.entregue).length}/${gerais.length}</div></div>${gerais.map(d=>`<div class="pend-doc-row"><div class="pend-dot ${d.entregue?'ok':'pend'}"></div><div style="flex:1;">${d.nome}</div><div style="font-size:11px;color:${d.entregue?'var(--green)':'var(--red)'};">${d.entregue?'Entregue':'Pendente'}</div></div>`).join('')}</div>`;}
   mob.equipe.forEach(e=>{
     const prf=state.profissionais.find(p=>p.id===e.profId);if(!prf)return;
     const dp=(mob.documentos||[]).filter(d=>d.profId===prf.id);const all=[...gerais,...dp];
     const init=prf.nome.split(' ').slice(0,2).map(n=>n[0]).join('');
     const pend=all.filter(d=>!d.entregue).length;
-    html+=`<div class="pend-person-block"><div class="pend-person-header"><div class="pend-person-avatar">${init}</div><div style="flex:1;font-weight:600;font-size:13px;">${prf.nome} <span style="font-size:11px;font-weight:400;color:var(--text3);">${e.papel||prf.cargo}</span></div><div style="font-size:12px;color:${pend>0?'var(--red)':'var(--green)'};">${pend>0?pend+' pend\u00eancia(s)':'\u2713 Completo'}</div></div>${all.map(d=>`<div class="pend-doc-row"><div class="pend-dot ${d.entregue?'ok':'pend'}"></div><div style="flex:1;">${d.nome}${!d.profId?' <span style="font-size:10px;color:var(--accent);">[Geral]</span>':''}</div><div style="font-size:11px;color:${d.entregue?'var(--green)':'var(--red)'};">${d.entregue?'Entregue':'Pendente'}</div></div>`).join('')}</div>`;
+    html+=`<div class="pend-person-block"><div class="pend-person-header"><div class="pend-person-avatar">${init}</div><div style="flex:1;font-weight:600;font-size:13px;">${prf.nome} <span style="font-size:11px;font-weight:400;color:var(--text3);">${e.papel||prf.cargo}</span></div><div style="font-size:12px;color:${pend>0?'var(--red)':'var(--green)'};">${pend>0?pend+' pendência(s)':'✓ Completo'}</div></div>${all.map(d=>`<div class="pend-doc-row"><div class="pend-dot ${d.entregue?'ok':'pend'}"></div><div style="flex:1;">${d.nome}${!d.profId?' <span style="font-size:10px;color:var(--accent);">[Geral]</span>':''}</div><div style="font-size:11px;color:${d.entregue?'var(--green)':'var(--red)'};">${d.entregue?'Entregue':'Pendente'}</div></div>`).join('')}</div>`;
   });
-  c.innerHTML=html||'<div class="empty-state"><div class="empty-icon">\ud83d\udcc4</div><p>Sem documentos cadastrados.</p></div>';
+  c.innerHTML=html||'<div class="empty-state"><div class="empty-icon">📄</div><p>Sem documentos cadastrados.</p></div>';
 }
 
 function renderAppPassaporte(mob){
   const c=document.getElementById('app-detalhe-passaporte');
-  if(!(mob.passaporte||[]).length){c.innerHTML='<div class="empty-state"><div class="empty-icon">\ud83e\udeaa</div><p>Nenhum documento de acesso.</p></div>';return;}
+  if(!(mob.passaporte||[]).length){c.innerHTML='<div class="empty-state"><div class="empty-icon">🪪</div><p>Nenhum documento de acesso.</p></div>';return;}
   const byProf={};
   mob.passaporte.forEach(p=>{if(!byProf[p.profId])byProf[p.profId]=[];byProf[p.profId].push(p);});
   c.innerHTML=Object.entries(byProf).map(([pid,docs])=>{
     const prf=state.profissionais.find(p=>p.id===parseInt(pid));
     const init=prf?prf.nome.split(' ').slice(0,2).map(n=>n[0]).join(''):'?';
-    return`<div class="passport-block"><div class="passport-person-header"><div class="pend-person-avatar">${init}</div><div style="font-weight:600;font-size:13px;">${prf?prf.nome:'\u2014'}</div><div style="margin-left:auto;font-size:12px;color:var(--text3);">${docs.length} doc(s)</div></div>
-    ${docs.map(doc=>{const vc=validadeClass(doc.validade);return`<div class="passport-doc-row"><div style="font-size:15px;">\ud83e\udeaa</div><div style="flex:1;"><div style="font-size:13px;font-weight:500;">${doc.tipo}</div>${doc.numero?`<div style="font-size:11px;color:var(--text3);font-family:var(--mono);">N\u00b0 ${doc.numero}</div>`:''}</div><div class="passport-validade ${vc}">${doc.validade?'Val. '+formatDate(doc.validade):'Sem validade'}${vc==='venc'?' \u26a0 Vencido':vc==='warn'?' \u26a0 Em breve':''}</div><button class="team-remove" onclick="removerPassaporte(${mob.id},${doc.id})">\u00d7</button></div>`;}).join('')}
+    return`<div class="passport-block"><div class="passport-person-header"><div class="pend-person-avatar">${init}</div><div style="font-weight:600;font-size:13px;">${prf?prf.nome:'—'}</div><div style="margin-left:auto;font-size:12px;color:var(--text3);">${docs.length} doc(s)</div></div>
+    ${docs.map(doc=>{const vc=validadeClass(doc.validade);return`<div class="passport-doc-row"><div style="font-size:15px;">🪪</div><div style="flex:1;"><div style="font-size:13px;font-weight:500;">${doc.tipo}</div>${doc.numero?`<div style="font-size:11px;color:var(--text3);font-family:var(--mono);">N° ${doc.numero}</div>`:''}</div><div class="passport-validade ${vc}">${doc.validade?'Val. '+formatDate(doc.validade):'Sem validade'}${vc==='venc'?' ⚠ Vencido':vc==='warn'?' ⚠ Em breve':''}</div><button class="team-remove" onclick="removerPassaporte(${mob.id},${doc.id})">×</button></div>`;}).join('')}
     </div>`;
   }).join('');
 }
@@ -1481,11 +1424,11 @@ function appSwitchTab(tab){
   document.getElementById('app-tab-'+tab).classList.add('active');
 }
 
-// \u2500\u2500 APP: EDITAR MOB \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── APP: EDITAR MOB ───────────────────────────────
 function openModalEditarMob(){
   const mob=state.mobilizacoes.find(m=>m.id===state.currentMobId);if(!mob)return;
   state.editingMobId=mob.id;
-  document.getElementById('modal-mob-title').textContent='Editar Mobiliza\u00e7\u00e3o';
+  document.getElementById('modal-mob-title').textContent='Editar Mobilização';
   document.getElementById('mob-nome').value=mob.nome;
   document.getElementById('mob-status').value=mob.status||'cadastrado';
   document.getElementById('mob-lider').value=mob.liderContrato||'';
@@ -1504,17 +1447,17 @@ function openModalEditarMob(){
 
 
 
-// \u2500\u2500 APP: SOLICITAR INFORMA\u00c7\u00c3O \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── APP: SOLICITAR INFORMAÇÃO ─────────────────────
 function openModalSolicitarInfo(){openModal('modal-solicitar-info');document.getElementById('info-req-texto').value='';}
 function salvarInfoRequest(){
   const texto=document.getElementById('info-req-texto').value.trim();
-  if(!texto)return showToast('Descreva a pend\u00eancia.');
+  if(!texto)return showToast('Descreva a pendência.');
   const mob=state.mobilizacoes.find(m=>m.id===state.currentMobId);
   if(!mob.infoRequests)mob.infoRequests=[];
   mob.infoRequests.push({texto,data:new Date().toISOString(),respondido:false});
   mob.status='pendente-info';
   closeModal('modal-solicitar-info');
-  showToast('Solicita\u00e7\u00e3o registrada. E-mail ser\u00e1 enviado ao l\u00edder quando o backend estiver integrado.','amber');
+  showToast('Solicitação registrada. E-mail será enviado ao líder quando o backend estiver integrado.','amber');
   renderAppDetalhe(mob.id);
   renderAppPainel();
 }
@@ -1527,7 +1470,7 @@ function marcarRespondido(mobId,idx){
   showToast('Marcado como respondido.','green');
 }
 
-// \u2500\u2500 APP: DOCUMENTO \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── APP: DOCUMENTO ────────────────────────────────
 function openModalAddDoc(){
   const mob=state.mobilizacoes.find(m=>m.id===state.currentMobId);if(!mob)return;
   ['doc-nome','doc-caminho'].forEach(id=>document.getElementById(id).value='');
@@ -1559,7 +1502,7 @@ function removerDoc(mobId,idx){
   showToast('Documento removido.');
 }
 
-// \u2500\u2500 APP: PASSAPORTE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── APP: PASSAPORTE ───────────────────────────────
 function openModalAddPassaporte(){
   const mob=state.mobilizacoes.find(m=>m.id===state.currentMobId);if(!mob)return;
   ['pass-tipo','pass-numero','pass-obs'].forEach(id=>document.getElementById(id).value='');
@@ -1583,21 +1526,21 @@ function removerPassaporte(mobId,passId){
   renderAppPassaporte(mob);showToast('Removido.');
 }
 
-// \u2500\u2500 APP: GESTORES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── APP: GESTORES ─────────────────────────────────
 function openModalGestor(){['gest-nome','gest-cargo','gest-area','gest-email','gest-tel','gest-obs'].forEach(id=>document.getElementById(id).value='');openModal('modal-gestor');}
 
 function renderGestores(){
   const c=document.getElementById('gestores-list');
-  if(!state.gestores.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">\ud83d\udc64</div><p>Nenhum gestor cadastrado.</p></div>';return;}
+  if(!state.gestores.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">👤</div><p>Nenhum gestor cadastrado.</p></div>';return;}
   c.innerHTML=state.gestores.map(g=>{
     const init=g.nome.split(' ').slice(0,2).map(n=>n[0]).join('');
     return`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow);margin-bottom:12px;">
       <div style="width:44px;height:44px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;">${init}</div>
-      <div style="flex:1;"><div style="font-size:15px;font-weight:600;">${g.nome}</div><div style="font-size:12px;color:var(--text3);">${g.cargo}${g.area?' \u00b7 '+g.area:''}</div>
+      <div style="flex:1;"><div style="font-size:15px;font-weight:600;">${g.nome}</div><div style="font-size:12px;color:var(--text3);">${g.cargo}${g.area?' · '+g.area:''}</div>
         <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
-          ${g.email?`<span style="font-size:12px;background:var(--bg3);padding:3px 10px;border-radius:20px;border:1px solid var(--border);">\u2709 ${g.email}</span>`:''}
-          ${g.tel?`<span style="font-size:12px;background:var(--bg3);padding:3px 10px;border-radius:20px;border:1px solid var(--border);">\ud83d\udcf1 ${g.tel}</span>`:''}
-          ${g.obs?`<span style="font-size:12px;background:var(--bg3);padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--text3);">\ud83d\udcac ${g.obs}</span>`:''}
+          ${g.email?`<span style="font-size:12px;background:var(--bg3);padding:3px 10px;border-radius:20px;border:1px solid var(--border);">✉ ${g.email}</span>`:''}
+          ${g.tel?`<span style="font-size:12px;background:var(--bg3);padding:3px 10px;border-radius:20px;border:1px solid var(--border);">📱 ${g.tel}</span>`:''}
+          ${g.obs?`<span style="font-size:12px;background:var(--bg3);padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--text3);">💬 ${g.obs}</span>`:''}
         </div>
       </div>
       <button class="btn btn-ghost btn-sm" style="color:var(--red);" onclick="removerGestor(${g.id})">Remover</button>
@@ -1606,27 +1549,27 @@ function renderGestores(){
 }
 
 
-// \u2500\u2500 APP: CLIENTES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── APP: CLIENTES ─────────────────────────────────
 function openModalCliente(){['cli-nome','cli-cnpj','cli-contato','cli-email','cli-tel'].forEach(id=>document.getElementById(id).value='');openModal('modal-cliente');}
 
 function renderClientes(){
   const c=document.getElementById('clientes-table');
-  if(!state.clientes.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">\ud83c\udfe2</div><p>Nenhum cliente.</p></div>';return;}
-  c.innerHTML=`<table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:2px solid var(--border);">${['Empresa','CNPJ','Contato','E-mail','Telefone',''].map(h=>`<th style="text-align:left;padding:8px 12px;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">${h}</th>`).join('')}</tr></thead><tbody>${state.clientes.map(c2=>`<tr style="border-bottom:1px solid var(--border);transition:background 0.12s;" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''"><td style="padding:12px;font-weight:500;">${c2.nome}</td><td style="padding:12px;font-size:12px;font-family:var(--mono);color:var(--text2);">${c2.cnpj||'\u2014'}</td><td style="padding:12px;">${c2.contato||'\u2014'}</td><td style="padding:12px;font-size:12px;color:var(--accent);">${c2.email||'\u2014'}</td><td style="padding:12px;font-size:12px;">${c2.tel||'\u2014'}</td><td style="padding:12px;"><button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="removerCliente(${c2.id})">Remover</button></td></tr>`).join('')}</tbody></table>`;
+  if(!state.clientes.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">🏢</div><p>Nenhum cliente.</p></div>';return;}
+  c.innerHTML=`<table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:2px solid var(--border);">${['Empresa','CNPJ','Contato','E-mail','Telefone',''].map(h=>`<th style="text-align:left;padding:8px 12px;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">${h}</th>`).join('')}</tr></thead><tbody>${state.clientes.map(c2=>`<tr style="border-bottom:1px solid var(--border);transition:background 0.12s;" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''"><td style="padding:12px;font-weight:500;">${c2.nome}</td><td style="padding:12px;font-size:12px;font-family:var(--mono);color:var(--text2);">${c2.cnpj||'—'}</td><td style="padding:12px;">${c2.contato||'—'}</td><td style="padding:12px;font-size:12px;color:var(--accent);">${c2.email||'—'}</td><td style="padding:12px;font-size:12px;">${c2.tel||'—'}</td><td style="padding:12px;"><button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="removerCliente(${c2.id})">Remover</button></td></tr>`).join('')}</tbody></table>`;
 }
 
 
-// \u2500\u2500 APP: PROFISSIONAIS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── APP: PROFISSIONAIS ────────────────────────────
 function openModalProfissional(){['prf-nome','prf-cargo','prf-email','prf-matricula'].forEach(id=>document.getElementById(id).value='');document.getElementById('prf-vinculo').value='hidrobr';document.getElementById('prf-regime').value='clt';openModal('modal-profissional');}
 
 function renderProfissionais(){
   const c=document.getElementById('profissionais-table');
-  if(!state.profissionais.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">\ud83d\udc64</div><p>Nenhum profissional.</p></div>';return;}
-  c.innerHTML=`<table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:2px solid var(--border);">${['Nome','Cargo','V\u00ednculo','Regime','E-mail','Matr\u00edcula',''].map(h=>`<th style="text-align:left;padding:8px 12px;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">${h}</th>`).join('')}</tr></thead><tbody>${state.profissionais.map(p=>{const init=p.nome.split(' ').slice(0,2).map(n=>n[0]).join('');return`<tr style="border-bottom:1px solid var(--border);transition:background 0.12s;" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''"><td style="padding:12px;"><div style="display:flex;align-items:center;gap:10px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--accent-l);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">${init}</div><span style="font-weight:500;">${p.nome}</span></div></td><td style="padding:12px;font-size:12px;color:var(--text2);">${p.cargo||'\u2014'}</td><td style="padding:12px;">${vincBadge(p.vinculo)}</td><td style="padding:12px;">${regimeBadge(p.regime)}</td><td style="padding:12px;font-size:12px;color:var(--accent);">${p.email||'\u2014'}</td><td style="padding:12px;font-size:12px;font-family:var(--mono);">${p.matricula||'\u2014'}</td><td style="padding:12px;"><button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="removerProfissional(${p.id})">Remover</button></td></tr>`;}).join('')}</tbody></table>`;
+  if(!state.profissionais.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">👤</div><p>Nenhum profissional.</p></div>';return;}
+  c.innerHTML=`<table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:2px solid var(--border);">${['Nome','Cargo','Vínculo','Regime','E-mail','Matrícula',''].map(h=>`<th style="text-align:left;padding:8px 12px;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">${h}</th>`).join('')}</tr></thead><tbody>${state.profissionais.map(p=>{const init=p.nome.split(' ').slice(0,2).map(n=>n[0]).join('');return`<tr style="border-bottom:1px solid var(--border);transition:background 0.12s;" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''"><td style="padding:12px;"><div style="display:flex;align-items:center;gap:10px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--accent-l);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">${init}</div><span style="font-weight:500;">${p.nome}</span></div></td><td style="padding:12px;font-size:12px;color:var(--text2);">${p.cargo||'—'}</td><td style="padding:12px;">${vincBadge(p.vinculo)}</td><td style="padding:12px;">${regimeBadge(p.regime)}</td><td style="padding:12px;font-size:12px;color:var(--accent);">${p.email||'—'}</td><td style="padding:12px;font-size:12px;font-family:var(--mono);">${p.matricula||'—'}</td><td style="padding:12px;"><button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="removerProfissional(${p.id})">Remover</button></td></tr>`;}).join('')}</tbody></table>`;
 }
 
 
-// \u2500\u2500 REPORT SEMANAL \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── REPORT SEMANAL ────────────────────────────────
 function renderReport(){
   const hoje=new Date();
   const mobs=state.mobilizacoes;
@@ -1641,7 +1584,7 @@ function renderReport(){
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid var(--border);">
       <div style="display:flex;align-items:center;gap:12px;">
         <svg width="28" height="28" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="11" stroke="#1a6fbf" stroke-width="1.5" opacity="0.5"/><circle cx="13" cy="13" r="7" stroke="#1a6fbf" stroke-width="1.5" opacity="0.75"/><circle cx="13" cy="13" r="3" fill="#1a6fbf"/></svg>
-        <div><div style="font-size:18px;font-weight:700;letter-spacing:0.1em;color:#0d1f35;">ORION \u00b7 REPORT SEMANAL</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Gest\u00e3o de Mobiliza\u00e7\u00e3o \u00b7 HIDROBR</div></div>
+        <div><div style="font-size:18px;font-weight:700;letter-spacing:0.1em;color:#0d1f35;">ORION · REPORT SEMANAL</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Gestão de Mobilização · HIDROBR</div></div>
       </div>
       <div style="text-align:right;font-size:12px;color:var(--text3);">Gerado em<br><strong style="color:var(--text);">${hoje.toLocaleDateString('pt-BR',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</strong></div>
     </div>
@@ -1653,10 +1596,10 @@ function renderReport(){
       <div style="background:var(--green-l);border:1px solid #bbf7d0;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:700;font-family:var(--mono);color:var(--green);">${por_status.mobilizado}</div><div style="font-size:11px;color:var(--green);">Mobilizado</div></div>
     </div>
 
-    ${sla?`<div style="background:var(--accent-l);border:1px solid #bfdbfe;border-radius:10px;padding:16px 20px;margin-bottom:28px;display:flex;align-items:center;gap:16px;"><div style="font-size:32px;font-weight:700;font-family:var(--mono);color:var(--accent);">${sla}d</div><div><div style="font-size:13px;font-weight:600;color:var(--accent);">SLA M\u00e9dio de Mobiliza\u00e7\u00e3o</div><div style="font-size:12px;color:var(--text3);">Tempo m\u00e9dio da abertura at\u00e9 o status Mobilizado</div></div></div>`:''}
+    ${sla?`<div style="background:var(--accent-l);border:1px solid #bfdbfe;border-radius:10px;padding:16px 20px;margin-bottom:28px;display:flex;align-items:center;gap:16px;"><div style="font-size:32px;font-weight:700;font-family:var(--mono);color:var(--accent);">${sla}d</div><div><div style="font-size:13px;font-weight:600;color:var(--accent);">SLA Médio de Mobilização</div><div style="font-size:12px;color:var(--text3);">Tempo médio da abertura até o status Mobilizado</div></div></div>`:''}
 
     <table style="width:100%;border-collapse:collapse;margin-bottom:28px;">
-      <thead><tr style="background:var(--sidebar);color:#fff;"><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">PROJETO</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">CLIENTE</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">L\u00cdDER</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">STATUS</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">FAROL</th><th style="padding:10px 14px;text-align:right;font-size:11px;letter-spacing:0.06em;">DOCS</th><th style="padding:10px 14px;text-align:right;font-size:11px;letter-spacing:0.06em;">PRAZO</th></tr></thead>
+      <thead><tr style="background:var(--sidebar);color:#fff;"><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">PROJETO</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">CLIENTE</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">LÍDER</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">STATUS</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">FAROL</th><th style="padding:10px 14px;text-align:right;font-size:11px;letter-spacing:0.06em;">DOCS</th><th style="padding:10px 14px;text-align:right;font-size:11px;letter-spacing:0.06em;">PRAZO</th></tr></thead>
       <tbody>
         ${mobs.map((mob,i)=>{
           const cli=state.clientes.find(c=>c.id===mob.clienteId);
@@ -1664,20 +1607,20 @@ function renderReport(){
           const corHex={verde:'#16a34a',amarelo:'#d97706',vermelho:'#dc2626',cinza:'#9ca3af'}[cor];
           return`<tr style="border-bottom:1px solid var(--border);background:${i%2===0?'#fff':'var(--bg)'}">
             <td style="padding:10px 14px;font-size:13px;font-weight:500;">${mob.nome}</td>
-            <td style="padding:10px 14px;font-size:12px;color:var(--text2);">${cli?cli.nome:'\u2014'}</td>
-            <td style="padding:10px 14px;font-size:12px;color:var(--text2);">${mob.liderContrato||'\u2014'}</td>
+            <td style="padding:10px 14px;font-size:12px;color:var(--text2);">${cli?cli.nome:'—'}</td>
+            <td style="padding:10px 14px;font-size:12px;color:var(--text2);">${mob.liderContrato||'—'}</td>
             <td style="padding:10px 14px;">${statusBadgeHTML(mob.status)}</td>
-            <td style="padding:10px 14px;"><span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:${corHex};">\u2b24 ${{verde:'Em dia',amarelo:'Aten\u00e7\u00e3o',vermelho:'Cr\u00edtico',cinza:'Novo'}[cor]}</span></td>
+            <td style="padding:10px 14px;"><span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:${corHex};">⬤ ${{verde:'Em dia',amarelo:'Atenção',vermelho:'Crítico',cinza:'Novo'}[cor]}</span></td>
             <td style="padding:10px 14px;text-align:right;font-size:12px;font-family:var(--mono);">${pct}%</td>
-            <td style="padding:10px 14px;text-align:right;font-size:12px;">${mob.prazo?formatDate(mob.prazo):'\u2014'}</td>
+            <td style="padding:10px 14px;text-align:right;font-size:12px;">${mob.prazo?formatDate(mob.prazo):'—'}</td>
           </tr>`;
         }).join('')}
       </tbody>
     </table>
 
     <div style="border-top:1px solid var(--border);padding-top:16px;font-size:11px;color:var(--text3);display:flex;justify-content:space-between;">
-      <span>Orion \u2014 Sistema de Gest\u00e3o de Mobiliza\u00e7\u00e3o \u00b7 HIDROBR</span>
-      <span>Relat\u00f3rio gerado automaticamente em ${hoje.toLocaleDateString('pt-BR')}</span>
+      <span>Orion — Sistema de Gestão de Mobilização · HIDROBR</span>
+      <span>Relatório gerado automaticamente em ${hoje.toLocaleDateString('pt-BR')}</span>
     </div>
   </div>`;
 }
@@ -1687,7 +1630,7 @@ function printReport(){
   window.print();
 }
 
-// \u2500\u2500 FECHAR MODAL NO BACKDROP \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── FECHAR MODAL NO BACKDROP ──────────────────────
 
 // ── SUPABASE ──────────────────────────────────────────────────
 const SUPA_URL='https://qmemmskitfpbqqnfddyv.supabase.co';
@@ -1915,7 +1858,7 @@ document.querySelectorAll('.modal-backdrop').forEach(bd=>{
   bd.addEventListener('click',e=>{if(e.target===bd)bd.classList.remove('open');});
 });
 
-// \u2500\u2500 INIT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── INIT ──────────────────────────────────────────
 carregarDadosSupabase().then(()=>{renderLandingStatus();populateClienteSelectSol();atualizarSumarios();}).catch(e=>{console.warn("Supabase offline:",e.message);state.clientes=clientes272.map((c,i)=>{return{id:i+1,...c,contato:"",email:"",tel:""};});renderLandingStatus();});
 
 </script>
