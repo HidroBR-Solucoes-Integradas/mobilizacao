@@ -25,6 +25,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 /* ── VIEWS ── */
 .view{display:none;}
 .view.active{display:block;}
+#view-landing.active{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#0d3060 100%);overflow-y:auto;}
+#view-portal.active{display:flex;flex-direction:column;min-height:100vh;}
+#view-app.active{display:flex;min-height:100vh;}
+#view-login.active{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#0d3060 100%);}
 
 /* ══════════════════════════════════════════
    LOGIN SCREEN
@@ -347,7 +351,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 <!-- ══════════════════════════════════════
      VIEW: LANDING / SELEÇÃO
 ══════════════════════════════════════ -->
-<div class="view active" id="view-landing" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#0d3060 100%);">
+<div class="view active" id="view-landing" style="min-height:100vh;">
   <div style="text-align:center;color:#fff;padding:40px 20px;">
     <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;">
       <svg width="32" height="32" viewBox="0 0 26 26" fill="none">
@@ -397,7 +401,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
       </div>
       <div class="login-title">Acesso Restrito</div>
       <div class="login-sub">Equipe de Mobilização HIDROBR</div>
-      <input class="login-input" id="login-user" placeholder="Usuário" autocomplete="off">
+      <input class="login-input" id="login-user" type="email" placeholder="E-mail" autocomplete="off">
       <input class="login-input" id="login-pass" type="password" placeholder="Senha" onkeydown="if(event.key==='Enter')doLogin()">
       <div class="login-err" id="login-err">Usuário ou senha incorretos.</div>
       <button class="login-btn" onclick="doLogin()">Entrar</button>
@@ -1035,17 +1039,54 @@ function goPortal(){
   renderSolEquipe();
 }
 
-function doLogin(){
-  const u=document.getElementById('login-user').value.trim().toLowerCase();
-  const p=document.getElementById('login-pass').value;
-  if(CREDENTIALS[u]&&CREDENTIALS[u]===p){
-    document.getElementById('login-err').style.display='none';
-    document.getElementById('app-username').textContent=u.charAt(0).toUpperCase()+u.slice(1);
-    document.getElementById('app-avatar').textContent=u.substring(0,2).toUpperCase();
-    showView('view-app');
-    appNav('painel');
-  } else {
-    document.getElementById('login-err').style.display='block';
+async function doLogin(){
+  const email=document.getElementById('login-user').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const btn=document.querySelector('.login-btn')||document.querySelector('[onclick="doLogin()"]');
+  const err=document.getElementById('login-err');
+  if(err) err.style.display='none';
+  if(btn){ btn.textContent='Entrando...'; btn.disabled=true; }
+  try{
+    if(!email) throw new Error('Informe o e-mail.');
+    if(!pass) throw new Error('Informe a senha.');
+    // Credenciais locais (fallback)
+    const CREDS={'mobilizacao@hidrobr.com.br':'hidrobr2024','admin@hidrobr.com.br':'admin123'};
+    let logado=false, nomeUsuario='';
+    if(CREDS[email]){
+      if(CREDS[email]!==pass) throw new Error('E-mail ou senha incorretos.');
+      nomeUsuario=email.split('@')[0];
+      logado=true;
+    } else {
+      // Tentar Supabase para usuários criados no painel
+      try{
+        const{createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+        const cli=createClient(SUPA_URL,SUPA_KEY);
+        const{data,error}=await cli.auth.signInWithPassword({email,password:pass});
+        if(error) throw new Error('E-mail ou senha incorretos.');
+        nomeUsuario=data.user.user_metadata?.nome||data.user.email.split('@')[0];
+        logado=true;
+      }catch(supaErr){
+        throw new Error(supaErr.message||'E-mail ou senha incorretos.');
+      }
+    }
+    if(logado){
+      const nome=nomeUsuario;
+      const av=document.getElementById('app-avatar');
+      const un=document.getElementById('app-username');
+      if(av) av.textContent=nome.substring(0,2).toUpperCase();
+      if(un) un.textContent=nome;
+      showView('view-app');
+      if(typeof appNav==='function') appNav('mobilizacoes');
+      if(typeof carregarDadosSupabase==='function') carregarDadosSupabase().then(()=>{
+        if(typeof renderAppMobs==='function') renderAppMobs();
+        if(typeof atualizarSumarios==='function') atualizarSumarios();
+      });
+    }
+  }catch(e){
+    if(err){ err.textContent=e.message; err.style.display='block'; }
+    else alert(e.message);
+  }finally{
+    if(btn){ btn.textContent='Entrar'; btn.disabled=false; }
   }
 }
 function doLogout(){showView('view-landing');}
