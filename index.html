@@ -23,12 +23,12 @@
 body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;}
 
 /* ── VIEWS ── */
-.view{display:none;}
-.view.active{display:block;}
-#view-landing.active{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#0d3060 100%);overflow-y:auto;}
-#view-portal.active{display:flex;flex-direction:column;min-height:100vh;}
-#view-app.active{display:flex;min-height:100vh;}
-#view-login.active{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#0d3060 100%);}
+.view{display:none !important;}
+.view.active{display:block !important;}
+#view-landing.active{display:flex !important;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#0d3060 100%);overflow-y:auto;}
+#view-portal.active{display:flex !important;flex-direction:column;min-height:100vh;}
+#view-app.active{display:flex !important;min-height:100vh;}
+#view-login.active{display:flex !important;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0d1f35 0%,#1a3860 60%,#0d3060 100%);}
 
 /* ══════════════════════════════════════════
    LOGIN SCREEN
@@ -106,7 +106,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
    APP SHELL (PAINEL INTERNO)
 ══════════════════════════════════════════ */
 #view-app{display:none;}
-#view-app.active{display:flex;min-height:100vh;}
+#view-app.active{display:flex !important;min-height:100vh;}
 
 .sidebar{width:240px;background:var(--sidebar);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:50;}
 .sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,0.07);}
