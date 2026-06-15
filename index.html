@@ -455,7 +455,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
             </div>
             <div class="form-group">
               <label class="form-label">Cliente <span>*</span></label>
-              <select class="form-select" id="sol-cliente"><option value="">Selecione o cliente...</option></select>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <select class="form-select" id="sol-cliente" style="flex:1;"><option value="">Selecione o cliente...</option></select>
+                <button type="button" class="btn btn-secondary btn-sm" style="white-space:nowrap;flex-shrink:0;" onclick="abrirModalNovoClienteInline()" title="Cadastrar novo cliente">＋ Novo</button>
+              </div>
             </div>
           </div>
           <div class="form-row">
@@ -687,6 +690,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
       <div class="tab-panel active" id="app-tab-equipe">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
           <div style="font-size:13px;color:var(--text3);" id="app-equipe-count"></div>
+          <button class="btn btn-secondary btn-sm" onclick="openModalAddProfDetalhe()">＋ Adicionar Profissional</button>
         </div>
         <div class="team-list" id="app-detalhe-team-list"></div>
       </div>
@@ -752,6 +756,57 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 <!-- ══════════════════════════════════════
      MODAIS
 ══════════════════════════════════════ -->
+
+<!-- Modal: Adicionar profissional no detalhe da mobilização (gestor) -->
+<div class="modal-backdrop" id="modal-add-prof-detalhe">
+  <div class="modal wide">
+    <div class="modal-header"><span class="modal-title">Adicionar Profissional à Mobilização</span><button class="modal-close" onclick="closeModal('modal-add-prof-detalhe')">×</button></div>
+    <div class="modal-body">
+      <div id="panel-det-existente">
+        <div class="form-row full">
+          <div class="form-group">
+            <label class="form-label">Buscar profissional cadastrado</label>
+            <input class="form-input" id="det-prof-busca" placeholder="Nome ou cargo..." oninput="filtrarProfDetalhe()">
+          </div>
+        </div>
+        <div id="det-prof-lista" style="border:1px solid var(--border);border-radius:7px;max-height:200px;overflow-y:auto;margin-bottom:12px;"></div>
+        <div id="det-prof-selecionado-info" style="font-size:12px;margin-bottom:14px;min-height:18px;"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Papel no Projeto</label>
+          <input class="form-input" id="det-prof-papel" placeholder="Ex: Líder Técnico, Analista...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vínculo</label>
+          <select class="form-select" id="det-prof-vinculo">
+            <option value="hidrobr">HIDROBR</option>
+            <option value="hbr">HBR</option>
+            <option value="terceiro">Terceiro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Regime</label>
+          <select class="form-select" id="det-prof-regime">
+            <option value="clt">CLT</option>
+            <option value="pj">PJ</option>
+            <option value="socio">Sócio</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cargo / Especialidade</label>
+          <input class="form-input" id="det-prof-cargo" placeholder="Ex: Engenheiro Civil">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-prof-detalhe')">Cancelar</button>
+      <button class="btn btn-primary" onclick="addProfDetalhe()">Adicionar à Equipe</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal: Adicionar profissional na solicitação -->
 <div class="modal-backdrop" id="modal-add-prof-sol">
@@ -1409,6 +1464,7 @@ function renderAppEquipe(mob){
       <div style="flex:1;"><div style="display:flex;align-items:center;gap:6px;font-weight:500;">${prf.nome} ${vincBadge(e.vinculo||prf.vinculo)} ${regimeBadge(e.regime||prf.regime)}</div>
       <div style="font-size:11px;color:var(--text3);">${e.papel||prf.cargo}</div></div>
       <div style="font-size:11px;color:var(--text3);font-family:var(--mono);">${prf.matricula?'Mat. '+prf.matricula:''}</div>
+      <button class="team-remove" title="Remover da equipe" onclick="removerProfDetalhe(${mob.id},${e.profId})">×</button>
     </div>`;
   }).join('');
 }
@@ -1882,6 +1938,88 @@ async function salvarMobilizacao(){
   try{const db=await getSupa();await db.from('mobilizacoes').update(u).eq('id',id);}catch(e){}
   Object.assign(mob,{nome:u.nome,clienteId:u.cliente_id,liderContrato:u.lider_contrato,respCliente:u.resp_cliente,inicio:u.inicio||'',prazo:u.prazo||'',sistemaCliente:u.sistema_cliente,obs:u.obs,status:u.status});
   closeModal('modal-mob');showToast('Atualizado!','green');renderAppDetalhe(id);renderAppMobs();atualizarSumarios();renderLandingStatus();
+}
+
+// ── APP: GERENCIAR EQUIPE NO DETALHE ─────────────────────────
+let _detProfSelId = null;
+
+function openModalAddProfDetalhe(){
+  _detProfSelId = null;
+  document.getElementById('det-prof-busca').value = '';
+  document.getElementById('det-prof-papel').value = '';
+  document.getElementById('det-prof-cargo').value = '';
+  document.getElementById('det-prof-vinculo').value = 'hidrobr';
+  document.getElementById('det-prof-regime').value = 'clt';
+  document.getElementById('det-prof-selecionado-info').innerHTML = '';
+  filtrarProfDetalhe();
+  openModal('modal-add-prof-detalhe');
+}
+
+function filtrarProfDetalhe(){
+  const mob = state.mobilizacoes.find(m=>m.id===state.currentMobId);
+  const busca = (document.getElementById('det-prof-busca')?.value||'').toLowerCase();
+  const jaAdic = new Set((mob?.equipe||[]).map(e=>e.profId));
+  const lista = state.profissionais.filter(p=>!jaAdic.has(p.id)&&(!busca||p.nome.toLowerCase().includes(busca)||(p.cargo||'').toLowerCase().includes(busca)));
+  const c = document.getElementById('det-prof-lista');
+  if(!lista.length){c.innerHTML='<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">Nenhum encontrado.</div>';return;}
+  c.innerHTML = lista.map(p=>{
+    const init = p.nome.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase();
+    const sel = (_detProfSelId===p.id);
+    return '<div onclick="selecionarProfDetalhe('+p.id+')" style="display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);background:'+(sel?'var(--accent-l)':'var(--bg2)')+';">'
+      +'<div style="width:34px;height:34px;border-radius:50%;background:'+(sel?'var(--accent)':'var(--accent-l)')+';color:'+(sel?'#fff':'var(--accent)')+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">'+init+'</div>'
+      +'<div><div style="font-size:13px;font-weight:600;color:var(--text);">'+p.nome+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);">'+(p.cargo||'—')+' · '+(p.vinculo||'').toUpperCase()+'</div></div>'
+      +(sel?'<span style="color:var(--accent);font-size:16px;margin-left:auto;">✓</span>':'')
+      +'</div>';
+  }).join('');
+}
+
+function selecionarProfDetalhe(profId){
+  _detProfSelId = profId;
+  const prf = state.profissionais.find(p=>p.id===profId);
+  const info = document.getElementById('det-prof-selecionado-info');
+  if(info&&prf){
+    info.innerHTML='<span style="color:var(--accent);font-weight:600;">✓ '+prf.nome+'</span>';
+    document.getElementById('det-prof-cargo').value = prf.cargo||'';
+    document.getElementById('det-prof-vinculo').value = prf.vinculo||'hidrobr';
+    document.getElementById('det-prof-regime').value = prf.regime||'clt';
+  }
+  filtrarProfDetalhe();
+}
+
+async function addProfDetalhe(){
+  if(!_detProfSelId) return showToast('Selecione um profissional da lista.');
+  const mob = state.mobilizacoes.find(m=>m.id===state.currentMobId);
+  if(!mob) return;
+  if(mob.equipe.find(e=>e.profId===_detProfSelId)) return showToast('Profissional já está na equipe.');
+  const papel = document.getElementById('det-prof-papel').value.trim();
+  const vinculo = document.getElementById('det-prof-vinculo').value;
+  const regime = document.getElementById('det-prof-regime').value;
+  const cargo = document.getElementById('det-prof-cargo').value.trim();
+  const novoItem = {profId:_detProfSelId, papel, vinculo, regime, cargo};
+  mob.equipe.push(novoItem);
+  try{
+    const db = await getSupa();
+    await db.from('mobilizacoes').update({equipe:mob.equipe}).eq('id',mob.id);
+  }catch(e){}
+  closeModal('modal-add-prof-detalhe');
+  showToast('Profissional adicionado à equipe!','green');
+  renderAppEquipe(mob);
+  document.getElementById('app-equipe-count').textContent=`${mob.equipe.length} profissional(is) na equipe`;
+}
+
+async function removerProfDetalhe(mobId, profId){
+  if(!confirm('Remover este profissional da equipe?')) return;
+  const mob = state.mobilizacoes.find(m=>m.id===mobId);
+  if(!mob) return;
+  mob.equipe = mob.equipe.filter(e=>e.profId!==profId);
+  try{
+    const db = await getSupa();
+    await db.from('mobilizacoes').update({equipe:mob.equipe}).eq('id',mob.id);
+  }catch(e){}
+  showToast('Profissional removido da equipe.');
+  renderAppEquipe(mob);
+  document.getElementById('app-equipe-count').textContent=`${mob.equipe.length} profissional(is) na equipe`;
 }
 
 // ── BIND SOL LISTENERS ────────────────────────────────────────
