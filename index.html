@@ -333,8 +333,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
   #report-area { position: fixed; top: 0; left: 0; width: 100%; }
   .no-print { display: none !important; }
 }
-#report-area { display: none; }
-#report-area.visible { display: block; }
+#report-area { display: block; }
 
 /* TOAST */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:12px 18px;border-radius:8px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,0.25);z-index:999;opacity:0;transform:translateY(8px);transition:all 0.25s;pointer-events:none;max-width:340px;}
@@ -811,46 +810,121 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 <!-- Modal: Adicionar profissional na solicitação -->
 <div class="modal-backdrop" id="modal-add-prof-sol">
   <div class="modal wide">
-    <div class="modal-header"><span class="modal-title">Adicionar Profissional à Solicitação</span><button class="modal-close" onclick="closeModal('modal-add-prof-sol')">×</button></div>
+    <div class="modal-header">
+      <span class="modal-title">Adicionar Profissional à Solicitação</span>
+      <button class="modal-close" onclick="closeModal('modal-add-prof-sol')">×</button>
+    </div>
     <div class="modal-body">
-      <div class="form-row full">
-        <div class="form-group">
-          <label class="form-label">Profissional <span>*</span></label>
-          <select class="form-select" id="sol-prof-select"><option value="">Selecione ou adicione novo...</option></select>
+
+      <!-- Abas -->
+      <div style="display:flex;gap:6px;margin-bottom:20px;">
+        <button id="tab-sol-existente" onclick="solProfTab('existente')"
+          style="flex:1;padding:9px;border-radius:7px;border:none;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;background:var(--accent);color:#fff;">
+          🔍 Selecionar da lista
+        </button>
+        <button id="tab-sol-novo" onclick="solProfTab('novo')"
+          style="flex:1;padding:9px;border-radius:7px;border:none;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;background:var(--bg3);color:var(--text2);">
+          ＋ Cadastrar novo profissional
+        </button>
+      </div>
+
+      <!-- Painel: Existente -->
+      <div id="panel-sol-existente">
+        <div class="form-row full" style="margin-bottom:10px;">
+          <div class="form-group">
+            <label class="form-label">Buscar por nome ou cargo</label>
+            <input class="form-input" id="sol-prof-busca" placeholder="Digite para filtrar..." oninput="filtrarProfExistentes()">
+          </div>
+        </div>
+        <div id="sol-prof-lista" style="border:1px solid var(--border);border-radius:7px;max-height:200px;overflow-y:auto;margin-bottom:12px;"></div>
+        <div id="sol-prof-selecionado-info" style="font-size:12px;margin-bottom:14px;min-height:18px;"></div>
+        <div style="border-top:1px solid var(--border);padding-top:16px;">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Papel no Projeto</label>
+              <input class="form-input" id="sol-prof-papel" placeholder="Ex: Líder Técnico, Analista...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Vínculo</label>
+              <select class="form-select" id="sol-prof-vinculo">
+                <option value="hidrobr">HIDROBR</option>
+                <option value="hbr">HBR</option>
+                <option value="terceiro">Terceiro</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Regime</label>
+              <select class="form-select" id="sol-prof-regime">
+                <option value="clt">CLT</option>
+                <option value="pj">PJ</option>
+                <option value="socio">Sócio</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cargo / Especialidade</label>
+              <input class="form-input" id="sol-prof-cargo" placeholder="Preenchido ao selecionar">
+            </div>
+          </div>
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Papel no Projeto</label>
-          <input class="form-input" id="sol-prof-papel" placeholder="Ex: Líder Técnico, Analista...">
+
+      <!-- Painel: Novo profissional -->
+      <div id="panel-sol-novo" style="display:none;">
+        <div style="background:var(--accent-l);border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--accent);">
+          ℹ Os dados serão salvos no cadastro de profissionais e o profissional será adicionado à solicitação automaticamente.
         </div>
-        <div class="form-group">
-          <label class="form-label">Vínculo</label>
-          <select class="form-select" id="sol-prof-vinculo">
-            <option value="hidrobr">HIDROBR</option>
-            <option value="hbr">HBR</option>
-            <option value="terceiro">Terceiro</option>
-          </select>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nome Completo <span>*</span></label>
+            <input class="form-input" id="novo-prof-nome" placeholder="Nome completo">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cargo / Especialidade <span>*</span></label>
+            <input class="form-input" id="novo-prof-cargo" placeholder="Ex: Engenheiro Civil">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">E-mail <span>*</span></label>
+            <input class="form-input" id="novo-prof-email" type="email" placeholder="email@empresa.com.br">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Matrícula</label>
+            <input class="form-input" id="novo-prof-matricula" placeholder="00000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Vínculo <span>*</span></label>
+            <select class="form-select" id="novo-prof-vinculo">
+              <option value="hidrobr">HIDROBR</option>
+              <option value="hbr">HBR</option>
+              <option value="terceiro">Terceiro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Regime <span>*</span></label>
+            <select class="form-select" id="novo-prof-regime">
+              <option value="clt">CLT</option>
+              <option value="pj">PJ</option>
+              <option value="socio">Sócio</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="form-group">
+            <label class="form-label">Papel no Projeto</label>
+            <input class="form-input" id="novo-prof-papel" placeholder="Ex: Líder Técnico, Analista...">
+          </div>
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Regime</label>
-          <select class="form-select" id="sol-prof-regime">
-            <option value="clt">CLT</option>
-            <option value="pj">PJ</option>
-            <option value="socio">Sócio</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Cargo / Especialidade</label>
-          <input class="form-input" id="sol-prof-cargo" placeholder="Ex: Engenheiro Civil">
-        </div>
-      </div>
+
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-add-prof-sol')">Cancelar</button>
-      <button class="btn btn-primary" onclick="addProfSolicitacao()">Adicionar</button>
+      <button class="btn btn-primary" id="btn-confirmar-prof-sol" onclick="addProfSolicitacao()">Adicionar à Solicitação</button>
     </div>
   </div>
 </div>
@@ -1166,45 +1240,89 @@ document.getElementById('sol-tem-sistema').addEventListener('change',function(){
   document.getElementById('sol-sistema-wrap').style.display=this.value==='sim'?'':'none';
 });
 
+// ── PORTAL: MODAL ADD PROF (abas existente / novo) ───────────
+let _solProfTab = 'existente';
+let _solProfSelId = null;
+
+function solProfTab(aba){
+  _solProfTab = aba;
+  const isEx = aba === 'existente';
+  document.getElementById('panel-sol-existente').style.display = isEx ? '' : 'none';
+  document.getElementById('panel-sol-novo').style.display      = isEx ? 'none' : '';
+  document.getElementById('tab-sol-existente').style.background = isEx ? 'var(--accent)' : 'var(--bg3)';
+  document.getElementById('tab-sol-existente').style.color      = isEx ? '#fff' : 'var(--text2)';
+  document.getElementById('tab-sol-novo').style.background      = isEx ? 'var(--bg3)' : 'var(--accent)';
+  document.getElementById('tab-sol-novo').style.color           = isEx ? 'var(--text2)' : '#fff';
+}
+
 function openModalAddProfSol(){
-  const sel=document.getElementById('sol-prof-select');
-  sel.innerHTML='<option value="">Selecione profissional existente...</option>';
-  state.profissionais.filter(p=>!state.solEquipe.find(e=>e.profId===p.id)).forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=`${p.nome} — ${p.cargo}`;sel.appendChild(o);});
-  ['sol-prof-papel','sol-prof-cargo'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('sol-prof-vinculo').value='hidrobr';
-  document.getElementById('sol-prof-regime').value='clt';
+  _solProfSelId = null;
+  solProfTab('existente');
+  document.getElementById('sol-prof-busca').value = '';
+  document.getElementById('sol-prof-papel').value = '';
+  document.getElementById('sol-prof-cargo').value = '';
+  document.getElementById('sol-prof-vinculo').value = 'hidrobr';
+  document.getElementById('sol-prof-regime').value = 'clt';
+  document.getElementById('sol-prof-selecionado-info').innerHTML = '';
+  // limpar campos novo
+  ['novo-prof-nome','novo-prof-cargo','novo-prof-email','novo-prof-matricula','novo-prof-papel'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('novo-prof-vinculo').value = 'hidrobr';
+  document.getElementById('novo-prof-regime').value  = 'clt';
+  filtrarProfExistentes();
   openModal('modal-add-prof-sol');
 }
 
-document.getElementById('sol-prof-select').addEventListener('change',function(){
-  const prf=state.profissionais.find(p=>p.id===parseInt(this.value));
-  if(!prf)return;
-  document.getElementById('sol-prof-cargo').value=prf.cargo||'';
-  document.getElementById('sol-prof-vinculo').value=prf.vinculo||'hidrobr';
-  document.getElementById('sol-prof-regime').value=prf.regime||'clt';
-});
-
-function addProfSolicitacao(){
-  const profIdVal=document.getElementById('sol-prof-select').value;
-  const papel=document.getElementById('sol-prof-papel').value.trim();
-  const vinculo=document.getElementById('sol-prof-vinculo').value;
-  const regime=document.getElementById('sol-prof-regime').value;
-  const cargo=document.getElementById('sol-prof-cargo').value.trim();
-
-  let profId=null;
-  if(profIdVal){
-    profId=parseInt(profIdVal);
+async function addProfSolicitacao(){
+  if(_solProfTab === 'existente'){
+    // ── aba existente ──
+    if(!_solProfSelId) return showToast('Selecione um profissional da lista.');
+    if(state.solEquipe.find(e=>e.profId===_solProfSelId)) return showToast('Profissional já foi adicionado.');
+    const papel   = document.getElementById('sol-prof-papel').value.trim();
+    const vinculo = document.getElementById('sol-prof-vinculo').value;
+    const regime  = document.getElementById('sol-prof-regime').value;
+    const cargo   = document.getElementById('sol-prof-cargo').value.trim();
+    state.solEquipe.push({profId:_solProfSelId, papel, vinculo, regime, cargo});
+    closeModal('modal-add-prof-sol');
+    renderSolEquipe();
   } else {
-    // Criar profissional temporário se não selecionado mas cargo preenchido
-    if(!cargo){return showToast('Selecione ou informe o cargo do profissional.');}
-    const newP={id:prfIdCounter++,nome:'Profissional '+prfIdCounter,cargo,email:'',matricula:'',vinculo,regime};
-    state.profissionais.push(newP);
-    profId=newP.id;
+    // ── aba novo ──
+    const nome     = document.getElementById('novo-prof-nome').value.trim();
+    const cargo    = document.getElementById('novo-prof-cargo').value.trim();
+    const email    = document.getElementById('novo-prof-email').value.trim();
+    const matricula= document.getElementById('novo-prof-matricula').value.trim();
+    const vinculo  = document.getElementById('novo-prof-vinculo').value;
+    const regime   = document.getElementById('novo-prof-regime').value;
+    const papel    = document.getElementById('novo-prof-papel').value.trim();
+
+    if(!nome)  return showToast('Informe o nome completo do profissional.');
+    if(!cargo) return showToast('Informe o cargo ou especialidade.');
+    if(!email) return showToast('Informe o e-mail do profissional.');
+
+    const btn = document.getElementById('btn-confirmar-prof-sol');
+    btn.textContent = 'Salvando...'; btn.disabled = true;
+
+    const payload = {nome, cargo, email, matricula, vinculo, regime};
+    let newProf;
+    try {
+      const db = await getSupa();
+      const {data, error} = await db.from('profissionais').insert(payload).select().single();
+      if(error) throw error;
+      newProf = s2p(data);
+    } catch(e) {
+      newProf = {id: prfIdCounter++, ...payload};
+    }
+    state.profissionais.push(newProf);
+    state.profissionais.sort((a,b)=>a.nome.localeCompare(b.nome));
+    state.solEquipe.push({profId: newProf.id, papel, vinculo, regime, cargo});
+    btn.textContent = 'Adicionar à Solicitação'; btn.disabled = false;
+    closeModal('modal-add-prof-sol');
+    showToast('Profissional cadastrado e adicionado!','green');
+    renderSolEquipe();
   }
-  state.solEquipe.push({profId,papel,vinculo,regime,cargo:cargo||state.profissionais.find(p=>p.id===profId)?.cargo||''});
-  closeModal('modal-add-prof-sol');
-  renderSolEquipe();
 }
+
 
 function renderSolEquipe(){
   const c=document.getElementById('sol-equipe-list');
@@ -1698,7 +1816,7 @@ function renderReport(){
     <table style="width:100%;border-collapse:collapse;margin-bottom:28px;">
       <thead><tr style="background:var(--sidebar);color:#fff;"><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">PROJETO</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">CLIENTE</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">LÍDER</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">STATUS</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">FAROL</th><th style="padding:10px 14px;text-align:right;font-size:11px;letter-spacing:0.06em;">DOCS</th><th style="padding:10px 14px;text-align:right;font-size:11px;letter-spacing:0.06em;">PRAZO</th></tr></thead>
       <tbody>
-        ${mobs.map((mob,i)=>{
+        ${mobs.length ? mobs.map((mob,i)=>{
           const cli=state.clientes.find(c=>c.id===mob.clienteId);
           const cor=calcFarol(mob);const pct=progressPct(mob);
           const corHex={verde:'#16a34a',amarelo:'#d97706',vermelho:'#dc2626',cinza:'#9ca3af'}[cor];
@@ -1711,7 +1829,7 @@ function renderReport(){
             <td style="padding:10px 14px;text-align:right;font-size:12px;font-family:var(--mono);">${pct}%</td>
             <td style="padding:10px 14px;text-align:right;font-size:12px;">${mob.prazo?formatDate(mob.prazo):'—'}</td>
           </tr>`;
-        }).join('')}
+        }).join('') : '<tr><td colspan="7" style="padding:24px;text-align:center;color:var(--text3);font-size:13px;">Nenhuma mobilização cadastrada.</td></tr>'}
       </tbody>
     </table>
 
@@ -1842,31 +1960,20 @@ function renderLandingStatus(){
   }).join('');
 }
 
-// ── ABAS PROFISSIONAL NA SOLICITAÇÃO ─────────────────────────
-let _solProfTab='existente',_solProfSelId=null;
-function switchProfTab(aba){
-  _solProfTab=aba;_solProfSelId=null;
-  const isEx=aba==='existente';
-  document.getElementById('panel-prof-existente').style.display=isEx?'':'none';
-  document.getElementById('panel-prof-novo').style.display=isEx?'none':'';
-  document.getElementById('tab-prof-existente').style.background=isEx?'var(--accent)':'var(--bg3)';
-  document.getElementById('tab-prof-existente').style.color=isEx?'#fff':'var(--text2)';
-  document.getElementById('tab-prof-novo').style.background=isEx?'var(--bg3)':'var(--accent)';
-  document.getElementById('tab-prof-novo').style.color=isEx?'var(--text2)':'#fff';
-}
+// ── BUSCA / SELEÇÃO DE PROFISSIONAL EXISTENTE (portal) ───────
 function filtrarProfExistentes(){
   const busca=(document.getElementById('sol-prof-busca')?.value||'').toLowerCase();
   const jaAdic=new Set(state.solEquipe.map(e=>e.profId));
   const lista=state.profissionais.filter(p=>!jaAdic.has(p.id)&&(!busca||p.nome.toLowerCase().includes(busca)||(p.cargo||'').toLowerCase().includes(busca)));
   const c=document.getElementById('sol-prof-lista');
-  if(!lista.length){c.innerHTML='<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">Nenhum encontrado.</div>';return;}
+  if(!lista.length){c.innerHTML='<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">Nenhum profissional encontrado.</div>';return;}
   c.innerHTML=lista.map(p=>{
     const init=p.nome.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase();
     const sel=(_solProfSelId===p.id);
     return '<div onclick="selecionarProfExistente('+p.id+')" style="display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);background:'+(sel?'var(--accent-l)':'var(--bg2)')+';">'
       +'<div style="width:34px;height:34px;border-radius:50%;background:'+(sel?'var(--accent)':'var(--accent-l)')+';color:'+(sel?'#fff':'var(--accent)')+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">'+init+'</div>'
-      +'<div><div style="font-size:13px;font-weight:600;color:var(--text);">'+p.nome+'</div>'
-      +'<div style="font-size:11px;color:var(--text3);">'+(p.cargo||'—')+' · '+(p.vinculo||'').toUpperCase()+'</div></div>'
+      +'<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--text);">'+p.nome+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);">'+(p.cargo||'—')+' · '+(p.vinculo||'').toUpperCase()+' · '+(p.email||'—')+'</div></div>'
       +(sel?'<span style="color:var(--accent);font-size:16px;margin-left:auto;">✓</span>':'')
       +'</div>';
   }).join('');
@@ -1875,7 +1982,12 @@ function selecionarProfExistente(profId){
   _solProfSelId=profId;
   const prf=state.profissionais.find(p=>p.id===profId);
   const info=document.getElementById('sol-prof-selecionado-info');
-  if(info&&prf)info.innerHTML='<span style="color:var(--accent);font-weight:600;">✓ '+prf.nome+'</span>';
+  if(info&&prf){
+    info.innerHTML='<span style="color:var(--accent);font-weight:600;">✓ '+prf.nome+' selecionado</span>';
+    document.getElementById('sol-prof-cargo').value=prf.cargo||'';
+    document.getElementById('sol-prof-vinculo').value=prf.vinculo||'hidrobr';
+    document.getElementById('sol-prof-regime').value=prf.regime||'clt';
+  }
   filtrarProfExistentes();
 }
 function abrirModalNovoClienteInline(){
