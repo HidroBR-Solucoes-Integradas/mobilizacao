@@ -1864,7 +1864,7 @@ async function carregarDadosSupabase(){
   try{
     const db=await getSupa();
     const[rC,rP,rG,rM]=await Promise.all([
-      db.from('clientes').select('*').order('nome'),
+      db.from('clientes_mob').select('*').order('nome'),
       db.from('profissionais').select('*').order('nome'),
       db.from('gestores').select('*').order('nome'),
       db.from('mobilizacoes').select('*').order('created_at',{ascending:false})
@@ -2007,12 +2007,12 @@ function abrirModalNovoClienteInline(){
 async function salvarCliente(){
   const nome=document.getElementById('cli-nome').value.trim();if(!nome)return showToast('Informe o nome da empresa.');
   const p={nome,cnpj:document.getElementById('cli-cnpj').value.trim(),contato:document.getElementById('cli-contato').value.trim(),email:document.getElementById('cli-email').value.trim()};
-  try{const db=await getSupa();const{data,error}=await db.from('clientes').insert(p).select().single();if(error)throw error;state.clientes.push(s2c(data));state.clientes.sort((a,b)=>a.nome.localeCompare(b.nome));}
+  try{const db=await getSupa();const{data,error}=await db.from('clientes_mob').insert(p).select().single();if(error)throw error;state.clientes.push(s2c(data));state.clientes.sort((a,b)=>a.nome.localeCompare(b.nome));}
   catch(e){state.clientes.push({id:'tmp_'+Date.now(),...p});}
   closeModal('modal-cliente');showToast('Cliente salvo!','green');renderClientes();
   if(window._clienteCallbackAfterSave){window._clienteCallbackAfterSave();window._clienteCallbackAfterSave=null;}
 }
-async function removerCliente(id){if(!confirm('Remover este cliente?'))return;try{const db=await getSupa();await db.from('clientes').delete().eq('id',id);}catch(e){}state.clientes=state.clientes.filter(c=>c.id!==id);renderClientes();showToast('Cliente removido.');}
+async function removerCliente(id){if(!confirm('Remover este cliente?'))return;try{const db=await getSupa();await db.from('clientes_mob').delete().eq('id',id);}catch(e){}state.clientes=state.clientes.filter(c=>c.id!==id);renderClientes();showToast('Cliente removido.');}
 async function salvarGestor(){
   const nome=document.getElementById('gest-nome').value.trim();if(!nome)return showToast('Informe o nome.');
   const p={nome,cargo:document.getElementById('gest-cargo').value.trim(),email:document.getElementById('gest-email').value.trim(),tel:document.getElementById('gest-tel').value.trim()};
