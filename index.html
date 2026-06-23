@@ -2638,6 +2638,7 @@ async function confirmarAddProfPortal() {
   const mob = state.mobilizacoes.find(m => m.id === _portalAddMobId);
   if (!mob) return;
   const btn = document.getElementById('btn-confirmar-add-portal');
+  const cli = state.clientes.find(c => c.id === mob.clienteId);
 
   if (_portalProfTab === 'existente') {
     if (!_portalProfSelId) return showToast('Selecione um profissional da lista.');
@@ -2651,6 +2652,23 @@ async function confirmarAddProfPortal() {
       const db = await getSupa();
       await db.from('mobilizacoes').update({ equipe: mob.equipe }).eq('id', mob.id);
     } catch(e) {}
+    const prf = state.profissionais.find(p => p.id === _portalProfSelId);
+    gerarNotificacao({
+      tipo: 'add_prof', icone: '👤',
+      assunto: 'Profissional adicionado: ' + (prf ? prf.nome : '—') + ' — ' + mob.nome,
+      de: (mob.liderContrato || 'Líder de Contrato') + ' <lider@hidrobr.com.br>',
+      para: 'Equipe de Mobilização <mobilizacao@hidrobr.com.br>',
+      corpo: '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;width:160px;">Profissional</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + (prf ? prf.nome : '—') + '</td></tr>'
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Cargo</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + (cargo || (prf ? prf.cargo : '—')) + '</td></tr>'
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Papel no Projeto</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + (papel || '—') + '</td></tr>'
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Vínculo</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + vincLabel(vinculo) + ' · ' + regime.toUpperCase() + '</td></tr>'
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Mobilização</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + mob.nome + '</td></tr>'
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Cliente</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + (cli ? cli.nome : '—') + '</td></tr>'
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Líder de Contrato</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + (mob.liderContrato || '—') + '</td></tr>'
+        + '</table>',
+      mobId: mob.id,
+    });
     closeModal('modal-add-prof-mob-portal');
     showToast('Profissional adicionado à mobilização!', 'green');
     renderPortalMinhas();
@@ -2683,6 +2701,24 @@ async function confirmarAddProfPortal() {
       const db = await getSupa();
       await db.from('mobilizacoes').update({ equipe: mob.equipe }).eq('id', mob.id);
     } catch(e) {}
+    gerarNotificacao({
+      tipo: 'add_prof', icone: '👤',
+      assunto: 'Novo profissional cadastrado e adicionado: ' + nome + ' — ' + mob.nome,
+      de: (mob.liderContrato || 'Líder de Contrato') + ' <lider@hidrobr.com.br>',
+      para: 'Equipe de Mobilização <mobilizacao@hidrobr.com.br>',
+      corpo: '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;width:160px;">Profissional</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + nome + ' <span style="font-size:10px;background:#dcfce7;color:#16a34a;padding:1px 7px;border-radius:10px;font-weight:600;">Novo cadastro</span></td></tr>'
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Cargo</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + cargo + '</td></tr>'
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">E-mail</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + email + '</td></tr>'
+        + (matricula ? '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Matrícula</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + matricula + '</td></tr>' : '')
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Papel no Projeto</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + (papel || '—') + '</td></tr>'
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Vínculo</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + vincLabel(vinculo) + ' · ' + regime.toUpperCase() + '</td></tr>'
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Mobilização</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + mob.nome + '</td></tr>'
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Cliente</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + (cli ? cli.nome : '—') + '</td></tr>'
+        + '<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Líder de Contrato</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">' + (mob.liderContrato || '—') + '</td></tr>'
+        + '</table>',
+      mobId: mob.id,
+    });
     btn.textContent = 'Adicionar à Mobilização'; btn.disabled = false;
     closeModal('modal-add-prof-mob-portal');
     showToast('Profissional cadastrado e adicionado!', 'green');
@@ -2786,6 +2822,7 @@ function emailBodyHTML(n, dtStr){
   const tipos = {
     nova_mob:    'Nova Solicitação de Mobilização',
     status_prof: 'Atualização de Status — Profissional',
+    add_prof:    'Inclusão de Profissional',
     geral:       'Notificação do Sistema',
   };
   const labelTipo = tipos[n.tipo] || 'Notificação do Sistema';
@@ -2793,6 +2830,7 @@ function emailBodyHTML(n, dtStr){
   const saudacoes = {
     nova_mob:    'Prezada Equipe de Mobilização,',
     status_prof: 'Prezado(a) Líder de Contrato,',
+    add_prof:    'Prezada Equipe de Mobilização,',
     geral:       'Prezado(a),',
   };
   const saudacao = saudacoes[n.tipo] || 'Prezado(a),';
@@ -2800,6 +2838,7 @@ function emailBodyHTML(n, dtStr){
   const intros = {
     nova_mob:    'Uma nova solicitação de mobilização foi registrada no sistema Orion e requer a sua atenção. Por favor, verifique os detalhes abaixo e dê início ao processo de mobilização conforme os prazos estabelecidos.',
     status_prof: 'Informamos que houve uma atualização no status de mobilização de um profissional vinculado ao seu contrato. Acompanhe o andamento pelo sistema Orion sempre que necessário.',
+    add_prof:    'Um novo profissional foi incluído em uma mobilização existente pelo líder de contrato. Verifique os dados abaixo e providencie o processo de mobilização para este profissional.',
     geral:       'O sistema Orion gerou uma notificação automática relacionada à gestão de mobilização. Verifique as informações abaixo.',
   };
   const intro = intros[n.tipo] || '';
@@ -2807,6 +2846,7 @@ function emailBodyHTML(n, dtStr){
   const encerramentos = {
     nova_mob:    'Após análise, atualize o status da mobilização no sistema conforme o andamento do processo. Em caso de dúvidas, utilize a funcionalidade Solicitar Informação diretamente no painel.',
     status_prof: 'Caso tenha dúvidas sobre esta atualização ou necessite de alguma informação adicional, entre em contato com a equipe de mobilização pelo sistema.',
+    add_prof:    'Acesse a mobilização no sistema para atualizar o status deste profissional e acompanhar o andamento da sua documentação.',
     geral:       'Para mais detalhes, acesse o sistema Orion.',
   };
   const encerramento = encerramentos[n.tipo] || '';
