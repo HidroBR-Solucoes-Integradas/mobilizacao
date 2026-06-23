@@ -2476,24 +2476,49 @@ async function salvarGestor(){
 }
 async function removerGestor(id){if(!confirm('Remover?'))return;try{const db=await getSupa();await db.from('gestores').delete().eq('id',id);}catch(e){}state.gestores=state.gestores.filter(g=>g.id!==id);renderGestores();showToast('Gestor removido.');}
 async function salvarProfissional(){
-  const nome=document.getElementById('prf-nome').value.trim();if(!nome)return showToast('Informe o nome.');
-  const p={nome,cargo:document.getElementById('prf-cargo').value.trim(),email:document.getElementById('prf-email').value.trim(),matricula:document.getElementById('prf-matricula').value.trim()||null,vinculo:document.getElementById('prf-vinculo').value,regime:document.getElementById('prf-regime').value};
+  const nome=document.getElementById('prf-nome').value.trim();
+  if(!nome)return showToast('Informe o nome.');
+  const matriculaRaw=document.getElementById('prf-matricula').value.trim();
+  const p={
+    nome,
+    cargo:document.getElementById('prf-cargo').value.trim(),
+    email:document.getElementById('prf-email').value.trim()||null,
+    matricula:matriculaRaw||null,
+    vinculo:document.getElementById('prf-vinculo').value,
+    regime:document.getElementById('prf-regime').value
+  };
+
+  let salvoNoBanco=false;
   try{
     const db=await getSupa();
     const{data,error}=await db.from('profissionais').insert(p).select().single();
-    if(error)throw error;
-    state.profissionais.push(s2p(data));
-    // Recarregar lista completa do banco para garantir sincronia
-    const{data:lista,error:errL}=await db.from('profissionais').select('*').order('nome');
-    if(!errL&&lista) state.profissionais=lista.map(s2p);
+    if(error){
+      // Mostrar erro real no console e no toast para diagnóstico
+      console.error('Erro Supabase ao salvar profissional:',error);
+      showToast('Banco: '+error.message,'');
+    } else {
+      state.profissionais.push(s2p(data));
+      salvoNoBanco=true;
+      // Recarregar lista completa
+      const{data:lista}=await db.from('profissionais').select('*').order('nome');
+      if(lista) state.profissionais=lista.map(s2p);
+    }
   }catch(e){
-    // Fallback local: adiciona ao state sem depender do banco
-    const novoLocal={id:prfIdCounter++,...p,matricula:p.matricula||''};
-    state.profissionais.push(novoLocal);
-    state.profissionais.sort((a,b)=>a.nome.localeCompare(b.nome));
-    console.warn('Profissional salvo apenas localmente:',e.message);
+    console.error('Exceção ao salvar profissional:',e);
   }
-  closeModal('modal-profissional');showToast('Profissional salvo!','green');renderProfissionais();
+
+  // Independente do banco — garante que aparece na sessão atual
+  if(!salvoNoBanco){
+    const jaExiste=state.profissionais.find(x=>x.nome===p.nome&&x.email===p.email);
+    if(!jaExiste){
+      state.profissionais.push({id:'local_'+Date.now(),...p,matricula:p.matricula||''});
+      state.profissionais.sort((a,b)=>a.nome.localeCompare(b.nome));
+    }
+  }
+
+  closeModal('modal-profissional');
+  showToast(salvoNoBanco?'Profissional salvo!':'Profissional salvo localmente (verifique o console).', salvoNoBanco?'green':'');
+  renderProfissionais();
 }
 async function removerProfissional(id){if(!confirm('Remover?'))return;try{const db=await getSupa();await db.from('profissionais').delete().eq('id',id);}catch(e){}state.profissionais=state.profissionais.filter(p=>p.id!==id);renderProfissionais();showToast('Profissional removido.');}
 async function enviarSolicitacao(){
