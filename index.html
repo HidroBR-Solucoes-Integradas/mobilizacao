@@ -2479,11 +2479,23 @@ async function salvarProfissional(){
   const nome=document.getElementById('prf-nome').value.trim();
   if(!nome)return showToast('Informe o nome.');
   const matriculaRaw=document.getElementById('prf-matricula').value.trim();
+
+  // Gerar matrícula automática EXTxxx quando não informada
+  let matricula = matriculaRaw;
+  if(!matricula){
+    const nums = state.profissionais
+      .map(p => p.matricula)
+      .filter(m => m && m.startsWith('EXT'))
+      .map(m => parseInt(m.replace('EXT',''))||0);
+    const proximo = nums.length ? Math.max(...nums) + 1 : 1;
+    matricula = 'EXT' + String(proximo).padStart(3,'0');
+  }
+
   const p={
     nome,
     cargo:document.getElementById('prf-cargo').value.trim(),
     email:document.getElementById('prf-email').value.trim()||null,
-    matricula:matriculaRaw||null,
+    matricula,
     vinculo:document.getElementById('prf-vinculo').value,
     regime:document.getElementById('prf-regime').value
   };
@@ -2493,13 +2505,11 @@ async function salvarProfissional(){
     const db=await getSupa();
     const{data,error}=await db.from('profissionais').insert(p).select().single();
     if(error){
-      // Mostrar erro real no console e no toast para diagnóstico
       console.error('Erro Supabase ao salvar profissional:',error);
       showToast('Banco: '+error.message,'');
     } else {
       state.profissionais.push(s2p(data));
       salvoNoBanco=true;
-      // Recarregar lista completa
       const{data:lista}=await db.from('profissionais').select('*').order('nome');
       if(lista) state.profissionais=lista.map(s2p);
     }
@@ -2507,17 +2517,16 @@ async function salvarProfissional(){
     console.error('Exceção ao salvar profissional:',e);
   }
 
-  // Independente do banco — garante que aparece na sessão atual
   if(!salvoNoBanco){
-    const jaExiste=state.profissionais.find(x=>x.nome===p.nome&&x.email===p.email);
+    const jaExiste=state.profissionais.find(x=>x.nome===p.nome&&x.matricula===p.matricula);
     if(!jaExiste){
-      state.profissionais.push({id:'local_'+Date.now(),...p,matricula:p.matricula||''});
+      state.profissionais.push({id:'local_'+Date.now(),...p});
       state.profissionais.sort((a,b)=>a.nome.localeCompare(b.nome));
     }
   }
 
   closeModal('modal-profissional');
-  showToast(salvoNoBanco?'Profissional salvo!':'Profissional salvo localmente (verifique o console).', salvoNoBanco?'green':'');
+  showToast(salvoNoBanco?`Profissional salvo! Matrícula: ${matricula}`:`Profissional salvo localmente. Matrícula: ${matricula}`, salvoNoBanco?'green':'');
   renderProfissionais();
 }
 async function removerProfissional(id){if(!confirm('Remover?'))return;try{const db=await getSupa();await db.from('profissionais').delete().eq('id',id);}catch(e){}state.profissionais=state.profissionais.filter(p=>p.id!==id);renderProfissionais();showToast('Profissional removido.');}
