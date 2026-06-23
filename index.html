@@ -2309,22 +2309,22 @@ async function carregarDadosSupabase(){
     else state.clientes=clientes272.map((c,i)=>{return{id:i+1,...c,contato:'',email:'',tel:''}});
     if(!rG.error){state.gestores=rG.data.filter(g=>!g.nome.startsWith('__TX_')).map(s2g);if(state.gestores.length)gestIdCounter=Math.max(...state.gestores.map(g=>g.id))+1;}
     if(!rM.error){state.mobilizacoes=rM.data.map(s2m);if(rM.data.length)mobIdCounter=Math.max(...rM.data.map(m=>m.id))+1;}
-    // ── Sincronizar profissionais: apagar os existentes e reinserir da planilha ──
-    const {data: existentes, error: errList} = await db.from('profissionais').select('id,matricula');
+    // ── Sincronizar profissionais: upsert da base interna + preservar terceiros ──
+    const {data: existentes, error: errList} = await db.from('profissionais').select('id,matricula,vinculo');
     if(!errList){
-      // Mapeamento de matrícula → id existente no banco (para preservar referências nas mobilizações)
+      // Mapeamento de matrícula → id existente no banco
       const mapaMatricula={};
       (existentes||[]).forEach(p=>{ if(p.matricula) mapaMatricula[p.matricula]=p.id; });
-      // Upsert por matrícula
+      // Upsert apenas dos profissionais da base interna (com matrícula)
       const upsertData = profissionaisBase.map(p=>{
         const existeId = mapaMatricula[p.matricula];
         return existeId ? {id: existeId, ...p} : {...p};
       });
-      const {error: errUp} = await db.from('profissionais').upsert(upsertData, {onConflict:'matricula'});
-      // Recarregar lista atualizada
+      await db.from('profissionais').upsert(upsertData, {onConflict:'matricula'});
+      // Recarregar lista completa — inclui terceiros sem matrícula e os da base
       const {data: pData, error: errP} = await db.from('profissionais').select('*').order('nome');
-      if(!errP){state.profissionais=pData.map(s2p);if(pData.length)prfIdCounter=Math.max(...pData.map(p=>p.id))+1;}
-      else { state.profissionais=profissionaisBase.map((p,i)=>{return{id:i+1,...p}});}
+      if(!errP&&pData){state.profissionais=pData.map(s2p);if(pData.length)prfIdCounter=Math.max(...pData.map(p=>p.id))+1;}
+      else { state.profissionais=profissionaisBase.map((p,i)=>{return{id:i+1,...p}}); }
     } else {
       state.profissionais=profissionaisBase.map((p,i)=>{return{id:i+1,...p}});
     }
@@ -2477,8 +2477,22 @@ async function salvarGestor(){
 async function removerGestor(id){if(!confirm('Remover?'))return;try{const db=await getSupa();await db.from('gestores').delete().eq('id',id);}catch(e){}state.gestores=state.gestores.filter(g=>g.id!==id);renderGestores();showToast('Gestor removido.');}
 async function salvarProfissional(){
   const nome=document.getElementById('prf-nome').value.trim();if(!nome)return showToast('Informe o nome.');
-  const p={nome,cargo:document.getElementById('prf-cargo').value.trim(),email:document.getElementById('prf-email').value.trim(),matricula:document.getElementById('prf-matricula').value.trim(),vinculo:document.getElementById('prf-vinculo').value,regime:document.getElementById('prf-regime').value};
-  try{const db=await getSupa();const{data,error}=await db.from('profissionais').insert(p).select().single();if(error)throw error;state.profissionais.push(s2p(data));}catch(e){state.profissionais.push({id:prfIdCounter++,...p});}
+  const p={nome,cargo:document.getElementById('prf-cargo').value.trim(),email:document.getElementById('prf-email').value.trim(),matricula:document.getElementById('prf-matricula').value.trim()||null,vinculo:document.getElementById('prf-vinculo').value,regime:document.getElementById('prf-regime').value};
+  try{
+    const db=await getSupa();
+    const{data,error}=await db.from('profissionais').insert(p).select().single();
+    if(error)throw error;
+    state.profissionais.push(s2p(data));
+    // Recarregar lista completa do banco para garantir sincronia
+    const{data:lista,error:errL}=await db.from('profissionais').select('*').order('nome');
+    if(!errL&&lista) state.profissionais=lista.map(s2p);
+  }catch(e){
+    // Fallback local: adiciona ao state sem depender do banco
+    const novoLocal={id:prfIdCounter++,...p,matricula:p.matricula||''};
+    state.profissionais.push(novoLocal);
+    state.profissionais.sort((a,b)=>a.nome.localeCompare(b.nome));
+    console.warn('Profissional salvo apenas localmente:',e.message);
+  }
   closeModal('modal-profissional');showToast('Profissional salvo!','green');renderProfissionais();
 }
 async function removerProfissional(id){if(!confirm('Remover?'))return;try{const db=await getSupa();await db.from('profissionais').delete().eq('id',id);}catch(e){}state.profissionais=state.profissionais.filter(p=>p.id!==id);renderProfissionais();showToast('Profissional removido.');}
