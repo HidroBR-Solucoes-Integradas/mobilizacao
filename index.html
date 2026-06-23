@@ -695,6 +695,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
           <span id="app-detail-farol"></span>
           <button class="btn btn-secondary btn-sm" onclick="openModalEditarMob()">✎ Editar</button>
           <button class="btn btn-warning btn-sm" onclick="openModalSolicitarInfo()">💬 Solicitar Informação</button>
+          <button class="btn btn-sm" style="background:var(--red-l);color:var(--red);border:1px solid #fecaca;" onclick="excluirMobilizacao(state.currentMobId)">🗑 Excluir</button>
         </div>
       </div>
       <div id="app-info-requests"></div>
@@ -2091,17 +2092,86 @@ function renderProfissionais(){
 
 
 // ── REPORT SEMANAL ────────────────────────────────
+async function excluirMobilizacao(mobId){
+  const mob = state.mobilizacoes.find(m => m.id === mobId);
+  if(!mob) return;
+  const confirmMsg = `Tem certeza que deseja excluir a mobilização "${mob.nome}"?\n\nEsta ação é permanente e não pode ser desfeita.`;
+  if(!confirm(confirmMsg)) return;
+  try {
+    const db = await getSupa();
+    await db.from('mobilizacoes').delete().eq('id', mobId);
+  } catch(e) {}
+  state.mobilizacoes = state.mobilizacoes.filter(m => m.id !== mobId);
+  showToast('Mobilização excluída.', '');
+  appNav('mobilizacoes');
+  atualizarSumarios();
+  renderLandingStatus();
+}
+
 function renderReport(){
-  const hoje=new Date();
-  const mobs=state.mobilizacoes;
-  const totalDias=mobs.filter(m=>m.status==='mobilizado').map(m=>calcSLADias(m)).filter(d=>d);
-  const sla=totalDias.length?Math.round(totalDias.reduce((a,b)=>a+b,0)/totalDias.length):null;
+  const hoje = new Date();
+  const inicioSemana = new Date(hoje);
+  inicioSemana.setDate(hoje.getDate() - hoje.getDay() - 6); // últimos 7 dias
+  inicioSemana.setHours(0,0,0,0);
 
-  const por_status={cadastrado:0,processamento:0,mobilizado:0,'pendente-info':0};
-  mobs.forEach(m=>por_status[m.status]=(por_status[m.status]||0)+1);
+  const mobs = state.mobilizacoes.filter(m => m.status !== 'inativo');
 
-  document.getElementById('report-area').innerHTML=`
-  <div style="font-family:var(--sans);max-width:900px;margin:0 auto;background:#fff;padding:40px;border-radius:12px;border:1px solid var(--border);">
+  // SLA
+  const totalDias = mobs.filter(m=>m.status==='mobilizado').map(m=>calcSLADias(m)).filter(d=>d);
+  const sla = totalDias.length ? Math.round(totalDias.reduce((a,b)=>a+b,0)/totalDias.length) : null;
+
+  const por_status = {cadastrado:0, processamento:0, mobilizado:0, 'pendente-info':0};
+  mobs.forEach(m => por_status[m.status] = (por_status[m.status]||0)+1);
+
+  // ── Métricas de profissionais ──────────────────────────────────
+  // Total de profissionais únicos com statusMob === 'mobilizado' em qualquer mobilização
+  const profMobilizadosSet = new Set();
+  const profMobilizadosSemanaSet = new Set();
+  const profEmProcessoSet = new Set();
+  const profSolicitadoSet = new Set();
+
+  mobs.forEach(mob => {
+    (mob.equipe || []).forEach(e => {
+      const st = e.statusMob || 'solicitado';
+      if(st === 'mobilizado'){
+        profMobilizadosSet.add(e.profId);
+        // "mobilizado na semana" — usa dataCriacao da mob como proxy se não tiver timestamp
+        // ou verifica se a mob foi criada nos últimos 7 dias (heurística para dados de seed)
+        const dataMob = mob.dataCriacao ? new Date(mob.dataCriacao) : null;
+        if(dataMob && dataMob >= inicioSemana) profMobilizadosSemanaSet.add(e.profId);
+      } else if(st === 'em_processo') {
+        profEmProcessoSet.add(e.profId);
+      } else {
+        profSolicitadoSet.add(e.profId);
+      }
+    });
+  });
+
+  const totalProfMobilizados = profMobilizadosSet.size;
+  const profSemana = profMobilizadosSemanaSet.size;
+  const totalEmProcesso = profEmProcessoSet.size;
+  const totalSolicitado = profSolicitadoSet.size;
+  const totalProfissionais = new Set([...profMobilizadosSet, ...profEmProcessoSet, ...profSolicitadoSet]).size;
+
+  // ── Profissionais mobilizados (lista para o report) ────────────
+  const listaProfMob = [];
+  mobs.forEach(mob => {
+    const cli = state.clientes.find(c => c.id === mob.clienteId);
+    (mob.equipe || []).forEach(e => {
+      const prf = state.profissionais.find(p => p.id === e.profId);
+      if(!prf) return;
+      const st = e.statusMob || 'solicitado';
+      if(st === 'mobilizado') listaProfMob.push({prf, mob, cli, e});
+    });
+  });
+
+  const stLabel = {cadastrado:'Cadastrado',processamento:'Processamento',mobilizado:'Mobilizado','pendente-info':'Pend. Informação'};
+  const corHexMap = {verde:'#16a34a',amarelo:'#d97706',vermelho:'#dc2626',cinza:'#9ca3af'};
+
+  document.getElementById('report-area').innerHTML = `
+  <div style="font-family:var(--sans);max-width:940px;margin:0 auto;background:#fff;padding:40px;border-radius:12px;border:1px solid var(--border);">
+
+    <!-- Cabeçalho -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid var(--border);">
       <div style="display:flex;align-items:center;gap:12px;">
         <svg width="28" height="28" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="11" stroke="#1a6fbf" stroke-width="1.5" opacity="0.5"/><circle cx="13" cy="13" r="7" stroke="#1a6fbf" stroke-width="1.5" opacity="0.75"/><circle cx="13" cy="13" r="3" fill="#1a6fbf"/></svg>
@@ -2110,6 +2180,8 @@ function renderReport(){
       <div style="text-align:right;font-size:12px;color:var(--text3);">Gerado em<br><strong style="color:var(--text);">${hoje.toLocaleDateString('pt-BR',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</strong></div>
     </div>
 
+    <!-- Cards de mobilizações -->
+    <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Mobilizações</div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;">
       <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:700;font-family:var(--mono);color:var(--accent);">${mobs.length}</div><div style="font-size:11px;color:var(--text3);">Total</div></div>
       <div style="background:#e0e7ff;border:1px solid #c7d2fe;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:700;font-family:var(--mono);color:#3730a3;">${por_status.cadastrado}</div><div style="font-size:11px;color:#3730a3;">Cadastrado</div></div>
@@ -2117,28 +2189,84 @@ function renderReport(){
       <div style="background:var(--green-l);border:1px solid #bbf7d0;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:700;font-family:var(--mono);color:var(--green);">${por_status.mobilizado}</div><div style="font-size:11px;color:var(--green);">Mobilizado</div></div>
     </div>
 
-    ${sla?`<div style="background:var(--accent-l);border:1px solid #bfdbfe;border-radius:10px;padding:16px 20px;margin-bottom:28px;display:flex;align-items:center;gap:16px;"><div style="font-size:32px;font-weight:700;font-family:var(--mono);color:var(--accent);">${sla}d</div><div><div style="font-size:13px;font-weight:600;color:var(--accent);">SLA Médio de Mobilização</div><div style="font-size:12px;color:var(--text3);">Tempo médio da abertura até o status Mobilizado</div></div></div>`:''}
+    <!-- Cards de profissionais -->
+    <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Profissionais</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:700;font-family:var(--mono);color:var(--accent);">${totalProfissionais}</div><div style="font-size:11px;color:var(--text3);">Total em mobilização</div></div>
+      <div style="background:#e0e7ff;border:1px solid #c7d2fe;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:700;font-family:var(--mono);color:#3730a3;">${totalSolicitado}</div><div style="font-size:11px;color:#3730a3;">Solicitados</div></div>
+      <div style="background:var(--amber-l);border:1px solid #fde68a;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:700;font-family:var(--mono);color:var(--amber);">${totalEmProcesso}</div><div style="font-size:11px;color:var(--amber);">Em Processo</div></div>
+      <div style="background:var(--green-l);border:1px solid #bbf7d0;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:700;font-family:var(--mono);color:var(--green);">${totalProfMobilizados}</div><div style="font-size:11px;color:var(--green);">Mobilizados</div></div>
+    </div>
+    <!-- Destaque: mobilizados na semana -->
+    <div style="background:linear-gradient(120deg,#0d1f35,#1a3860);border-radius:10px;padding:16px 22px;margin-bottom:28px;display:flex;align-items:center;gap:18px;">
+      <div style="font-size:36px;font-weight:700;font-family:var(--mono);color:#86efac;min-width:56px;text-align:center;">${profSemana}</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#fff;">Profissionais mobilizados nos últimos 7 dias</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Profissionais com status atualizado para <strong style="color:#86efac;">Mobilizado</strong> em mobilizações abertas na última semana</div>
+      </div>
+      ${sla ? `<div style="margin-left:auto;text-align:center;background:rgba(255,255,255,0.08);border-radius:8px;padding:10px 18px;"><div style="font-size:22px;font-weight:700;color:#fcd34d;font-family:var(--mono);">${sla}d</div><div style="font-size:10px;color:rgba(255,255,255,0.4);">SLA Médio</div></div>` : ''}
+    </div>
 
+    <!-- Tabela de mobilizações -->
+    <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Detalhe por Mobilização</div>
     <table style="width:100%;border-collapse:collapse;margin-bottom:28px;">
-      <thead><tr style="background:var(--sidebar);color:#fff;"><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">PROJETO</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">CLIENTE</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">LÍDER</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">STATUS</th><th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">FAROL</th><th style="padding:10px 14px;text-align:right;font-size:11px;letter-spacing:0.06em;">DOCS</th><th style="padding:10px 14px;text-align:right;font-size:11px;letter-spacing:0.06em;">PRAZO</th></tr></thead>
+      <thead><tr style="background:var(--sidebar);color:#fff;">
+        <th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">PROJETO</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">CLIENTE</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">LÍDER</th>
+        <th style="padding:10px 14px;text-align:center;font-size:11px;letter-spacing:0.06em;">EQUIPE</th>
+        <th style="padding:10px 14px;text-align:center;font-size:11px;letter-spacing:0.06em;">MOB.</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">STATUS</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">FAROL</th>
+        <th style="padding:10px 14px;text-align:right;font-size:11px;letter-spacing:0.06em;">DOCS</th>
+        <th style="padding:10px 14px;text-align:right;font-size:11px;letter-spacing:0.06em;">PRAZO</th>
+      </tr></thead>
       <tbody>
-        ${mobs.length ? mobs.map((mob,i)=>{
-          const cli=state.clientes.find(c=>c.id===mob.clienteId);
-          const cor=calcFarol(mob);const pct=progressPct(mob);
-          const corHex={verde:'#16a34a',amarelo:'#d97706',vermelho:'#dc2626',cinza:'#9ca3af'}[cor];
-          return`<tr style="border-bottom:1px solid var(--border);background:${i%2===0?'#fff':'var(--bg)'}">
+        ${mobs.length ? mobs.map((mob,i) => {
+          const cli = state.clientes.find(c=>c.id===mob.clienteId);
+          const cor = calcFarol(mob);
+          const pct = progressPct(mob);
+          const corHex = corHexMap[cor];
+          const totalEquipe = (mob.equipe||[]).length;
+          const totalMob = (mob.equipe||[]).filter(e=>(e.statusMob||'solicitado')==='mobilizado').length;
+          return `<tr style="border-bottom:1px solid var(--border);background:${i%2===0?'#fff':'var(--bg)'}">
             <td style="padding:10px 14px;font-size:13px;font-weight:500;">${mob.nome}</td>
             <td style="padding:10px 14px;font-size:12px;color:var(--text2);">${cli?cli.nome:'—'}</td>
             <td style="padding:10px 14px;font-size:12px;color:var(--text2);">${mob.liderContrato||'—'}</td>
+            <td style="padding:10px 14px;text-align:center;font-size:12px;font-family:var(--mono);">${totalEquipe}</td>
+            <td style="padding:10px 14px;text-align:center;font-size:12px;font-family:var(--mono);font-weight:700;color:${totalMob>0?'var(--green)':'var(--text3)'};">${totalMob}</td>
             <td style="padding:10px 14px;">${statusBadgeHTML(mob.status)}</td>
             <td style="padding:10px 14px;"><span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:${corHex};">⬤ ${{verde:'Em dia',amarelo:'Atenção',vermelho:'Crítico',cinza:'Novo'}[cor]}</span></td>
             <td style="padding:10px 14px;text-align:right;font-size:12px;font-family:var(--mono);">${pct}%</td>
             <td style="padding:10px 14px;text-align:right;font-size:12px;">${mob.prazo?formatDate(mob.prazo):'—'}</td>
           </tr>`;
-        }).join('') : '<tr><td colspan="7" style="padding:24px;text-align:center;color:var(--text3);font-size:13px;">Nenhuma mobilização cadastrada.</td></tr>'}
+        }).join('') : '<tr><td colspan="9" style="padding:24px;text-align:center;color:var(--text3);font-size:13px;">Nenhuma mobilização cadastrada.</td></tr>'}
       </tbody>
     </table>
 
+    <!-- Tabela de profissionais mobilizados -->
+    ${listaProfMob.length ? `
+    <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Profissionais com Status Mobilizado</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:28px;">
+      <thead><tr style="background:var(--green);color:#fff;">
+        <th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">PROFISSIONAL</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">CARGO / PAPEL</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">VÍNCULO</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">MOBILIZAÇÃO</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:0.06em;">CLIENTE</th>
+      </tr></thead>
+      <tbody>
+        ${listaProfMob.map((item,i) => `<tr style="border-bottom:1px solid var(--border);background:${i%2===0?'#fff':'var(--bg)'}">
+          <td style="padding:10px 14px;font-size:13px;font-weight:500;">${item.prf.nome}${item.prf.matricula?`<span style="font-size:10px;color:var(--text3);margin-left:6px;font-family:var(--mono);">Mat. ${item.prf.matricula}</span>`:''}</td>
+          <td style="padding:10px 14px;font-size:12px;color:var(--text2);">${item.e.papel||item.prf.cargo||'—'}</td>
+          <td style="padding:10px 14px;font-size:12px;">${vincLabel(item.e.vinculo||item.prf.vinculo)} · ${(item.e.regime||item.prf.regime||'').toUpperCase()}</td>
+          <td style="padding:10px 14px;font-size:12px;color:var(--text2);">${item.mob.nome}</td>
+          <td style="padding:10px 14px;font-size:12px;color:var(--text2);">${item.cli?item.cli.nome:'—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>` : ''}
+
+    <!-- Rodapé -->
     <div style="border-top:1px solid var(--border);padding-top:16px;font-size:11px;color:var(--text3);display:flex;justify-content:space-between;">
       <span>Orion — Sistema de Gestão de Mobilização · HIDROBR</span>
       <span>Relatório gerado automaticamente em ${hoje.toLocaleDateString('pt-BR')}</span>
