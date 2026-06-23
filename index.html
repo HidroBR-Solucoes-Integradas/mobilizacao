@@ -582,6 +582,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
     <div class="sidebar-section">
       <div class="sidebar-section-label">Principal</div>
       <div class="nav-item active" onclick="appNav('painel')"><span class="nav-icon">◉</span> Painel <span class="nav-badge" id="badge-novas">0</span></div>
+      <div class="nav-item" onclick="appNav('notificacoes')"><span class="nav-icon">🔔</span> Notificações <span class="nav-badge" id="badge-notif">0</span></div>
       <div class="nav-item" onclick="appNav('dashboard')"><span class="nav-icon">◈</span> Dashboard</div>
       <div class="nav-item" onclick="appNav('mobilizacoes')"><span class="nav-icon">⊞</span> Mobilizações <span class="nav-badge" id="badge-mob">0</span></div>
     </div>
@@ -729,6 +730,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
         </div>
         <div id="app-detalhe-passaporte"></div>
       </div>
+    </div>
+
+    <!-- PAGE: NOTIFICAÇÕES -->
+    <div class="page" id="app-page-notificacoes">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <h2 style="font-size:18px;font-weight:700;margin-bottom:4px;">Caixa de Notificações</h2>
+          <p style="font-size:13px;color:var(--text3);">Registro cronológico de todas as atividades e solicitações do sistema</p>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="marcarTodasLidas()">✓ Marcar todas como lidas</button>
+      </div>
+      <div id="notif-inbox"></div>
     </div>
 
     <!-- PAGE: GESTORES -->
@@ -1264,6 +1277,7 @@ let state = {
   mobilizacoes: [], clientes: [], profissionais: [], gestores: [],
   currentMobId: null, editingMobId: null,
   solEquipe: [], // equipe temporária na solicitação
+  notificacoes: [],
 };
 let mobIdCounter=1, cliIdCounter=1, prfIdCounter=1, docIdCounter=1, gestIdCounter=1, passIdCounter=1;
 
@@ -1353,6 +1367,53 @@ function seedData(){
   state.mobilizacoes = [mob1, mob2, mob3];
   mobIdCounter = 4;
   docIdCounter = 9;
+}
+
+// Notificações de exemplo — sempre carregadas, independente do Supabase
+function seedNotificacoes(){
+  if(state.notificacoes.length > 0) return; // não sobrescrever se já houver
+  state.notificacoes = [
+    {
+      id: 1001, lida: false,
+      data: new Date(Date.now()-3*86400000).toISOString(),
+      tipo:'nova_mob', icone:'📋',
+      assunto:'Nova solicitação: Auditoria de Processos — Planta Gavião Peixoto',
+      de:'Rodrigo Alves <rodrigo.alves@hidrobr.com.br>',
+      para:'Equipe de Mobilização <mobilizacao@hidrobr.com.br>',
+      corpo:'<table style="width:100%;border-collapse:collapse;font-size:13px;"><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;width:160px;">Projeto</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Auditoria de Processos — Planta Gavião Peixoto</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Cliente</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Embraer S.A.</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Líder de Contrato</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Rodrigo Alves</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Início previsto</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">15/08/2025</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Prazo</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">15/10/2025</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Profissionais</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Giovana Torres — Geóloga Sênior</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Observações</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Projeto crítico com sigilo industrial. Assinar NDA antes do início.</td></tr></table>',
+      mobId:3,
+    },
+    {
+      id: 1002, lida: false,
+      data: new Date(Date.now()-5*86400000).toISOString(),
+      tipo:'status_prof', icone:'⏳',
+      assunto:'Status atualizado: Diego Nogueira — Modernização Plataforma P-77',
+      de:'Sistema Orion <orion@hidrobr.com.br>',
+      para:'Rodrigo Alves <rodrigo.alves@hidrobr.com.br>',
+      corpo:'<table style="width:100%;border-collapse:collapse;font-size:13px;"><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;width:140px;">Profissional</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Diego Nogueira</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Cargo</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Especialista HSE</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Cliente</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Petrobras S.A.</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Status anterior</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Solicitado</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Novo status</td><td style="padding:6px 12px;border:1px solid #e2e8f0;font-weight:700;color:#d97706;">Em Processo</td></tr></table>',
+      mobId:1,
+    },
+    {
+      id: 1003, lida: true,
+      data: new Date(Date.now()-18*86400000).toISOString(),
+      tipo:'nova_mob', icone:'📋',
+      assunto:'Nova solicitação: Modernização Plataforma P-77',
+      de:'Rodrigo Alves <rodrigo.alves@hidrobr.com.br>',
+      para:'Equipe de Mobilização <mobilizacao@hidrobr.com.br>',
+      corpo:'<table style="width:100%;border-collapse:collapse;font-size:13px;"><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;width:160px;">Projeto</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Modernização Plataforma P-77</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Cliente</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Petrobras S.A.</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Líder de Contrato</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Rodrigo Alves</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Profissionais</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Ana Paula Ferreira, Bruno Castilho, Diego Nogueira</td></tr></table>',
+      mobId:1,
+    },
+    {
+      id: 1004, lida: true,
+      data: new Date(Date.now()-52*86400000).toISOString(),
+      tipo:'status_prof', icone:'✅',
+      assunto:'Status atualizado: Carla Drummond — Implantação MES Carajás',
+      de:'Sistema Orion <orion@hidrobr.com.br>',
+      para:'Patrícia Nunes <patricia.nunes@hidrobr.com.br>',
+      corpo:'<table style="width:100%;border-collapse:collapse;font-size:13px;"><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;width:140px;">Profissional</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Carla Drummond</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Cargo</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Consultora Líder</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Cliente</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Vale S.A.</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Status anterior</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">Em Processo</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Novo status</td><td style="padding:6px 12px;border:1px solid #e2e8f0;font-weight:700;color:#16a34a;">Mobilizado</td></tr></table>',
+      mobId:2,
+    },
+  ];
 }
 
 // ── HELPERS ───────────────────────────────────────
@@ -1632,6 +1693,7 @@ function renderPortalStatus(){
 let appCurrentPage='painel', appCurrentFilter='todos';
 const appPageTitles={
   painel:['Painel','Solicitações recebidas'],
+  notificacoes:['Notificações','Registro de atividades do sistema'],
   dashboard:['Dashboard','Análise e indicadores'],
   mobilizacoes:['Mobilizações','Todas as solicitações'],
   detalhe:['Detalhe da Mobilização',''],
@@ -1652,6 +1714,7 @@ function appNav(pg,mobId){
   document.getElementById('app-topbar-actions').innerHTML='';
   appCurrentPage=pg;
   if(pg==='painel')renderAppPainel();
+  if(pg==='notificacoes')renderNotificacoes();
   if(pg==='dashboard')renderAppDashboard();
   if(pg==='mobilizacoes')renderAppMobs();
   if(pg==='gestores')renderGestores();
@@ -1800,14 +1863,32 @@ function renderAppEquipe(mob){
   const c=document.getElementById('app-detalhe-team-list');
   document.getElementById('app-equipe-count').textContent=`${mob.equipe.length} profissional(is) na equipe`;
   if(!mob.equipe.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><p>Equipe não definida.</p></div>';return;}
+  const statusProf={
+    solicitado:  {label:'Solicitado',   bg:'#e0e7ff', color:'#3730a3'},
+    em_processo: {label:'Em Processo',  bg:'var(--amber-l)', color:'var(--amber)'},
+    mobilizado:  {label:'Mobilizado',   bg:'var(--green-l)', color:'var(--green)'},
+  };
   c.innerHTML=mob.equipe.map(e=>{
     const prf=state.profissionais.find(p=>p.id===e.profId);if(!prf)return'';
     const init=prf.nome.split(' ').slice(0,2).map(n=>n[0]).join('');
-    return`<div class="team-item"><div class="team-avatar">${init}</div>
-      <div style="flex:1;"><div style="display:flex;align-items:center;gap:6px;font-weight:500;">${prf.nome} ${vincBadge(e.vinculo||prf.vinculo)} ${regimeBadge(e.regime||prf.regime)}</div>
-      <div style="font-size:11px;color:var(--text3);">${e.papel||prf.cargo}</div></div>
-      <div style="font-size:11px;color:var(--text3);font-family:var(--mono);">${prf.matricula?'Mat. '+prf.matricula:''}</div>
-      <button class="team-remove" title="Remover da equipe" onclick="removerProfDetalhe(${mob.id},${e.profId})">×</button>
+    const st=e.statusMob||'solicitado';
+    const stCfg=statusProf[st]||statusProf.solicitado;
+    return`<div class="team-item" style="flex-wrap:wrap;gap:10px;">
+      <div class="team-avatar">${init}</div>
+      <div style="flex:1;min-width:160px;">
+        <div style="display:flex;align-items:center;gap:6px;font-weight:500;flex-wrap:wrap;">${prf.nome} ${vincBadge(e.vinculo||prf.vinculo)} ${regimeBadge(e.regime||prf.regime)}</div>
+        <div style="font-size:11px;color:var(--text3);">${e.papel||prf.cargo}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <select onchange="alterarStatusProf(${mob.id},${e.profId},this.value)"
+          style="font-size:11px;font-weight:600;padding:4px 8px;border-radius:20px;border:1.5px solid ${stCfg.color};background:${stCfg.bg};color:${stCfg.color};cursor:pointer;outline:none;font-family:var(--sans);appearance:none;-webkit-appearance:none;padding-right:20px;background-image:url('data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'10\\' height=\\'6\\'><path d=\\'M0 0l5 6 5-6z\\' fill=\\'%23666\\'/></svg>');background-repeat:no-repeat;background-position:right 6px center;">
+          <option value="solicitado"  ${st==='solicitado' ?'selected':''}>● Solicitado</option>
+          <option value="em_processo" ${st==='em_processo'?'selected':''}>● Em Processo</option>
+          <option value="mobilizado"  ${st==='mobilizado' ?'selected':''}>● Mobilizado</option>
+        </select>
+        <div style="font-size:11px;color:var(--text3);font-family:var(--mono);">${prf.matricula?'Mat. '+prf.matricula:''}</div>
+        <button class="team-remove" title="Remover da equipe" onclick="removerProfDetalhe(${mob.id},${e.profId})">×</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -2281,9 +2362,31 @@ async function enviarSolicitacao(){
   if(!clienteId)return showToast('Selecione o cliente.');
   if(!lider)return showToast('Informe o líder de contrato.');
   const temSist=document.getElementById('sol-tem-sistema').value==='sim';
-  const payload={nome,cliente_id:clienteId,lider_contrato:lider,resp_cliente:document.getElementById('sol-resp-cliente').value.trim(),inicio:document.getElementById('sol-inicio').value||null,prazo:document.getElementById('sol-prazo').value||null,sistema_cliente:temSist?(document.getElementById('sol-sistema-nome')||{value:''}).value.trim():'',obs:document.getElementById('sol-obs').value.trim(),status:'cadastrado',equipe:[...state.solEquipe],documentos:[],passaporte:{}};
-  try{const db=await getSupa();const{data,error}=await db.from('mobilizacoes').insert(payload).select().single();if(error)throw error;state.mobilizacoes.unshift(s2m(data));}
-  catch(e){state.mobilizacoes.unshift({id:mobIdCounter++,nome,clienteId,liderContrato:lider,respCliente:payload.resp_cliente,inicio:payload.inicio||'',prazo:payload.prazo||'',sistemaCliente:payload.sistema_cliente,obs:payload.obs,status:'cadastrado',equipe:[...state.solEquipe],documentos:[],passaporte:{}});}
+  const equipeEnvio=[...state.solEquipe];
+  const payload={nome,cliente_id:clienteId,lider_contrato:lider,resp_cliente:document.getElementById('sol-resp-cliente').value.trim(),inicio:document.getElementById('sol-inicio').value||null,prazo:document.getElementById('sol-prazo').value||null,sistema_cliente:temSist?(document.getElementById('sol-sistema-nome')||{value:''}).value.trim():'',obs:document.getElementById('sol-obs').value.trim(),status:'cadastrado',equipe:equipeEnvio,documentos:[],passaporte:{}};
+  const cli=state.clientes.find(c=>String(c.id)===String(clienteId));
+  let novaMob;
+  try{const db=await getSupa();const{data,error}=await db.from('mobilizacoes').insert(payload).select().single();if(error)throw error;novaMob=s2m(data);state.mobilizacoes.unshift(novaMob);}
+  catch(e){novaMob={id:mobIdCounter++,nome,clienteId,liderContrato:lider,respCliente:payload.resp_cliente,inicio:payload.inicio||'',prazo:payload.prazo||'',sistemaCliente:payload.sistema_cliente,obs:payload.obs,status:'cadastrado',equipe:equipeEnvio,documentos:[],passaporte:{},dataCriacao:new Date().toISOString()};state.mobilizacoes.unshift(novaMob);}
+  // ── Notificação de nova solicitação ──
+  const profs=equipeEnvio.map(e=>{const p=state.profissionais.find(x=>x.id===e.profId);return p?`<li>${p.nome} — ${e.papel||p.cargo}</li>`:''}).filter(Boolean).join('');
+  gerarNotificacao({
+    tipo:'nova_mob', icone:'📋',
+    assunto:`Nova solicitação de mobilização: ${nome}`,
+    de:`${lider} <lider@hidrobr.com.br>`,
+    para:'Equipe de Mobilização <mobilizacao@hidrobr.com.br>',
+    corpo:`Uma nova solicitação de mobilização foi registrada no sistema e aguarda processamento.<br><br>
+<table style="width:100%;border-collapse:collapse;font-size:13px;">
+  <tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;width:160px;">Projeto</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">${nome}</td></tr>
+  <tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Cliente</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">${cli?.nome||clienteId}</td></tr>
+  <tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Líder de Contrato</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">${lider}</td></tr>
+  <tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Início previsto</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">${payload.inicio?formatDate(payload.inicio):'Não informado'}</td></tr>
+  <tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Prazo</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">${payload.prazo?formatDate(payload.prazo):'Não informado'}</td></tr>
+  <tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Profissionais</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">${equipeEnvio.length>0?`<ul style="margin:0;padding-left:16px;">${profs}</ul>`:'Nenhum informado'}</td></tr>
+  ${payload.obs?`<tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Observações</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">${payload.obs}</td></tr>`:''}
+</table>`,
+    mobId: novaMob.id,
+  });
   state.solEquipe=[];renderSolEquipe();renderLandingStatus();
   ['sol-nome','sol-lider','sol-resp-cliente','sol-inicio','sol-prazo','sol-obs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('sol-cliente').value='';
@@ -2381,18 +2484,14 @@ async function removerProfDetalhe(mobId, profId){
 }
 
 // ── PORTAL: MINHAS SOLICITAÇÕES ──────────────────────────────
-function profStatusBadge(mob, profId) {
-  // Verifica pendências de documento específicas do profissional
-  const docs = (mob.documentos || []).filter(d => d.profId === profId);
-  const passaporte = mob.passaporte || {};
-  const passItems = Object.values(passaporte).filter ? Object.values(passaporte) : [];
-  const profPass = passItems.filter(p => p && p.profId === profId);
-  const docsOk = docs.length === 0 || docs.every(d => d.entregue);
-  const passOk = profPass.length === 0 || profPass.every(p => p.entregue);
-  if (mob.status === 'mobilizado') return '<span class="status-badge" style="background:var(--green-l);color:var(--green);">✓ Mobilizado</span>';
-  if (!docsOk || !passOk) return '<span class="status-badge" style="background:var(--red-l);color:var(--red);">⚠ Pendências</span>';
-  if (mob.status === 'processamento') return '<span class="status-badge" style="background:var(--amber-l);color:var(--amber);">⏳ Em Processamento</span>';
-  return '<span class="status-badge status-cadastrado">Cadastrado</span>';
+function profStatusBadge(mob, entry) {
+  const st = entry.statusMob || 'solicitado';
+  const cfg = {
+    solicitado:  { label:'Solicitado',   bg:'#e0e7ff', color:'#3730a3' },
+    em_processo: { label:'Em Processo',  bg:'#fef3c7', color:'#d97706' },
+    mobilizado:  { label:'Mobilizado',   bg:'#dcfce7', color:'#16a34a' },
+  }[st] || { label:'Solicitado', bg:'#e0e7ff', color:'#3730a3' };
+  return `<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:${cfg.bg};color:${cfg.color};white-space:nowrap;">● ${cfg.label}</span>`;
 }
 
 function renderPortalMinhas() {
@@ -2425,7 +2524,7 @@ function renderPortalMinhas() {
       const prf = state.profissionais.find(p => p.id === e.profId);
       if (!prf) return '';
       const init = prf.nome.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
-      const stBadge = profStatusBadge(mob, e.profId);
+      const stBadge = profStatusBadge(mob, e);
       const docs = (mob.documentos || []).filter(d => d.profId === e.profId);
       const docsEntregues = docs.filter(d => d.entregue).length;
       return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg2);">
@@ -2591,6 +2690,237 @@ async function confirmarAddProfPortal() {
   }
 }
 
+// ── STATUS DO PROFISSIONAL NA MOBILIZAÇÃO ─────────────────────
+async function alterarStatusProf(mobId, profId, novoStatus){
+  const mob = state.mobilizacoes.find(m=>m.id===mobId);
+  if(!mob) return;
+  const entry = mob.equipe.find(e=>e.profId===profId);
+  if(!entry) return;
+  const statusAnterior = entry.statusMob || 'solicitado';
+  if(statusAnterior === novoStatus) return;
+  entry.statusMob = novoStatus;
+  // Persiste
+  try{ const db=await getSupa(); await db.from('mobilizacoes').update({equipe:mob.equipe}).eq('id',mob.id); }catch(e){}
+  // Gera notificação
+  const prf = state.profissionais.find(p=>p.id===profId);
+  const cli = state.clientes.find(c=>c.id===mob.clienteId);
+  const labelMap = {solicitado:'Solicitado', em_processo:'Em Processo', mobilizado:'Mobilizado'};
+  gerarNotificacao({
+    tipo: 'status_prof',
+    icone: novoStatus==='mobilizado'?'✅': novoStatus==='em_processo'?'⏳':'📋',
+    assunto: `Status atualizado: ${prf?.nome||'Profissional'} — ${mob.nome}`,
+    de: 'Sistema Orion <orion@hidrobr.com.br>',
+    para: `${mob.liderContrato||'Líder de Contrato'} <lider@hidrobr.com.br>`,
+    corpo: `O status de mobilização do profissional <strong>${prf?.nome||'—'}</strong> foi atualizado na mobilização <strong>${mob.nome}</strong>.\n\n<table style="width:100%;border-collapse:collapse;font-size:13px;"><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;width:140px;">Profissional</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">${prf?.nome||'—'}</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Cargo</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">${entry.papel||prf?.cargo||'—'}</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Cliente</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">${cli?.nome||'—'}</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Status anterior</td><td style="padding:6px 12px;border:1px solid #e2e8f0;">${labelMap[statusAnterior]}</td></tr><tr><td style="padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;">Novo status</td><td style="padding:6px 12px;border:1px solid #e2e8f0;font-weight:700;color:${novoStatus==='mobilizado'?'#16a34a':novoStatus==='em_processo'?'#d97706':'#3730a3'};">${labelMap[novoStatus]}</td></tr></table>`,
+    mobId,
+  });
+  renderAppEquipe(mob);
+  showToast(`${prf?.nome} → ${labelMap[novoStatus]}`, 'green');
+}
+
+// ── NOTIFICAÇÕES ──────────────────────────────────────────────
+// state.notificacoes = []  (já inicializado no state)
+function gerarNotificacao(opts){
+  if(!state.notificacoes) state.notificacoes=[];
+  const notif = {
+    id: Date.now(),
+    lida: false,
+    data: new Date().toISOString(),
+    tipo: opts.tipo||'geral',
+    icone: opts.icone||'📬',
+    assunto: opts.assunto||'Notificação',
+    de: opts.de||'Sistema Orion <orion@hidrobr.com.br>',
+    para: opts.para||'Equipe de Mobilização <mobilizacao@hidrobr.com.br>',
+    corpo: opts.corpo||'',
+    mobId: opts.mobId||null,
+  };
+  state.notificacoes.unshift(notif);
+  atualizarBadgeNotif();
+  // Se a página de notificações estiver ativa, re-renderiza
+  if(appCurrentPage==='notificacoes') renderNotificacoes();
+}
+
+function atualizarBadgeNotif(){
+  const nLidas = (state.notificacoes||[]).filter(n=>!n.lida).length;
+  const badge = document.getElementById('badge-notif');
+  if(badge){ badge.textContent = nLidas; badge.style.display = nLidas>0?'':'none'; }
+}
+
+function marcarTodasLidas(){
+  (state.notificacoes||[]).forEach(n=>n.lida=true);
+  atualizarBadgeNotif();
+  renderNotificacoes();
+}
+
+function marcarLida(id){
+  const n=(state.notificacoes||[]).find(n=>n.id===id);
+  if(n) n.lida=true;
+  atualizarBadgeNotif();
+  // Atualizar visual sem re-renderizar o DOM
+  const row=document.getElementById('notif-row-'+id);
+  if(row){
+    row.style.borderColor='var(--border)';
+    row.style.borderLeftColor='#9ca3af';
+    const header=document.getElementById('notif-header-'+id);
+    if(header) header.style.background='var(--bg2)';
+    const dot=document.getElementById('notif-dot-'+id);
+    if(dot) dot.remove();
+    const avatar=document.getElementById('notif-avatar-'+id);
+    if(avatar){ avatar.style.background='var(--bg3)'; avatar.style.color='var(--text3)'; }
+    const lbl=document.getElementById('notif-lida-'+id);
+    if(lbl) lbl.remove();
+  }
+}
+
+function toggleNotifBody(id){
+  const el=document.getElementById('notif-body-'+id);
+  const btn=document.getElementById('notif-toggle-'+id);
+  if(!el) return;
+  const aberto=el.style.display!=='none';
+  el.style.display=aberto?'none':'block';
+  if(btn) btn.textContent=aberto?'Abrir ▾':'Fechar ▴';
+  if(!aberto) marcarLida(id);
+}
+
+function emailBodyHTML(n, dtStr){
+  const tipos = {
+    nova_mob:    'Nova Solicitação de Mobilização',
+    status_prof: 'Atualização de Status — Profissional',
+    geral:       'Notificação do Sistema',
+  };
+  const labelTipo = tipos[n.tipo] || 'Notificação do Sistema';
+
+  const saudacoes = {
+    nova_mob:    'Prezada Equipe de Mobilização,',
+    status_prof: 'Prezado(a) Líder de Contrato,',
+    geral:       'Prezado(a),',
+  };
+  const saudacao = saudacoes[n.tipo] || 'Prezado(a),';
+
+  const intros = {
+    nova_mob:    'Uma nova solicitação de mobilização foi registrada no sistema Orion e requer a sua atenção. Por favor, verifique os detalhes abaixo e dê início ao processo de mobilização conforme os prazos estabelecidos.',
+    status_prof: 'Informamos que houve uma atualização no status de mobilização de um profissional vinculado ao seu contrato. Acompanhe o andamento pelo sistema Orion sempre que necessário.',
+    geral:       'O sistema Orion gerou uma notificação automática relacionada à gestão de mobilização. Verifique as informações abaixo.',
+  };
+  const intro = intros[n.tipo] || '';
+
+  const encerramentos = {
+    nova_mob:    'Após análise, atualize o status da mobilização no sistema conforme o andamento do processo. Em caso de dúvidas, utilize a funcionalidade Solicitar Informação diretamente no painel.',
+    status_prof: 'Caso tenha dúvidas sobre esta atualização ou necessite de alguma informação adicional, entre em contato com a equipe de mobilização pelo sistema.',
+    geral:       'Para mais detalhes, acesse o sistema Orion.',
+  };
+  const encerramento = encerramentos[n.tipo] || '';
+
+  const btnAbrirHTML = n.mobId
+    ? '<div style="text-align:center;margin-bottom:20px;"><span onclick="appNav(\'detalhe\',' + n.mobId + ')" style="display:inline-block;background:#1a6fbf;color:#fff;font-size:13px;font-weight:600;padding:10px 24px;border-radius:7px;cursor:pointer;">Abrir no Sistema Orion →</span></div>'
+    : '';
+
+  return '<div style="font-family:Arial,sans-serif;max-width:680px;margin:0 auto;">'
+
+    // Cabeçalho institucional
+    + '<div style="background:linear-gradient(120deg,#0d1f35 0%,#1a3860 100%);border-radius:8px 8px 0 0;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;">'
+    +   '<div style="display:flex;align-items:center;gap:10px;">'
+    +     '<svg width="20" height="20" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="11" stroke="#1a6fbf" stroke-width="1.5" opacity="0.6"/><circle cx="13" cy="13" r="7" stroke="#1a6fbf" stroke-width="1.5" opacity="0.85"/><circle cx="13" cy="13" r="3" fill="#1a6fbf"/></svg>'
+    +     '<span style="font-size:15px;font-weight:700;letter-spacing:0.12em;color:#fff;">ORION</span>'
+    +     '<span style="font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:0.06em;">GESTÃO DE MOBILIZAÇÃO · HIDROBR</span>'
+    +   '</div>'
+    +   '<span style="font-size:10px;background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);padding:3px 10px;border-radius:10px;">' + labelTipo + '</span>'
+    + '</div>'
+
+    // Corpo
+    + '<div style="background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;padding:28px 32px;">'
+
+    // Saudação + intro
+    +   '<p style="font-size:14px;font-weight:600;color:#1e293b;margin:0 0 10px;">' + saudacao + '</p>'
+    +   '<p style="font-size:13px;color:#475569;line-height:1.7;margin:0 0 22px;">' + intro + '</p>'
+    +   '<div style="border-top:1px solid #e2e8f0;margin-bottom:22px;"></div>'
+
+    // Conteúdo dinâmico
+    +   '<div style="font-size:13px;color:#334155;line-height:1.7;">' + n.corpo + '</div>'
+
+    +   '<div style="border-top:1px solid #e2e8f0;margin:22px 0;"></div>'
+
+    // Encerramento
+    +   '<p style="font-size:13px;color:#475569;line-height:1.7;margin:0 0 18px;">' + encerramento + '</p>'
+    +   btnAbrirHTML
+
+    // Assinatura
+    +   '<div style="border-top:1px solid #e2e8f0;padding-top:16px;display:flex;gap:14px;align-items:flex-start;">'
+    +     '<div style="width:38px;height:38px;border-radius:50%;background:#e8f2fd;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+    +       '<svg width="16" height="16" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="11" stroke="#1a6fbf" stroke-width="1.5" opacity="0.5"/><circle cx="13" cy="13" r="7" stroke="#1a6fbf" stroke-width="1.5" opacity="0.75"/><circle cx="13" cy="13" r="3" fill="#1a6fbf"/></svg>'
+    +     '</div>'
+    +     '<div>'
+    +       '<div style="font-size:13px;font-weight:700;color:#1e293b;">Sistema Orion — Gestão de Mobilização</div>'
+    +       '<div style="font-size:12px;color:#64748b;margin-top:2px;">HIDROBR · Equipe de Mobilização</div>'
+    +       '<div style="font-size:11px;color:#94a3b8;margin-top:4px;">Este é um e-mail automático. Não responda diretamente a esta mensagem.</div>'
+    +     '</div>'
+    +   '</div>'
+
+    // Rodapé
+    +   '<div style="margin-top:18px;padding:10px 14px;background:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">'
+    +     '<div style="font-size:10px;color:#94a3b8;line-height:1.6;">'
+    +       '<strong style="color:#64748b;">Metadados</strong> &nbsp;·&nbsp; '
+    +       'Enviado em: ' + dtStr + ' &nbsp;·&nbsp; '
+    +       'De: ' + n.de + ' &nbsp;·&nbsp; '
+    +       'Para: ' + n.para
+    +     '</div>'
+    +   '</div>'
+
+    + '</div>'
+  + '</div>';
+}
+
+function renderNotificacoes(){
+  const container = document.getElementById('notif-inbox');
+  if(!container) return;
+  const lista = state.notificacoes || [];
+  if(!lista.length){
+    container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--text3);"><div style="font-size:48px;margin-bottom:16px;opacity:0.25;">📭</div><div style="font-size:14px;font-weight:500;">Caixa vazia</div><div style="font-size:12px;margin-top:4px;">As notificações do sistema aparecerão aqui</div></div>';
+    return;
+  }
+  // Renderiza cada card como wrapper, injeta o corpo via JS pós-render para evitar conflito de aspas
+  const cards = lista.map(function(n){
+    const dt  = new Date(n.data);
+    const dtStr = dt.toLocaleDateString('pt-BR') + ' às ' + dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    const isNova = !n.lida;
+    const borderC = isNova ? 'var(--accent)' : 'var(--border)';
+    const borderL = isNova ? 'var(--accent)' : '#9ca3af';
+    const headerBg = isNova ? 'var(--accent-l)' : 'var(--bg2)';
+    const avatarBg = isNova ? 'var(--accent)' : 'var(--bg3)';
+    const avatarColor = isNova ? '#fff' : 'var(--text3)';
+    return '<div id="notif-row-' + n.id + '" style="background:var(--bg2);border:1px solid ' + borderC + ';border-left:4px solid ' + borderL + ';border-radius:var(--radius);margin-bottom:10px;overflow:hidden;">'
+      + '<div id="notif-header-' + n.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;background:' + headerBg + ';" onclick="toggleNotifBody(' + n.id + ')">'
+      +   '<div id="notif-avatar-' + n.id + '" style="width:38px;height:38px;border-radius:50%;background:' + avatarBg + ';color:' + avatarColor + ';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">' + n.icone + '</div>'
+      +   '<div style="flex:1;min-width:0;">'
+      +     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">'
+      +       (isNova ? '<span id="notif-dot-' + n.id + '" style="width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;display:inline-block;"></span>' : '')
+      +       '<span style="font-weight:' + (isNova?700:500) + ';font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + n.assunto + '</span>'
+      +     '</div>'
+      +     '<div style="font-size:11px;color:var(--text3);">'
+      +       '<span style="font-weight:500;color:var(--text2);">' + n.de.split('<')[0].trim() + '</span>'
+      +       ' &nbsp;·&nbsp; ' + dtStr
+      +       (isNova ? ' &nbsp;·&nbsp; <span id="notif-lida-' + n.id + '" style="color:var(--accent);font-weight:600;">Não lida</span>' : '')
+      +     '</div>'
+      +   '</div>'
+      +   '<span id="notif-toggle-' + n.id + '" style="font-size:11px;color:var(--text3);padding:3px 8px;border-radius:5px;border:1px solid var(--border);background:var(--bg3);flex-shrink:0;">Abrir ▾</span>'
+      + '</div>'
+      + '<div id="notif-body-' + n.id + '" style="display:none;border-top:2px solid ' + borderL + ';background:#f8fafc;padding:20px;">'
+      + '</div>'
+    + '</div>';
+  });
+  container.innerHTML = cards.join('');
+  // Injeta o corpo do email APÓS o innerHTML, evitando conflitos de parsing
+  lista.forEach(function(n){
+    const dt  = new Date(n.data);
+    const dtStr = dt.toLocaleDateString('pt-BR') + ' às ' + dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    const bodyEl = document.getElementById('notif-body-' + n.id);
+    if(bodyEl) bodyEl.innerHTML = emailBodyHTML(n, dtStr);
+  });
+}
+
+// Gerar notificação quando uma nova mobilização é criada (hook na enviarSolicitacao)
+const _origEnviarSolicitacao = typeof enviarSolicitacao !== 'undefined' ? enviarSolicitacao : null;
+
 // ── BIND SOL LISTENERS ────────────────────────────────────────
 function bindSolListeners(){
   const btn=document.getElementById('btn-add-prof-sol');
@@ -2607,7 +2937,11 @@ document.querySelectorAll('.modal-backdrop').forEach(bd=>{
 });
 
 // ── INIT ──────────────────────────────────────────
-carregarDadosSupabase().then(()=>{renderLandingStatus();populateClienteSelectSol();atualizarSumarios();}).catch(e=>{
+carregarDadosSupabase().then(()=>{
+  renderLandingStatus();populateClienteSelectSol();atualizarSumarios();
+  seedNotificacoes();
+  atualizarBadgeNotif();
+}).catch(e=>{
   console.warn("Supabase offline — carregando dados de exemplo:", e.message);
   seedData();
   if(!state.clientes.length && typeof clientes272 !== 'undefined'){
@@ -2616,6 +2950,8 @@ carregarDadosSupabase().then(()=>{renderLandingStatus();populateClienteSelectSol
   renderLandingStatus();
   populateClienteSelectSol();
   if(typeof atualizarSumarios==='function') atualizarSumarios();
+  seedNotificacoes();
+  atualizarBadgeNotif();
 });
 
 </script>
