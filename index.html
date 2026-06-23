@@ -426,6 +426,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
     <div class="portal-nav">
       <div class="portal-nav-item active" id="pnav-solicitar" onclick="portalNav('solicitar')">Nova Solicitação</div>
       <div class="portal-nav-item" id="pnav-status" onclick="portalNav('status')">Status das Mobilizações</div>
+      <div class="portal-nav-item" id="pnav-minhas" onclick="portalNav('minhas')">Minhas Solicitações</div>
     </div>
     <button class="portal-login-btn" onclick="goLogin()">🔐 Equipe de Mobilização</button>
   </div>
@@ -539,6 +540,23 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
 
       <!-- Cards de status -->
       <div id="portal-status-list"></div>
+    </div>
+
+    <!-- PAGE: MINHAS SOLICITAÇÕES -->
+    <div class="portal-page" id="ppage-minhas">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:18px;font-weight:700;margin-bottom:4px;">Minhas Solicitações</h2>
+          <p style="font-size:13px;color:var(--text3);">Acompanhe o status de cada profissional e solicite novas inclusões em mobilizações existentes</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <label style="font-size:12px;font-weight:500;color:var(--text2);">Filtrar por líder:</label>
+          <select class="form-select" id="filtro-lider-minhas" onchange="renderPortalMinhas()" style="min-width:180px;">
+            <option value="">Todos os líderes</option>
+          </select>
+        </div>
+      </div>
+      <div id="portal-minhas-list"></div>
     </div>
 
   </div><!-- end portal-content -->
@@ -1110,6 +1128,127 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14
   </div>
 </div>
 
+<!-- Modal: Solicitar adição de profissional em mobilização existente (portal) -->
+<div class="modal-backdrop" id="modal-add-prof-mob-portal">
+  <div class="modal wide">
+    <div class="modal-header">
+      <span class="modal-title">Solicitar Adição de Profissional</span>
+      <button class="modal-close" onclick="closeModal('modal-add-prof-mob-portal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--accent-l);border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-bottom:18px;font-size:12px;color:var(--accent);">
+        <strong>Mobilização:</strong> <span id="modal-add-mob-nome" style="font-weight:600;"></span>
+      </div>
+
+      <!-- Abas -->
+      <div style="display:flex;gap:6px;margin-bottom:20px;">
+        <button id="tab-portal-existente" onclick="portalProfTab('existente')"
+          style="flex:1;padding:9px;border-radius:7px;border:none;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;background:var(--accent);color:#fff;">
+          🔍 Selecionar da lista
+        </button>
+        <button id="tab-portal-novo" onclick="portalProfTab('novo')"
+          style="flex:1;padding:9px;border-radius:7px;border:none;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;background:var(--bg3);color:var(--text2);">
+          ＋ Cadastrar novo profissional
+        </button>
+      </div>
+
+      <!-- Painel existente -->
+      <div id="panel-portal-existente">
+        <div class="form-row full" style="margin-bottom:10px;">
+          <div class="form-group">
+            <label class="form-label">Buscar por nome ou cargo</label>
+            <input class="form-input" id="portal-prof-busca" placeholder="Digite para filtrar..." oninput="filtrarProfPortal()">
+          </div>
+        </div>
+        <div id="portal-prof-lista" style="border:1px solid var(--border);border-radius:7px;max-height:200px;overflow-y:auto;margin-bottom:12px;"></div>
+        <div id="portal-prof-selecionado-info" style="font-size:12px;margin-bottom:14px;min-height:18px;"></div>
+        <div style="border-top:1px solid var(--border);padding-top:16px;">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Papel no Projeto</label>
+              <input class="form-input" id="portal-prof-papel" placeholder="Ex: Líder Técnico, Analista...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Vínculo</label>
+              <select class="form-select" id="portal-prof-vinculo">
+                <option value="hidrobr">HIDROBR</option>
+                <option value="hbr">HBR</option>
+                <option value="terceiro">Terceiro</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Regime</label>
+              <select class="form-select" id="portal-prof-regime">
+                <option value="clt">CLT</option>
+                <option value="pj">PJ</option>
+                <option value="socio">Sócio</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cargo / Especialidade</label>
+              <input class="form-input" id="portal-prof-cargo" placeholder="Ex: Engenheiro Civil">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Painel novo -->
+      <div id="panel-portal-novo" style="display:none;">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nome Completo <span style="color:var(--red)">*</span></label>
+            <input class="form-input" id="portal-novo-nome" placeholder="Nome completo">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cargo / Especialidade <span style="color:var(--red)">*</span></label>
+            <input class="form-input" id="portal-novo-cargo" placeholder="Ex: Engenheiro Civil">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">E-mail <span style="color:var(--red)">*</span></label>
+            <input class="form-input" type="email" id="portal-novo-email" placeholder="email@empresa.com.br">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Matrícula</label>
+            <input class="form-input" id="portal-novo-matricula" placeholder="00000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Vínculo</label>
+            <select class="form-select" id="portal-novo-vinculo">
+              <option value="hidrobr">HIDROBR</option>
+              <option value="hbr">HBR</option>
+              <option value="terceiro">Terceiro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Regime</label>
+            <select class="form-select" id="portal-novo-regime">
+              <option value="clt">CLT</option>
+              <option value="pj">PJ</option>
+              <option value="socio">Sócio</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="form-group">
+            <label class="form-label">Papel no Projeto</label>
+            <input class="form-input" id="portal-novo-papel" placeholder="Ex: Analista de Dados, Consultor...">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-prof-mob-portal')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-confirmar-add-portal" onclick="confirmarAddProfPortal()">Adicionar à Mobilização</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- ══════════════════════════════════════
@@ -1129,7 +1268,92 @@ let state = {
 let mobIdCounter=1, cliIdCounter=1, prfIdCounter=1, docIdCounter=1, gestIdCounter=1, passIdCounter=1;
 
 // ── SEED ──────────────────────────────────────────
-function seedData(){}
+function seedData(){
+  // Clientes
+  state.clientes = [
+    {id:1, nome:'Petrobras S.A.', cnpj:'33.000.167/0001-01', contato:'Carlos Mendes', email:'carlos.mendes@petrobras.com.br', tel:'(21) 99001-0001'},
+    {id:2, nome:'Vale S.A.', cnpj:'33.592.510/0001-54', contato:'Fernanda Lima', email:'fernanda.lima@vale.com', tel:'(31) 99002-0002'},
+    {id:3, nome:'Embraer S.A.', cnpj:'07.689.002/0001-89', contato:'Ricardo Souza', email:'ricardo.souza@embraer.com.br', tel:'(12) 99003-0003'},
+  ];
+  cliIdCounter = 4;
+
+  // Profissionais
+  state.profissionais = [
+    {id:1, nome:'Ana Paula Ferreira', cargo:'Engenheira Civil', vinculo:'hidrobr', regime:'clt', email:'ana.ferreira@hidrobr.com.br', matricula:'10421'},
+    {id:2, nome:'Bruno Castilho', cargo:'Analista de Projetos', vinculo:'hidrobr', regime:'clt', email:'bruno.castilho@hidrobr.com.br', matricula:'10422'},
+    {id:3, nome:'Carla Drummond', cargo:'Consultora Sênior', vinculo:'hbr', regime:'pj', email:'carla.drummond@hbr.com.br', matricula:'20101'},
+    {id:4, nome:'Diego Nogueira', cargo:'Especialista em Segurança', vinculo:'terceiro', regime:'pj', email:'diego.nogueira@parceiro.com', matricula:''},
+    {id:5, nome:'Elisa Monteiro', cargo:'Coordenadora de Campo', vinculo:'hidrobr', regime:'clt', email:'elisa.monteiro@hidrobr.com.br', matricula:'10423'},
+    {id:6, nome:'Felipe Ramos', cargo:'Técnico em Automação', vinculo:'hbr', regime:'clt', email:'felipe.ramos@hbr.com.br', matricula:'20102'},
+    {id:7, nome:'Giovana Torres', cargo:'Geóloga Sênior', vinculo:'hidrobr', regime:'clt', email:'giovana.torres@hidrobr.com.br', matricula:'10424'},
+  ];
+  prfIdCounter = 8;
+
+  // Mobilização 1 — Petrobras, em processamento, com pendências
+  const mob1 = {
+    id:1, nome:'Modernização Plataforma P-77', clienteId:1,
+    liderContrato:'Rodrigo Alves', respCliente:'Carlos Mendes',
+    inicio:'2025-07-01', prazo:'2025-09-30',
+    sistemaCliente:'SAP PM', obs:'Acesso restrito a área offshore. Exige NR-34.',
+    status:'processamento', dataCriacao: new Date(Date.now()-18*86400000).toISOString(),
+    equipe:[
+      {profId:1, papel:'Líder Técnico', vinculo:'hidrobr', regime:'clt', cargo:'Engenheira Civil'},
+      {profId:2, papel:'Analista de Projetos', vinculo:'hidrobr', regime:'clt', cargo:'Analista de Projetos'},
+      {profId:4, papel:'Especialista HSE', vinculo:'terceiro', regime:'pj', cargo:'Especialista em Segurança'},
+    ],
+    documentos:[
+      {id:1, nome:'Currículo', tipo:'curriculo', caminho:'docs/curriculo_ana.pdf', entregue:true,  profId:1},
+      {id:2, nome:'NR-34', tipo:'certificado', caminho:'docs/nr34_ana.pdf',      entregue:false, profId:1},
+      {id:3, nome:'Currículo', tipo:'curriculo', caminho:'docs/curriculo_bruno.pdf', entregue:true, profId:2},
+      {id:4, nome:'Contrato PJ', tipo:'contrato', caminho:'',                    entregue:false, profId:4},
+    ],
+    passaporte:{},
+    infoRequests:[
+      {texto:'Favor confirmar se o profissional Diego Nogueira possui certificação NR-34 atualizada ou se precisará realizá-la antes do início.', data: new Date(Date.now()-5*86400000).toISOString(), respondido:false}
+    ]
+  };
+
+  // Mobilização 2 — Vale, mobilizado, tudo ok
+  const mob2 = {
+    id:2, nome:'Implantação MES — Mina Carajás', clienteId:2,
+    liderContrato:'Patrícia Nunes', respCliente:'Fernanda Lima',
+    inicio:'2025-05-01', prazo:'2025-07-31',
+    sistemaCliente:'Oracle MES', obs:'',
+    status:'mobilizado', dataCriacao: new Date(Date.now()-52*86400000).toISOString(),
+    equipe:[
+      {profId:3, papel:'Consultora Líder', vinculo:'hbr', regime:'pj', cargo:'Consultora Sênior'},
+      {profId:5, papel:'Coordenadora de Campo', vinculo:'hidrobr', regime:'clt', cargo:'Coordenadora de Campo'},
+      {profId:6, papel:'Especialista em Automação', vinculo:'hbr', regime:'clt', cargo:'Técnico em Automação'},
+    ],
+    documentos:[
+      {id:5, nome:'Currículo', tipo:'curriculo', caminho:'docs/curriculo_carla.pdf', entregue:true, profId:3},
+      {id:6, nome:'Currículo', tipo:'curriculo', caminho:'docs/curriculo_elisa.pdf', entregue:true, profId:5},
+      {id:7, nome:'Contrato PJ', tipo:'contrato', caminho:'docs/contrato_carla.pdf', entregue:true, profId:3},
+      {id:8, nome:'Certificado Técnico', tipo:'certificado', caminho:'docs/cert_felipe.pdf', entregue:true, profId:6},
+    ],
+    passaporte:{},
+    infoRequests:[]
+  };
+
+  // Mobilização 3 — Embraer, cadastrado, aguardando
+  const mob3 = {
+    id:3, nome:'Auditoria de Processos — Planta Gavião Peixoto', clienteId:3,
+    liderContrato:'Rodrigo Alves', respCliente:'Ricardo Souza',
+    inicio:'2025-08-15', prazo:'2025-10-15',
+    sistemaCliente:'', obs:'Projeto crítico com sigilo industrial. Assinar NDA antes.',
+    status:'cadastrado', dataCriacao: new Date(Date.now()-3*86400000).toISOString(),
+    equipe:[
+      {profId:7, papel:'Geóloga Sênior', vinculo:'hidrobr', regime:'clt', cargo:'Geóloga Sênior'},
+    ],
+    documentos:[],
+    passaporte:{},
+    infoRequests:[]
+  };
+
+  state.mobilizacoes = [mob1, mob2, mob3];
+  mobIdCounter = 4;
+  docIdCounter = 9;
+}
 
 // ── HELPERS ───────────────────────────────────────
 function formatDate(s){if(!s)return'—';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;}
@@ -1220,13 +1444,14 @@ async function doLogin(){
 }
 function doLogout(){showView('view-landing');}
 
-// ── PORTAL: NAVEGAÇÃO ─────────────────────────────
+// ── PORTAL: NAVEGAÇÃO (atualizada com nova aba) ──────────────
 function portalNav(pg){
   document.querySelectorAll('.portal-nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.portal-page').forEach(p=>p.classList.remove('active'));
   document.getElementById('pnav-'+pg)?.classList.add('active');
   document.getElementById('ppage-'+pg)?.classList.add('active');
   if(pg==='status')renderPortalStatus();
+  if(pg==='minhas')renderPortalMinhas();
 }
 
 // ── PORTAL: SOLICITAÇÃO ───────────────────────────
@@ -2155,6 +2380,217 @@ async function removerProfDetalhe(mobId, profId){
   document.getElementById('app-equipe-count').textContent=`${mob.equipe.length} profissional(is) na equipe`;
 }
 
+// ── PORTAL: MINHAS SOLICITAÇÕES ──────────────────────────────
+function profStatusBadge(mob, profId) {
+  // Verifica pendências de documento específicas do profissional
+  const docs = (mob.documentos || []).filter(d => d.profId === profId);
+  const passaporte = mob.passaporte || {};
+  const passItems = Object.values(passaporte).filter ? Object.values(passaporte) : [];
+  const profPass = passItems.filter(p => p && p.profId === profId);
+  const docsOk = docs.length === 0 || docs.every(d => d.entregue);
+  const passOk = profPass.length === 0 || profPass.every(p => p.entregue);
+  if (mob.status === 'mobilizado') return '<span class="status-badge" style="background:var(--green-l);color:var(--green);">✓ Mobilizado</span>';
+  if (!docsOk || !passOk) return '<span class="status-badge" style="background:var(--red-l);color:var(--red);">⚠ Pendências</span>';
+  if (mob.status === 'processamento') return '<span class="status-badge" style="background:var(--amber-l);color:var(--amber);">⏳ Em Processamento</span>';
+  return '<span class="status-badge status-cadastrado">Cadastrado</span>';
+}
+
+function renderPortalMinhas() {
+  // Atualizar filtro de líderes
+  const liderSel = document.getElementById('filtro-lider-minhas');
+  const currentLider = liderSel.value;
+  const lideres = [...new Set(state.mobilizacoes.map(m => m.liderContrato).filter(Boolean))];
+  liderSel.innerHTML = '<option value="">Todos os líderes</option>';
+  lideres.forEach(l => { const o = document.createElement('option'); o.value = l; o.textContent = l; liderSel.appendChild(o); });
+  liderSel.value = currentLider;
+
+  const filtroLider = liderSel.value;
+  let mobs = state.mobilizacoes;
+  if (filtroLider) mobs = mobs.filter(m => m.liderContrato === filtroLider);
+
+  const container = document.getElementById('portal-minhas-list');
+  if (!mobs.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>Nenhuma mobilização encontrada.</p></div>';
+    return;
+  }
+
+  container.innerHTML = mobs.map(mob => {
+    const cli = state.clientes.find(c => c.id === mob.clienteId);
+    const cor = calcFarol(mob);
+    const dias = calcSLADias(mob);
+    const infoReqs = (mob.infoRequests || []).filter(r => !r.respondido);
+    const equipe = mob.equipe || [];
+
+    const equipeHTML = equipe.length ? equipe.map(e => {
+      const prf = state.profissionais.find(p => p.id === e.profId);
+      if (!prf) return '';
+      const init = prf.nome.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+      const stBadge = profStatusBadge(mob, e.profId);
+      const docs = (mob.documentos || []).filter(d => d.profId === e.profId);
+      const docsEntregues = docs.filter(d => d.entregue).length;
+      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg2);">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--accent-l);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">${init}</div>
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:13px;">${prf.nome}</div>
+          <div style="font-size:11px;color:var(--text3);">${e.papel || prf.cargo || '—'} · ${vincLabel(e.vinculo || prf.vinculo)} · ${(e.regime || prf.regime || '').toUpperCase()}</div>
+          ${docs.length ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;">📄 ${docsEntregues}/${docs.length} docs entregues</div>` : ''}
+        </div>
+        <div>${stBadge}</div>
+      </div>`;
+    }).join('') : `<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">Nenhum profissional nesta mobilização.</div>`;
+
+    return `<div class="card" style="margin-bottom:18px;overflow:hidden;">
+      <div class="card-header" style="border-left:4px solid ${cor === 'verde' ? 'var(--green)' : cor === 'amarelo' ? 'var(--amber)' : cor === 'vermelho' ? 'var(--red)' : '#9ca3af'};">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <span style="font-weight:700;font-size:14px;">${mob.nome}</span>
+            ${statusBadgeHTML(mob.status)}
+            ${farolHTML(cor)}
+            ${infoReqs.length ? `<span style="background:var(--red-l);color:var(--red);font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;">⚠ ${infoReqs.length} pendência(s)</span>` : ''}
+          </div>
+          <div style="font-size:12px;color:var(--text3);">Cliente: <strong style="color:var(--text2);">${cli ? cli.nome : '—'}</strong> · Líder: <strong style="color:var(--text2);">${mob.liderContrato || '—'}</strong>${dias !== null ? ` · <strong>${dias}d</strong> em aberto` : ''}</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="abrirModalAddProfPortal(${mob.id})" title="Solicitar adição de profissional nesta mobilização">＋ Adicionar Profissional</button>
+      </div>
+
+      ${infoReqs.length ? infoReqs.map(r => `<div class="info-request-box" style="margin:12px 20px 0;"><div class="irt">⚠ Informação Solicitada pela Equipe de Mobilização</div><p>${r.texto}</p></div>`).join('') : ''}
+
+      <div style="padding:12px 20px 6px;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border);">
+        👥 Profissionais (${equipe.length})
+      </div>
+      <div>${equipeHTML}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── PORTAL: MODAL ADICIONAR PROF EM MOB EXISTENTE ────────────
+let _portalAddMobId = null;
+let _portalProfTab = 'existente';
+let _portalProfSelId = null;
+
+function abrirModalAddProfPortal(mobId) {
+  _portalAddMobId = mobId;
+  _portalProfSelId = null;
+  _portalProfTab = 'existente';
+  const mob = state.mobilizacoes.find(m => m.id === mobId);
+  document.getElementById('modal-add-mob-nome').textContent = mob ? mob.nome : '';
+  // Reset campos existente
+  document.getElementById('portal-prof-busca').value = '';
+  document.getElementById('portal-prof-papel').value = '';
+  document.getElementById('portal-prof-cargo').value = '';
+  document.getElementById('portal-prof-vinculo').value = 'hidrobr';
+  document.getElementById('portal-prof-regime').value = 'clt';
+  document.getElementById('portal-prof-selecionado-info').innerHTML = '';
+  // Reset campos novo
+  ['portal-novo-nome','portal-novo-cargo','portal-novo-email','portal-novo-matricula','portal-novo-papel'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('portal-novo-vinculo').value = 'hidrobr';
+  document.getElementById('portal-novo-regime').value = 'clt';
+  portalProfTab('existente');
+  filtrarProfPortal();
+  openModal('modal-add-prof-mob-portal');
+}
+
+function portalProfTab(aba) {
+  _portalProfTab = aba;
+  const isEx = aba === 'existente';
+  document.getElementById('panel-portal-existente').style.display = isEx ? '' : 'none';
+  document.getElementById('panel-portal-novo').style.display = isEx ? 'none' : '';
+  document.getElementById('tab-portal-existente').style.background = isEx ? 'var(--accent)' : 'var(--bg3)';
+  document.getElementById('tab-portal-existente').style.color = isEx ? '#fff' : 'var(--text2)';
+  document.getElementById('tab-portal-novo').style.background = isEx ? 'var(--bg3)' : 'var(--accent)';
+  document.getElementById('tab-portal-novo').style.color = isEx ? 'var(--text2)' : '#fff';
+}
+
+function filtrarProfPortal() {
+  const mob = state.mobilizacoes.find(m => m.id === _portalAddMobId);
+  const busca = (document.getElementById('portal-prof-busca')?.value || '').toLowerCase();
+  const jaAdic = new Set((mob?.equipe || []).map(e => e.profId));
+  const lista = state.profissionais.filter(p => !jaAdic.has(p.id) && (!busca || p.nome.toLowerCase().includes(busca) || (p.cargo || '').toLowerCase().includes(busca)));
+  const c = document.getElementById('portal-prof-lista');
+  if (!lista.length) { c.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">Nenhum encontrado.</div>'; return; }
+  c.innerHTML = lista.map(p => {
+    const init = p.nome.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+    const sel = (_portalProfSelId === p.id);
+    return `<div onclick="selecionarProfPortal(${p.id})" style="display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);background:${sel ? 'var(--accent-l)' : 'var(--bg2)'};">
+      <div style="width:34px;height:34px;border-radius:50%;background:${sel ? 'var(--accent)' : 'var(--accent-l)'};color:${sel ? '#fff' : 'var(--accent)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${init}</div>
+      <div><div style="font-size:13px;font-weight:600;color:var(--text);">${p.nome}</div>
+      <div style="font-size:11px;color:var(--text3);">${p.cargo || '—'} · ${(p.vinculo || '').toUpperCase()}</div></div>
+      ${sel ? '<span style="color:var(--accent);font-size:16px;margin-left:auto;">✓</span>' : ''}
+    </div>`;
+  }).join('');
+}
+
+function selecionarProfPortal(profId) {
+  _portalProfSelId = profId;
+  const prf = state.profissionais.find(p => p.id === profId);
+  const info = document.getElementById('portal-prof-selecionado-info');
+  if (info && prf) {
+    info.innerHTML = '<span style="color:var(--accent);font-weight:600;">✓ ' + prf.nome + '</span>';
+    document.getElementById('portal-prof-cargo').value = prf.cargo || '';
+    document.getElementById('portal-prof-vinculo').value = prf.vinculo || 'hidrobr';
+    document.getElementById('portal-prof-regime').value = prf.regime || 'clt';
+  }
+  filtrarProfPortal();
+}
+
+async function confirmarAddProfPortal() {
+  const mob = state.mobilizacoes.find(m => m.id === _portalAddMobId);
+  if (!mob) return;
+  const btn = document.getElementById('btn-confirmar-add-portal');
+
+  if (_portalProfTab === 'existente') {
+    if (!_portalProfSelId) return showToast('Selecione um profissional da lista.');
+    if (mob.equipe.find(e => e.profId === _portalProfSelId)) return showToast('Profissional já está nesta mobilização.');
+    const papel = document.getElementById('portal-prof-papel').value.trim();
+    const vinculo = document.getElementById('portal-prof-vinculo').value;
+    const regime = document.getElementById('portal-prof-regime').value;
+    const cargo = document.getElementById('portal-prof-cargo').value.trim();
+    mob.equipe.push({ profId: _portalProfSelId, papel, vinculo, regime, cargo });
+    try {
+      const db = await getSupa();
+      await db.from('mobilizacoes').update({ equipe: mob.equipe }).eq('id', mob.id);
+    } catch(e) {}
+    closeModal('modal-add-prof-mob-portal');
+    showToast('Profissional adicionado à mobilização!', 'green');
+    renderPortalMinhas();
+  } else {
+    const nome = document.getElementById('portal-novo-nome').value.trim();
+    const cargo = document.getElementById('portal-novo-cargo').value.trim();
+    const email = document.getElementById('portal-novo-email').value.trim();
+    const matricula = document.getElementById('portal-novo-matricula').value.trim();
+    const vinculo = document.getElementById('portal-novo-vinculo').value;
+    const regime = document.getElementById('portal-novo-regime').value;
+    const papel = document.getElementById('portal-novo-papel').value.trim();
+    if (!nome) return showToast('Informe o nome completo do profissional.');
+    if (!cargo) return showToast('Informe o cargo ou especialidade.');
+    if (!email) return showToast('Informe o e-mail do profissional.');
+    btn.textContent = 'Salvando...'; btn.disabled = true;
+    const payload = { nome, cargo, email, matricula, vinculo, regime };
+    let newProf;
+    try {
+      const db = await getSupa();
+      const { data, error } = await db.from('profissionais').insert(payload).select().single();
+      if (error) throw error;
+      newProf = s2p(data);
+    } catch(e) {
+      newProf = { id: prfIdCounter++, ...payload };
+    }
+    state.profissionais.push(newProf);
+    state.profissionais.sort((a, b) => a.nome.localeCompare(b.nome));
+    mob.equipe.push({ profId: newProf.id, papel, vinculo, regime, cargo });
+    try {
+      const db = await getSupa();
+      await db.from('mobilizacoes').update({ equipe: mob.equipe }).eq('id', mob.id);
+    } catch(e) {}
+    btn.textContent = 'Adicionar à Mobilização'; btn.disabled = false;
+    closeModal('modal-add-prof-mob-portal');
+    showToast('Profissional cadastrado e adicionado!', 'green');
+    renderPortalMinhas();
+  }
+}
+
 // ── BIND SOL LISTENERS ────────────────────────────────────────
 function bindSolListeners(){
   const btn=document.getElementById('btn-add-prof-sol');
@@ -2171,7 +2607,16 @@ document.querySelectorAll('.modal-backdrop').forEach(bd=>{
 });
 
 // ── INIT ──────────────────────────────────────────
-carregarDadosSupabase().then(()=>{renderLandingStatus();populateClienteSelectSol();atualizarSumarios();}).catch(e=>{console.warn("Supabase offline:",e.message);state.clientes=clientes272.map((c,i)=>{return{id:i+1,...c,contato:"",email:"",tel:""};});renderLandingStatus();});
+carregarDadosSupabase().then(()=>{renderLandingStatus();populateClienteSelectSol();atualizarSumarios();}).catch(e=>{
+  console.warn("Supabase offline — carregando dados de exemplo:", e.message);
+  seedData();
+  if(!state.clientes.length && typeof clientes272 !== 'undefined'){
+    state.clientes = clientes272.map((c,i)=>({id:i+1,...c,contato:"",email:"",tel:""}));
+  }
+  renderLandingStatus();
+  populateClienteSelectSol();
+  if(typeof atualizarSumarios==='function') atualizarSumarios();
+});
 
 </script>
 </body>
